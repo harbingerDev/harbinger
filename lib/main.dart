@@ -1,5 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
+import 'package:flutter_login/flutter_login.dart';
 import 'package:easy_rich_text/easy_rich_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +30,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool showLogin = false;
+  void showLoginBox() {
+    setState(() {
+      showLogin = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,14 +140,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Container(
-                      width: MediaQuery.of(context).size.width * .40,
+                      width: MediaQuery.of(context).size.width * .4,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           EasyRichText(
                             "Launch fast!",
                             defaultStyle: GoogleFonts.roboto(
-                              fontSize: 55,
+                              fontSize: 75,
                               fontWeight: FontWeight.bold,
                               foreground: Paint()
                                 ..style = PaintingStyle.stroke
@@ -152,44 +159,51 @@ class _MyHomePageState extends State<MyHomePage> {
                           EasyRichText(
                             "Real fast!",
                             defaultStyle: GoogleFonts.roboto(
-                              fontSize: 70,
+                              fontSize: 95,
                               fontWeight: FontWeight.bold,
                               color: Color(0xff285981),
                             ),
                             textAlign: TextAlign.left,
                           ),
-                          Text(
-                            "Choose your tool, language, CI tool and we get you started in no time. We help you create tests, manage the way it is being written, gauging it's effectiveness and tracking the minutest of details all at one place. That too with more than 50% of effort and time saving. That's our promise.",
-                            style: GoogleFonts.roboto(
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                                color: Color(0xff285981)),
-                            textAlign: TextAlign.justify,
+                          Container(
+                            width: MediaQuery.of(context).size.width * .30,
+                            child: Text(
+                              "Choose your tool, language, CI tool and we get you started in no time. We help you create tests, manage the way it is being written, gauging it's effectiveness and tracking the minutest of details all at one place. That too with more than 50% of effort and time saving. That's our promise.",
+                              style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  color: Color(0xff285981)),
+                              textAlign: TextAlign.justify,
+                            ),
                           ),
                           SizedBox(
                             height: 20,
                           ),
-                          ElevatedButton(
-                            onPressed: () => {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xff285981),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 10),
-                              textStyle: GoogleFonts.roboto(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                            child: Text("Get started"),
-                          )
+                          showLogin
+                              ? Container()
+                              : ElevatedButton(
+                                  onPressed: () => {showLoginBox()},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xff285981),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 10),
+                                    textStyle: GoogleFonts.roboto(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.normal),
+                                  ),
+                                  child: Text("Get started"),
+                                )
                         ],
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      width: MediaQuery.of(context).size.width * .45,
-                      child: Image.asset("assets/images/launch.png"),
-                    )
+                    showLogin
+                        ? loginScreen(context)
+                        : Container(
+                            padding: EdgeInsets.all(10),
+                            width: MediaQuery.of(context).size.width * .45,
+                            child: Image.asset("assets/images/launch.png"),
+                          )
                   ],
                 ))
           ],
@@ -197,4 +211,65 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+Widget loginScreen(context) {
+  return Container(
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: Color(0xff285981),
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(20))),
+      width: MediaQuery.of(context).size.width * .45,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            width: MediaQuery.of(context).size.width * .30,
+            child: Column(children: <Widget>[
+              SizedBox(
+                height: 30,
+              ),
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "username",
+                  focusColor: Color(0xff285981),
+                ),
+                cursorColor: Color(0xff285981),
+                expands: false,
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "password",
+                  focusColor: Color(0xff285981),
+                ),
+                cursorColor: Color(0xff285981),
+                expands: false,
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              ElevatedButton(
+                onPressed: () => {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff285981),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  textStyle: GoogleFonts.roboto(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.normal),
+                ),
+                child: Text("Login"),
+              ),
+              SizedBox(
+                height: 30,
+              ),
+            ]),
+          ),
+        ),
+      ));
 }
