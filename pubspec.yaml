@@ -39,6 +39,7 @@ dependencies:
   easy_rich_text: ^1.1.0
   flutter_login: ^4.0.0
   process_run: ^0.12.3+2
+  loading_animation_widget: ^1.2.0+3
 
 dev_dependencies:
   flutter_test:
