@@ -1,8 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-import 'package:flutter_login/flutter_login.dart';
 import 'package:easy_rich_text/easy_rich_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:harbinger/screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,6 +31,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool showLogin = false;
+  bool authenticated = false;
   void showLoginBox() {
     setState(() {
       showLogin = true;
@@ -198,7 +199,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     showLogin
-                        ? loginScreen(context)
+                        ? LoginScreen()
                         : Container(
                             padding: EdgeInsets.all(10),
                             width: MediaQuery.of(context).size.width * .45,
@@ -211,65 +212,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-}
-
-Widget loginScreen(context) {
-  return Container(
-      decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: Color(0xff285981),
-          ),
-          borderRadius: BorderRadius.all(Radius.circular(20))),
-      width: MediaQuery.of(context).size.width * .45,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            width: MediaQuery.of(context).size.width * .30,
-            child: Column(children: <Widget>[
-              SizedBox(
-                height: 30,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "username",
-                  focusColor: Color(0xff285981),
-                ),
-                cursorColor: Color(0xff285981),
-                expands: false,
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "password",
-                  focusColor: Color(0xff285981),
-                ),
-                cursorColor: Color(0xff285981),
-                expands: false,
-              ),
-              SizedBox(
-                height: 30,
-              ),
-              ElevatedButton(
-                onPressed: () => {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff285981),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  textStyle: GoogleFonts.roboto(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal),
-                ),
-                child: Text("Login"),
-              ),
-              SizedBox(
-                height: 30,
-              ),
-            ]),
-          ),
-        ),
-      ));
 }
