@@ -1,6 +1,11 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:harbinger/screens/home_screen.dart';
+import 'package:harbinger/screens/test_plan_screen.dart';
+import 'package:harbinger/screens/test_reports.dart';
 import 'package:harbinger/widgets/loader_widget.dart';
 import 'package:process_run/shell.dart';
 
@@ -67,63 +72,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               destinations: getNavigationRailItems()),
           VerticalDivider(thickness: 1, width: 1),
           // This is the main content.
+
           loading
               ? LoaderWidget()
-              : Expanded(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  // // border: Border.all(
-                                  // //   color: Color(0xff285981),
-                                  // ),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey,
-                                      blurRadius: 2.0,
-                                    ),
-                                  ]),
-                              width: MediaQuery.of(context).size.width * .1,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Node version",
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 10,
-                                        color: Color(0xff285981),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    Text(
-                                      nodeVersion,
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xff285981),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              : _selectedIndex == 0
+                  ? Expanded(child: HomeScreen())
+                  : _selectedIndex == 1
+                      ? Expanded(child: TestPlanScreen())
+                      : Expanded(child: TestReports()),
         ],
       ),
     );

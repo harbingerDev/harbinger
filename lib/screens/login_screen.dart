@@ -38,6 +38,7 @@ class LoginScreen extends StatelessWidget {
                   height: 15,
                 ),
                 TextField(
+                  obscureText: true,
                   decoration: InputDecoration(
                     hintText: "password",
                     focusColor: Color(0xff285981),

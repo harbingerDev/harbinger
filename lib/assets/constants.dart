@@ -6,22 +6,32 @@ List<Map<String, dynamic>> navigationRailItems = [
   {
     "icon": Icons.home,
     "selectedIcon": Icons.home_filled,
-    "selectedIconColor": themeColor
+    "selectedIconColor": themeColor,
+    "text": "Home"
   },
   {
     "icon": Icons.account_tree_outlined,
     "selectedIcon": Icons.account_tree,
-    "selectedIconColor": themeColor
+    "selectedIconColor": themeColor,
+    "text": "Test plan"
   },
   {
     "icon": Icons.science_outlined,
     "selectedIcon": Icons.science,
-    "selectedIconColor": themeColor
+    "selectedIconColor": themeColor,
+    "text": "Test lab"
   },
   {
     "icon": Icons.bar_chart_outlined,
     "selectedIcon": Icons.bar_chart,
-    "selectedIconColor": themeColor
+    "selectedIconColor": themeColor,
+    "text": "Reports"
+  },
+  {
+    "icon": Icons.settings_outlined,
+    "selectedIcon": Icons.settings,
+    "selectedIconColor": themeColor,
+    "text": "Settings"
   }
 ];
 

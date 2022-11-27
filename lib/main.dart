@@ -1,11 +1,17 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:flutter/material.dart';
+import 'package:harbinger/models/projects.dart';
 import 'package:harbinger/screens/login_screen.dart';
 import 'package:harbinger/widgets/footer_widget.dart';
 import 'package:harbinger/widgets/lanch_text_widget.dart';
 import 'package:harbinger/widgets/launch_app_bar_widget.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(ProjectsAdapter());
   runApp(const MyApp());
 }
 

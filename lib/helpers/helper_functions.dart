@@ -15,7 +15,7 @@ List<NavigationRailDestination> getNavigationRailItems() {
             Icon(element["selectedIcon"], color: element["selectedIconColor"]),
         label: Padding(
           padding: standardPadding,
-          child: Text('Reports', style: textStyle12WithoutBold),
+          child: Text(element["text"], style: textStyle12WithoutBold),
         ),
       ),
     );
