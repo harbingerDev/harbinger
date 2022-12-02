@@ -47,7 +47,10 @@ dependencies:
   file_picker: ^5.2.2
   filesystem_picker: ^3.1.0
   path_provider: ^2.0.11
-  flutter_html: ^2.0.0-nullsafety.0
+  flutter_html: 3.0.0-alpha.6
+  firebase_core_desktop: ^1.0.2
+  firebase_auth_desktop: ^1.0.2
+  firebase_core_platform_interface: 4.5.1
 
 dev_dependencies:
   flutter_test:

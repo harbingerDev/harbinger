@@ -1,15 +1,26 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
 import 'package:flutter/material.dart';
 import 'package:harbinger/models/projects.dart';
+import 'package:harbinger/screens/auth_screen.dart';
 import 'package:harbinger/screens/login_screen.dart';
 import 'package:harbinger/widgets/footer_widget.dart';
 import 'package:harbinger/widgets/lanch_text_widget.dart';
 import 'package:harbinger/widgets/launch_app_bar_widget.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+      apiKey: "AIzaSyCjoI3lgFQFei92wc7hsQ-d5SiW3GF8s4k",
+      appId: "1:149802584253:web:9f5a4c8e7c235197dd8fd4",
+      messagingSenderId: "149802584253",
+      projectId: "harbinger-f8afb",
+    ),
+  );
   await Hive.initFlutter();
   Hive.registerAdapter(ProjectsAdapter());
   runApp(const MyApp());
@@ -49,33 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomSheet: Footer(),
-      appBar: AppbarLaunch(),
-      backgroundColor: Color(0xFFE8E8E8),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-                width: MediaQuery.of(context).size.width * .9,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    LaunchText(
-                      showLogin: showLogin,
-                      showLoginBox: showLoginBox,
-                    ),
-                    showLogin
-                        ? LoginScreen()
-                        : Container(
-                            padding: EdgeInsets.all(10),
-                            width: MediaQuery.of(context).size.width * .45,
-                            child: Image.asset("assets/images/launch.png"),
-                          )
-                  ],
-                ))
-          ],
-        ),
-      ),
+      body: Center(child: AuthScreen()),
     );
   }
 }

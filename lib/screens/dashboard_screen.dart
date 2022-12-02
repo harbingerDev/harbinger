@@ -71,15 +71,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               labelType: NavigationRailLabelType.selected,
               destinations: getNavigationRailItems()),
           VerticalDivider(thickness: 1, width: 1),
-          // This is the main content.
-
+          //Navigation rail handler
           loading
               ? LoaderWidget()
               : _selectedIndex == 0
                   ? Expanded(child: HomeScreen())
                   : _selectedIndex == 1
                       ? Expanded(child: TestPlanScreen())
-                      : Expanded(child: TestReports()),
+                      : _selectedIndex == 3
+                          ? Expanded(child: TestReports())
+                          : Container(),
         ],
       ),
     );

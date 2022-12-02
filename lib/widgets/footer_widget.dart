@@ -9,23 +9,29 @@ class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xff285981),
-      height: MediaQuery.of(context).size.height * .02,
+      color: Colors.black87,
+      height: MediaQuery.of(context).size.height * .03,
       width: double.infinity,
       child: Center(
           child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.copyright_outlined, size: 12, color: Colors.white),
+          Text(
+            "Powered by",
+            style: GoogleFonts.roboto(
+                fontSize: 12,
+                color: Colors.white,
+                fontWeight: FontWeight.normal),
+          ),
           SizedBox(
             width: 2,
           ),
           Text(
             "Feuji Inc.",
             style: GoogleFonts.roboto(
-                fontSize: 12,
-                color: Colors.white,
-                fontWeight: FontWeight.normal),
+                fontSize: 14,
+                color: Color(0xffE95622),
+                fontWeight: FontWeight.bold),
           ),
         ],
       )),
