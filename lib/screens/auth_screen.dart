@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:harbinger/screens/login_screen.dart';
+import 'package:harbinger/widgets/AuthPage/login_widget.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});

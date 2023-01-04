@@ -1,26 +1,16 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
+import 'package:harbinger/firebase_options.dart';
 import 'package:harbinger/models/projects.dart';
 import 'package:harbinger/screens/auth_screen.dart';
-import 'package:harbinger/screens/login_screen.dart';
-import 'package:harbinger/widgets/footer_widget.dart';
-import 'package:harbinger/widgets/lanch_text_widget.dart';
-import 'package:harbinger/widgets/launch_app_bar_widget.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'widgets/Common/footer_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: FirebaseOptions(
-      apiKey: "AIzaSyCjoI3lgFQFei92wc7hsQ-d5SiW3GF8s4k",
-      appId: "1:149802584253:web:9f5a4c8e7c235197dd8fd4",
-      messagingSenderId: "149802584253",
-      projectId: "harbinger-f8afb",
-    ),
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.windows);
   await Hive.initFlutter();
   Hive.registerAdapter(ProjectsAdapter());
   runApp(const MyApp());

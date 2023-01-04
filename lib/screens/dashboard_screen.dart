@@ -1,16 +1,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:harbinger/screens/home_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
-import 'package:harbinger/screens/test_reports.dart';
-import 'package:harbinger/widgets/loader_widget.dart';
+import 'package:harbinger/screens/test_reports_screen.dart';
 import 'package:process_run/shell.dart';
 
 import '../assets/constants.dart';
 import '../helpers/helper_functions.dart';
+import '../widgets/Common/loader_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -50,15 +48,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Row(
         children: <Widget>[
           NavigationRail(
+              useIndicator: true,
+              indicatorColor: Colors.grey.withOpacity(.1),
+              leading: Column(
+                children: [
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.network(
+                          "https://xsgames.co/randomusers/avatar.php?g=male",
+                          height: 50,
+                          width: 50,
+                        )),
+                  ),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      color: Colors.grey[100],
+                      height: 2,
+                      width: 60,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
               trailing: Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: IconButton(
-                        icon: const Icon(Icons.rocket_launch,
-                            color: themeColor, size: 25),
-                        onPressed: () {}),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset(
+                          scale: 10,
+                          "assets/images/logo.png",
+                          fit: BoxFit.fill,
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ),

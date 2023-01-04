@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:harbinger/widgets/Home/create_import_buttons.dart';
+import 'package:harbinger/widgets/Home/greetings.dart';
 import 'package:harbinger/widgets/Home/project_card.dart';
 import 'package:harbinger/widgets/Home/project_popup.dart';
 import 'package:hive/hive.dart';
@@ -44,7 +45,6 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
       ..projectName = projectName
       ..projectPath = projectPath;
     projectsBox.add(projects);
-    print(projectsBox.length);
     await projectsBox.close();
     getProjectData();
   }
@@ -55,25 +55,59 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 20, 30, 0),
-                child: CreateImportButtons(
-                  onClickDone: onClickDone,
-                  projectDataLength: projectDataList.length,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(32.0, 0, 0, 0),
+                        child: Chip(
+                          elevation: 1,
+                          backgroundColor: Colors.green.withOpacity(.2),
+                          label: Text(
+                            "Node version - 15.2",
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        child: Chip(
+                          elevation: 1,
+                          backgroundColor: Colors.green.withOpacity(.2),
+                          label: Text("Git version - 2.2"),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: CreateImportButtons(
+                      onClickDone: onClickDone,
+                      projectDataLength: projectDataList.length,
+                    ),
+                  ),
+                ],
               ),
               SizedBox(
                 height: 10,
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: projectDataList
-                        .map((e) => ProjectCard(
-                              projects: e,
-                            ))
-                        .toList(),
-                  ),
+                child: GridView(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: .8,
+                      crossAxisCount: MediaQuery.of(context).size.width > 1300
+                          ? 5
+                          : MediaQuery.of(context).size.width > 1200
+                              ? 4
+                              : 3,
+                      crossAxisSpacing: 4),
+                  children: projectDataList
+                      .map((e) => ProjectCard(
+                            projects: e,
+                          ))
+                      .toList(),
                 ),
               ),
             ],

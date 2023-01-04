@@ -1,7 +1,11 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:io' as io;
 import 'package:harbinger/widgets/TestPlan/test_spec.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/TestPlan/test_script.dart';
 
 class TestPlanScreen extends StatefulWidget {
   const TestPlanScreen({super.key});
@@ -28,16 +32,8 @@ class _TestPlanScreenState extends State<TestPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: <Widget>[
-      // your Content if there
-      Expanded(
-        child: ListView.builder(
-          itemCount: file.length,
-          itemBuilder: (BuildContext context, int index) {
-            return TestSpec(specName: file[index].toString());
-          },
-        ),
-      )
-    ]);
+    return TestScript(
+      specName: "x",
+    );
   }
 }

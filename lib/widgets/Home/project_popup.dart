@@ -1,13 +1,10 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:io';
-
+// ignore_for_file: prefer_const_constructors, unnecessary_new
+import 'package:chips_choice/chips_choice.dart';
+import 'package:code_editor/code_editor.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-
-import '../../models/projects.dart';
+import 'package:flutter_switch/flutter_switch.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProjectPopup extends StatefulWidget {
   final Function(String projectName, String projectPath) onClickedDone;
@@ -22,7 +19,36 @@ class ProjectPopup extends StatefulWidget {
 class _ProjectPopupState extends State<ProjectPopup> {
   final formKey = GlobalKey<FormState>();
   final projectNameController = TextEditingController();
+  final defaultTimeOutController = TextEditingController();
+  final environmentNameController = TextEditingController();
+  final environmentValueController = TextEditingController();
+  final workerNumberController = TextEditingController();
   String? projectPath = "";
+  List<String> tags = [];
+  List<String> options = ['Chrome', 'Safari', 'Edge'];
+  Map<String, String> environments = {};
+  bool parallel = false;
+
+  ChipsChoice getChips() {
+    return ChipsChoice<String>.multiple(
+      choiceCheckmark: true,
+      choiceStyle: C2ChipStyle.filled(
+        disabledStyle: C2ChipStyle(
+          backgroundColor: Colors.grey,
+        ),
+        selectedStyle: C2ChipStyle(
+          backgroundColor: Color(0xffE95622),
+        ),
+      ),
+      value: tags,
+      onChanged: (val) => setState(() => tags = val),
+      choiceItems: C2Choice.listFrom<String, String>(
+        source: options,
+        value: (i, v) => v,
+        label: (i, v) => v,
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -35,19 +61,168 @@ class _ProjectPopupState extends State<ProjectPopup> {
   Widget build(BuildContext context) {
     final title = widget.isAdd ? 'Add project' : 'Import project';
     return AlertDialog(
-      title: Text(title),
+      scrollable: true,
+      insetPadding: EdgeInsets.all(10),
+      backgroundColor: Colors.white,
+      title: Text(title,
+          style: GoogleFonts.roboto(
+              color: Colors.black87, fontWeight: FontWeight.bold)),
       content: Form(
         key: formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              SizedBox(height: 8),
-              buildProjectName(),
-              SizedBox(height: 8),
-              buildProjectPath()
-            ],
-          ),
+        child: Column(
+          children: <Widget>[
+            new Divider(
+              color: Color(0xffE95622),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              children: [
+                Text("Project path: ",
+                    style: GoogleFonts.roboto(
+                        color: Colors.black87, fontSize: 14)),
+                Text("C:\\harbinger\\",
+                    style: GoogleFonts.roboto(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 14)),
+              ],
+            ),
+            SizedBox(height: 8),
+            buildField(projectNameController, "Enter project name"),
+            SizedBox(height: 8),
+            buildField(
+                defaultTimeOutController, "Enter default timeout (in ms)"),
+            environments.isNotEmpty
+                ? SizedBox(height: 16)
+                : SizedBox(height: 8),
+            Column(
+              children: [
+                Row(
+                    children: environments.entries
+                        .map((e) => Tooltip(
+                              message: e.value,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                                child: Chip(
+                                  deleteIcon: Icon(
+                                    Icons.close,
+                                    size: 14,
+                                  ),
+                                  onDeleted: () {
+                                    setState(() {
+                                      environments.remove(e.key);
+                                    });
+                                  },
+                                  label: Text(e.key,
+                                      style: GoogleFonts.roboto(
+                                        color: Colors.black87,
+                                        fontSize: 14,
+                                      )),
+                                ),
+                              ),
+                            ))
+                        .toList()),
+                SizedBox(
+                  height: 8,
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: buildField(environmentNameController,
+                          "Enter environment name (qa,dev etc.)"),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      flex: 3,
+                      child: buildField(environmentValueController,
+                          "Enter environment url (http://www.google.com)"),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            environments[environmentNameController.text] =
+                                environmentValueController.text;
+                            environmentNameController.clear();
+                            environmentValueController.clear();
+                          });
+                        },
+                        child: Text('Add',
+                            style: GoogleFonts.roboto(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Row(
+                        children: [
+                          Text("Parallel execution? : ",
+                              style: GoogleFonts.roboto(
+                                  color: Colors.black87, fontSize: 14)),
+                          FlutterSwitch(
+                            inactiveColor: Colors.grey[300]!,
+                            activeColor: Color(0xffE95622),
+                            width: 55.0,
+                            height: 22.0,
+                            valueFontSize: 14.0,
+                            toggleSize: 15.0,
+                            value: parallel,
+                            borderRadius: 30.0,
+                            padding: 8.0,
+                            showOnOff: false,
+                            onToggle: (val) {
+                              setState(() {
+                                parallel = val;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: 16,
+                    ),
+                    parallel
+                        ? Expanded(
+                            flex: 2,
+                            child: buildField(workerNumberController,
+                                "Enter number of workers"))
+                        : Container(),
+                    SizedBox(
+                      width: 100,
+                    )
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Text("Browsers: ",
+                    style: GoogleFonts.roboto(
+                        color: Colors.black87, fontSize: 14)),
+                Container(width: 600, child: getChips())
+              ],
+            ),
+            SizedBox(height: 8),
+            //buildProjectPath()
+          ],
         ),
       ),
       actions: <Widget>[
@@ -57,11 +232,13 @@ class _ProjectPopupState extends State<ProjectPopup> {
     );
   }
 
-  Widget buildProjectName() => TextFormField(
-        controller: projectNameController,
+  Widget buildField(TextEditingController editingController, String hintText) =>
+      TextFormField(
+        style: GoogleFonts.roboto(
+            color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500),
+        controller: editingController,
         decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: 'Enter project name',
+          hintText: hintText,
         ),
         validator: (name) =>
             name != null && name.isEmpty ? 'Enter a project name' : null,
@@ -75,10 +252,14 @@ class _ProjectPopupState extends State<ProjectPopup> {
           },
       child: Text('Chose a file'));
   Widget buildAddButton(BuildContext context) {
-    final text = widget.isAdd ? 'Add' : 'Import';
+    final text = widget.isAdd ? 'Add project' : 'Import';
 
     return TextButton(
-      child: Text(text),
+      child: Text(text,
+          style: GoogleFonts.roboto(
+              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.bold)),
       onPressed: () async {
         final isValid = formKey.currentState!.validate();
 
@@ -94,7 +275,11 @@ class _ProjectPopupState extends State<ProjectPopup> {
   }
 
   Widget buildCancelButton(BuildContext context) => TextButton(
-        child: Text('Cancel'),
+        child: Text('Cancel',
+            style: GoogleFonts.roboto(
+                color: Colors.black87,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
         onPressed: () => Navigator.of(context).pop(),
       );
 }

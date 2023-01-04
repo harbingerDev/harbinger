@@ -27,7 +27,7 @@ class CreateImportButtons extends StatelessWidget {
                     isAdd: true,
                   )),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xff285981),
+            backgroundColor: Colors.black87,
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             textStyle: GoogleFonts.roboto(
                 fontSize: 14,
@@ -42,7 +42,7 @@ class CreateImportButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => {},
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xff285981),
+            backgroundColor: Colors.black87,
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             textStyle: GoogleFonts.roboto(
                 fontSize: 14,
@@ -61,7 +61,7 @@ npx playwright codegen -o "C:\\playwright_check\\tests\\first_script.spec.js" ht
   ''')
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xff285981),
+            backgroundColor: Colors.black87,
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             textStyle: GoogleFonts.roboto(
                 fontSize: 14,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const themeColor = Color(0xff285981);
+const themeColor = Colors.black87;
 List<Map<String, dynamic>> navigationRailItems = [
   {
     "icon": Icons.home,
