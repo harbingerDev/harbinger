@@ -28,14 +28,24 @@ class Steps {
   String? stepName;
   String? action;
   String? operatedOn;
+  String? input;
+  bool? isExpanded;
   List<Strategies>? strategies;
 
-  Steps({this.stepName, this.action, this.operatedOn, this.strategies});
+  Steps(
+      {this.stepName,
+      this.action,
+      this.operatedOn,
+      this.input,
+      this.isExpanded = false,
+      this.strategies});
 
   Steps.fromJson(Map<String, dynamic> json) {
     stepName = json['stepName'];
     action = json['action'];
     operatedOn = json['operatedOn'];
+    input = json['input'];
+    isExpanded = json['isExpanded'];
     if (json['strategies'] != null) {
       strategies = <Strategies>[];
       json['strategies'].forEach((v) {
@@ -49,6 +59,8 @@ class Steps {
     data['stepName'] = this.stepName;
     data['action'] = this.action;
     data['operatedOn'] = this.operatedOn;
+    data['input'] = this.input;
+    data['isExpanded'] = this.isExpanded;
     if (this.strategies != null) {
       data['strategies'] = this.strategies!.map((v) => v.toJson()).toList();
     }
