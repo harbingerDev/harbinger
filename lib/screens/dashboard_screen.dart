@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:harbinger/screens/home_screen.dart';
+import 'package:harbinger/screens/test_lab_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
 import 'package:harbinger/screens/test_reports_screen.dart';
 import 'package:process_run/shell.dart';
@@ -111,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ? Expanded(child: TestPlanScreen())
                       : _selectedIndex == 3
                           ? Expanded(child: TestReports())
-                          : Container(),
+                          : Expanded(child: TestLabScreen()),
         ],
       ),
     );
