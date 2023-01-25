@@ -1,13 +1,18 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../models/project.dart';
 import '../../models/projects.dart';
 
 class ProjectCard extends StatelessWidget {
-  const ProjectCard({super.key, required this.projects});
-  final Projects projects;
+  const ProjectCard(
+      {super.key, required this.projects, required this.activeProject});
+  final Project projects;
+  final int activeProject;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -56,14 +61,16 @@ class ProjectCard extends StatelessWidget {
                       child: Chip(
                         elevation: 1,
                         label: Text(
-                          "Active",
+                          activeProject == projects.id ? "Active" : "Inactive",
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.roboto(
                             color: Colors.black87,
                             fontSize: 15,
                           ),
                         ),
-                        backgroundColor: Colors.green.withOpacity(.2),
+                        backgroundColor: activeProject == projects.id
+                            ? Colors.green.withOpacity(.2)
+                            : Colors.black87.withOpacity(.2),
                       ),
                     ),
                   ),
@@ -72,7 +79,7 @@ class ProjectCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  projects.projectName,
+                  projects.projectName!,
                   style: GoogleFonts.roboto(
                     fontSize: 30,
                     color: Colors.black87,
@@ -96,7 +103,7 @@ class ProjectCard extends StatelessWidget {
                                   style: GoogleFonts.roboto(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.w500)),
-                              Text("Chrome, Edge, Safari")
+                              Text("${projects.browsers}".toLowerCase())
                             ],
                           ),
                         ),
@@ -108,7 +115,7 @@ class ProjectCard extends StatelessWidget {
                                   style: GoogleFonts.roboto(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.w500)),
-                              Text("True")
+                              Text("${projects.parallelExecution}")
                             ],
                           ),
                         ),
@@ -120,7 +127,8 @@ class ProjectCard extends StatelessWidget {
                                   style: GoogleFonts.roboto(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.w500)),
-                              Text("QA, Staging, UAT")
+                              Text(
+                                  "${json.decode(projects.environments!).keys.join(",").toLowerCase()}")
                             ],
                           ),
                         ),
@@ -136,7 +144,7 @@ class ProjectCard extends StatelessWidget {
                                 child: Tooltip(
                                   message: projects.projectPath,
                                   child: Text(
-                                    projects.projectPath,
+                                    projects.projectPath!,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -148,11 +156,11 @@ class ProjectCard extends StatelessWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
                             children: [
-                              Text("Default folder: ",
+                              Text("Default timeout: ",
                                   style: GoogleFonts.roboto(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.w500)),
-                              Text("/tests")
+                              Text("${projects.defaultTimeout}")
                             ],
                           ),
                         ),

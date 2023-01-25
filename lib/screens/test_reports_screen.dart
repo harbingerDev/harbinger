@@ -12,19 +12,6 @@ class TestReports extends StatefulWidget {
 }
 
 class _TestReportsState extends State<TestReports> {
-  Future<String> _read() async {
-    String text = "";
-    try {
-      final File file =
-          File('C:\\playwright_check\\playwright-report\\index.html');
-      text = await file.readAsString();
-    } catch (e) {
-      print(e.toString());
-    }
-
-    return text;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(

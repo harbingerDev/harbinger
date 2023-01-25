@@ -1,13 +1,13 @@
 // ignore_for_file: prefer_const_constructors, unnecessary_new
+
 import 'package:chips_choice/chips_choice.dart';
-import 'package:code_editor/code_editor.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProjectPopup extends StatefulWidget {
-  final Function(String projectName, String projectPath) onClickedDone;
+  final Function(Map<String, dynamic> projectObject) onClickedDone;
   final bool isAdd;
   const ProjectPopup(
       {super.key, required this.onClickedDone, required this.isAdd});
@@ -23,6 +23,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
   final environmentNameController = TextEditingController();
   final environmentValueController = TextEditingController();
   final workerNumberController = TextEditingController();
+  Map<String, dynamic> projectObject = {};
   String? projectPath = "";
   List<String> tags = [];
   List<String> options = ['Chrome', 'Safari', 'Edge'];
@@ -82,7 +83,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
                 Text("Project path: ",
                     style: GoogleFonts.roboto(
                         color: Colors.black87, fontSize: 14)),
-                Text("C:\\harbinger\\",
+                Text("C:\\exp\\",
                     style: GoogleFonts.roboto(
                         color: Colors.black87,
                         fontWeight: FontWeight.w500,
@@ -133,13 +134,13 @@ class _ProjectPopupState extends State<ProjectPopup> {
                   children: [
                     Expanded(
                       flex: 3,
-                      child: buildField(environmentNameController,
+                      child: buildEnvironmentField(environmentNameController,
                           "Enter environment name (qa,dev etc.)"),
                     ),
                     SizedBox(width: 16),
                     Expanded(
                       flex: 3,
-                      child: buildField(environmentValueController,
+                      child: buildEnvironmentField(environmentValueController,
                           "Enter environment url (http://www.google.com)"),
                     ),
                     Expanded(
@@ -232,6 +233,16 @@ class _ProjectPopupState extends State<ProjectPopup> {
     );
   }
 
+  Widget buildEnvironmentField(
+          TextEditingController editingController, String hintText) =>
+      TextFormField(
+        style: GoogleFonts.roboto(
+            color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500),
+        controller: editingController,
+        decoration: InputDecoration(
+          hintText: hintText,
+        ),
+      );
   Widget buildField(TextEditingController editingController, String hintText) =>
       TextFormField(
         style: GoogleFonts.roboto(
@@ -264,9 +275,14 @@ class _ProjectPopupState extends State<ProjectPopup> {
         final isValid = formKey.currentState!.validate();
 
         if (isValid) {
-          final projectName = projectNameController.text;
+          projectObject["project_name"] = projectNameController.text;
+          projectObject["project_path"] = "C:\\exp";
+          projectObject["default_timeout"] = defaultTimeOutController.text;
+          projectObject["environments"] = environments;
+          projectObject["parallel_execution"] = parallel.toString();
+          projectObject["browsers"] = tags;
 
-          widget.onClickedDone(projectName, projectPath!);
+          widget.onClickedDone(projectObject);
 
           Navigator.of(context).pop();
         }

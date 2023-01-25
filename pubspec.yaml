@@ -57,6 +57,9 @@ dependencies:
   chips_choice: ^3.0.0
   flutter_switch: ^0.3.2
   webview_windows: ^0.2.2
+  dio: ^4.0.6
+  http: ^0.13.5
+  shared_preferences: ^2.0.17
 
 dev_dependencies:
   flutter_test:

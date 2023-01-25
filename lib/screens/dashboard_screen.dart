@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:harbinger/screens/home_screen.dart';
 import 'package:harbinger/screens/test_lab_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
@@ -20,26 +19,13 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
-  bool loading = true;
+  bool loading = false;
   bool isFirstTime = true;
   var shell = Shell();
-  var nodeVersion;
-
-  getNodeVersion() async {
-    await shell.run('''
-    node -v
-    ''').then((result) => {
-          setState(() {
-            nodeVersion = result.first.outText;
-            loading = false;
-          })
-        });
-  }
 
   @override
   void initState() {
     super.initState();
-    getNodeVersion();
   }
 
   @override

@@ -32,8 +32,6 @@ class _TestLabScreenState extends State<TestLabScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TestScript(
-      specName: "x",
-    );
+    return TestScript(tab: "lab");
   }
 }

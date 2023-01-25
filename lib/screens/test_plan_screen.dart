@@ -15,25 +15,13 @@ class TestPlanScreen extends StatefulWidget {
 }
 
 class _TestPlanScreenState extends State<TestPlanScreen> {
-  late String directory;
-  // ignore: deprecated_member_use
-  late List file;
   @override
   void initState() {
     super.initState();
-    _listofFiles();
-  }
-
-  void _listofFiles() async {
-    setState(() {
-      file = io.Directory("C:/playwright_check/tests").listSync();
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return TestScript(
-      specName: "x",
-    );
+    return TestScript(tab: "plan");
   }
 }

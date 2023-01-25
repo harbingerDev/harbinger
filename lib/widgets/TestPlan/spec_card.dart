@@ -1,19 +1,21 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables, use_key_in_widget_constructors
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_highlight/flutter_highlight.dart';
-import 'package:flutter_highlight/themes/github.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_syntax_view/flutter_syntax_view.dart';
-import 'package:harbinger/widgets/Common/loader_widget.dart';
 import 'package:harbinger/widgets/TestPlan/show_code.dart';
 import 'package:harbinger/widgets/TestPlan/show_steps.dart';
 
 class SpecCard extends StatefulWidget {
-  const SpecCard({super.key, required this.script});
+  const SpecCard(
+      {super.key,
+      required this.script,
+      required this.tab,
+      required this.activeProject,
+      required this.executeScript});
   final String script;
+  final String tab;
+  final List<Map<String, dynamic>> activeProject;
+  final Function(String scriptName) executeScript;
 
   @override
   State<SpecCard> createState() => _SpecCardState();
@@ -60,47 +62,56 @@ class _SpecCardState extends State<SpecCard> {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
-                    Tooltip(
-                      message: "View script",
-                      child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.code),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ShowCode(
-                                  filePath: widget.script,
-                                ),
-                              ),
-                            );
-                          }),
-                    ),
+                    widget.tab == "plan"
+                        ? Tooltip(
+                            message: "View script",
+                            child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(Icons.code),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShowCode(
+                                        filePath: widget.script,
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          )
+                        : Container(),
                     SizedBox(
                       width: 20,
                     ),
-                    Tooltip(
-                      message: "Edit script",
-                      child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.edit_note_outlined),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ShowSteps(
-                                  filePath: widget.script,
-                                ),
-                              ),
-                            );
-                          }),
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Tooltip(
-                        message: "Execute script",
-                        child: Icon(Icons.play_arrow_outlined))
+                    widget.tab == "plan"
+                        ? Tooltip(
+                            message: "Edit script",
+                            child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(Icons.edit_note_outlined),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShowSteps(
+                                        filePath: widget.script,
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          )
+                        : Container(),
+                    widget.tab != "plan"
+                        ? Tooltip(
+                            message: "Execute script",
+                            child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(Icons.play_arrow_outlined),
+                                onPressed: () async {
+                                  await widget.executeScript(
+                                      widget.script.split("\\").last);
+                                }))
+                        : Container()
                   ],
                 ),
               )

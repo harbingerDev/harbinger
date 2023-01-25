@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 import 'package:webview_windows/webview_windows.dart';
@@ -15,9 +18,12 @@ class TestReportViewer extends StatefulWidget {
 }
 
 class _TestReportViewerState extends State<TestReportViewer> {
+  bool loaded = false;
   final _controller = WebviewController();
   final _textController = TextEditingController();
   bool _isWebviewSuspended = false;
+  int activeProjectId = 0;
+  late List<Map<String, dynamic>> activeProject;
 
   @override
   void initState() {
@@ -33,6 +39,18 @@ class _TestReportViewerState extends State<TestReportViewer> {
     //await WebviewController.initializeEnvironment(
     //    additionalArguments: '--show-fps-counter');
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      activeProjectId = prefs.getInt('activeProject')!;
+      String allProjects = prefs.getString('projectsObject')!;
+      List<Map<String, dynamic>> allProjectsCasted =
+          json.decode(allProjects).cast<Map<String, dynamic>>();
+      activeProject = activeProjectId != 0
+          ? allProjectsCasted
+              .where((project) => project['id'] == activeProjectId)
+              .toList()
+          : [];
+    });
     try {
       await _controller.initialize();
       _controller.url.listen((url) {
@@ -41,8 +59,8 @@ class _TestReportViewerState extends State<TestReportViewer> {
 
       await _controller.setBackgroundColor(Colors.transparent);
       await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-      await _controller
-          .loadUrl('C:\\playwright_check\\playwright-report\\index.html');
+      await _controller.loadUrl(
+          '${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\playwright-report\\index.html');
 
       if (!mounted) return;
       setState(() {});

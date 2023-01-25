@@ -43,6 +43,8 @@ TextStyle textStyle16WithoutBold = GoogleFonts.roboto(
   fontSize: 16,
   color: themeColor,
 );
+TextStyle textStyle16WithBold = GoogleFonts.roboto(
+    fontSize: 16, color: themeColor, fontWeight: FontWeight.bold);
 
 const standardPadding = EdgeInsets.all(8.0);
 const backgroundColor = Color(0xFFE8E8E8);
