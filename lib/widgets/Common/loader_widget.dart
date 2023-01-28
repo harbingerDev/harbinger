@@ -8,15 +8,12 @@ class LoaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          LoadingAnimationWidget.dotsTriangle(
-              color: Color(0xff285981), size: 50)
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        LoadingAnimationWidget.dotsTriangle(color: Color(0xff285981), size: 50)
+      ],
     );
   }
 }

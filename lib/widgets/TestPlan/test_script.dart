@@ -20,7 +20,7 @@ class TestScript extends StatefulWidget {
 }
 
 class _TestScriptState extends State<TestScript> {
-  late List scriptArray;
+  List scriptArray = [];
   bool loaded = false;
   int activeProjectId = 0;
   late List<Map<String, dynamic>> activeProject;
@@ -116,21 +116,41 @@ class _TestScriptState extends State<TestScript> {
 
   late String scriptName;
   late String url;
-  _showPopup() async {
+  late String testName;
+  late String tags;
+  _showPopup(String specName) async {
+    var _controller = new TextEditingController(text: specName);
+    scriptName = _controller.text;
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Record script"),
-          content: Container(
+          content: SizedBox(
             width: MediaQuery.of(context).size.width * .5,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  decoration: InputDecoration(hintText: "Enter script name"),
+                  readOnly: specName == "" ? false : true,
+                  controller: _controller,
+                  decoration: InputDecoration(hintText: "Enter spec name"),
                   onChanged: (value) {
                     scriptName = value;
+                  },
+                ),
+                TextField(
+                  decoration: InputDecoration(hintText: "Enter test name"),
+                  onChanged: (value) {
+                    testName = value;
+                  },
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      hintText:
+                          "Enter tags for test (eg. @smoke,@functionalComponent)"),
+                  onChanged: (value) {
+                    tags = value;
                   },
                 ),
                 TextField(
@@ -173,7 +193,9 @@ class _TestScriptState extends State<TestScript> {
       "project_path": activeProject[0]["project_path"],
       "project_name": activeProject[0]["project_name"],
       "script_name": "${scriptName.replaceAll(" ", "_")}.spec.js",
-      "url": url
+      "url": url,
+      "test_name": testName,
+      "tags": tags
     };
     final headers = {'Content-Type': 'application/json'};
     var recordScriptUrl =
@@ -226,7 +248,7 @@ class _TestScriptState extends State<TestScript> {
                       ),
                       widget.tab == "plan"
                           ? ElevatedButton(
-                              onPressed: () async => {_showPopup()},
+                              onPressed: () async => {_showPopup("")},
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black87,
                                 padding: EdgeInsets.symmetric(
@@ -270,6 +292,7 @@ class _TestScriptState extends State<TestScript> {
                         tab: widget.tab,
                         activeProject: activeProject,
                         executeScript: executeScript,
+                        showPopup: _showPopup,
                       );
                     },
                   ),
@@ -294,7 +317,7 @@ class _TestScriptState extends State<TestScript> {
                         height: 20,
                       ),
                       ElevatedButton(
-                        onPressed: () async => {_showPopup()},
+                        onPressed: () async => {_showPopup("")},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black87,
                           padding: EdgeInsets.symmetric(

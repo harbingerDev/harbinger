@@ -11,11 +11,13 @@ class SpecCard extends StatefulWidget {
       required this.script,
       required this.tab,
       required this.activeProject,
-      required this.executeScript});
+      required this.executeScript,
+      required this.showPopup});
   final String script;
   final String tab;
   final List<Map<String, dynamic>> activeProject;
   final Function(String scriptName) executeScript;
+  final Function(String specName) showPopup;
 
   @override
   State<SpecCard> createState() => _SpecCardState();
@@ -98,6 +100,24 @@ class _SpecCardState extends State<SpecCard> {
                                       ),
                                     ),
                                   );
+                                }),
+                          )
+                        : Container(),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    widget.tab == "plan"
+                        ? Tooltip(
+                            message: "add test",
+                            child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(Icons.add_task_outlined),
+                                onPressed: () async {
+                                  await widget.showPopup(widget.script
+                                      .split("\\")
+                                      .last
+                                      .split(".")
+                                      .first);
                                 }),
                           )
                         : Container(),
