@@ -6,8 +6,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:harbinger/models/codeStructure.dart';
+import 'package:harbinger/widgets/TestPlan/test_designGrid.dart';
 import 'package:http/http.dart' as http;
+import 'package:pluto_grid/pluto_grid.dart';
 import '../Common/loader_widget.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 class EditorViews extends StatefulWidget {
   const EditorViews({super.key, required this.filePath});
@@ -18,10 +21,29 @@ class EditorViews extends StatefulWidget {
 }
 
 class _EditorViewsState extends State<EditorViews> {
+  int selectedTestIndex = 0;
+  List<List<String>> testSteps = [];
+  List<String> availableLocatorStrategies = [
+    "getByRole",
+    "getByLabel",
+    "getByPlaceholder",
+    "getByText",
+    "getByAltText",
+    "getByTitle",
+    "getByTestId",
+    "filter",
+    "frameLocator",
+    "locator",
+    "nth"
+  ];
+  List<String> testNames = [];
+  List<PlutoRow> testRows = [];
+
   bool loaded = false;
   late String fileContent;
+  late List<String> lineArray;
   late List<CodeStructure> codeStructure;
-  late List<Map<String, List<List<dynamic>>>> tableData;
+  late Map<String, List<List<dynamic>>> tableData = {};
   Future<String> readFileAsString(String filePath) async {
     Map<String, String> executeScriptPayload = {"path": widget.filePath};
     final headers = {'Content-Type': 'application/json'};
@@ -35,16 +57,90 @@ class _EditorViewsState extends State<EditorViews> {
       )
     ]);
     setState(() {
-      codeStructure = json.decode(getASTResponse[0].body);
+      final List intermediate = json.decode(getASTResponse[0].body);
+      codeStructure =
+          intermediate.map((val) => CodeStructure.fromJson(val)).toList();
     });
+
     return File(widget.filePath).readAsString();
   }
 
   prepareData() {
     codeStructure.forEach((element) {
-      element.statements!.forEach((val) {
-        for (var i = (val.start! - 1); i < (val.end! - 1); i++) {}
+      testNames.length != codeStructure.length
+          ? testNames.add(element.name!)
+          : null;
+    });
+    CodeStructure element = codeStructure[selectedTestIndex];
+    List<List<dynamic>> codeDataArrayOfArray = [];
+    element.statements?.forEach((val) {
+      if (val.type == "AwaitExpression") {
+        var statement = "";
+
+        for (var i = val.start! - 1; i < (val.end!); i++) {
+          statement = "${statement}${lineArray[i]}";
+        }
+
+        List<dynamic> codeDataArray = [];
+        codeDataArray.add("AwaitExpression");
+        codeDataArray
+            .add(statement.trim().replaceAll("await", "").split(".")[0]);
+        codeDataArray.insert(1, "null");
+        List<String> strategies = statement
+            .trim()
+            .replaceAll("await", "")
+            .replaceAll("page.", "")
+            .replaceAll("page1.", "")
+            // ignore: valid_regexps
+            .split(").");
+
+        for (var i = 0; i < strategies.length; i++) {
+          if (strategies.length == 1) {
+            strategies[i].split("(").forEach((str) {
+              codeDataArray.add(str.trim().replaceAll(");", "").trim());
+            });
+          } else {
+            if (!(i == strategies.length - 1)) {
+              String requiredValue = availableLocatorStrategies.firstWhere(
+                  (element) => strategies[i].contains(element),
+                  orElse: () => "");
+              codeDataArray.add(requiredValue.trim());
+              codeDataArray
+                  .add(strategies[i].replaceAll("${requiredValue}(", ""));
+            } else {
+              strategies[i].split("(").forEach((str) {
+                codeDataArray.add(str.trim().replaceAll(");", "").trim());
+              });
+            }
+          }
+        }
+        if (codeDataArray.length == 7) {
+          codeDataArray.insert(5, "null");
+          codeDataArray.insert(6, "null");
+          codeDataArray.insert(7, "null");
+          codeDataArray.insert(8, "null");
+        } else if (codeDataArray.length == 9) {
+          codeDataArray.insert(7, "null");
+          codeDataArray.insert(8, "null");
+        } else if (codeDataArray.length == 5) {
+          codeDataArray.insert(3, "null");
+          codeDataArray.insert(4, "null");
+          codeDataArray.insert(5, "null");
+          codeDataArray.insert(6, "null");
+          codeDataArray.insert(7, "null");
+          codeDataArray.insert(8, "null");
+        }
+        codeDataArrayOfArray.add(codeDataArray);
+      }
+    });
+
+    tableData[element.name!] = codeDataArrayOfArray;
+    tableData[testNames[selectedTestIndex]]!.forEach((insideArray) {
+      List<String> intermediateArray = [];
+      insideArray.forEach((element) {
+        intermediateArray.add(element);
       });
+      testSteps.add(intermediateArray);
     });
   }
 
@@ -54,13 +150,20 @@ class _EditorViewsState extends State<EditorViews> {
     readFileAsString(widget.filePath).then((content) {
       setState(() {
         fileContent = content;
-        loaded = true;
+        var splitter = LineSplitter();
+        lineArray = splitter.convert(fileContent);
       });
     }).then((content) {
       setState(() {
         prepareData();
+        loaded = true;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -80,26 +183,52 @@ class _EditorViewsState extends State<EditorViews> {
       ),
       body: loaded
           ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Expanded(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      border: Border(
-                          bottom: BorderSide.none,
-                          top: BorderSide.none,
-                          right: BorderSide.none,
-                          left: BorderSide.none),
-                      color: Colors.white,
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Text("Please select the test to edit: "),
+                      Container(
+                        height: 50,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
+                          itemCount: testNames.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: selectedTestIndex == index
+                                      ? Color(0xffE95622)
+                                      : Colors.black87,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 10),
+                                  textStyle: GoogleFonts.roboto(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.normal),
+                                ),
+                                child: Text(testNames[index]),
+                                onPressed: () {
+                                  setState(() {
+                                    selectedTestIndex = index;
+                                    testSteps = [];
+                                    prepareData();
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
+                Expanded(child: TestDesignGrid(testSteps: testSteps))
               ],
             )
           : LoaderWidget(),

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:harbinger/widgets/TestPlan/editor_views.dart';
 import 'package:harbinger/widgets/TestPlan/show_code.dart';
 import 'package:harbinger/widgets/TestPlan/show_steps.dart';
 
@@ -95,7 +96,7 @@ class _SpecCardState extends State<SpecCard> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => ShowSteps(
+                                      builder: (context) => EditorViews(
                                         filePath: widget.script,
                                       ),
                                     ),

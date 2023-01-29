@@ -48,3 +48,68 @@ TextStyle textStyle16WithBold = GoogleFonts.roboto(
 
 const standardPadding = EdgeInsets.all(8.0);
 const backgroundColor = Color(0xFFE8E8E8);
+
+List<String> availableLocatorStrategies = [
+  "getByRole",
+  "getByLabel",
+  "getByPlaceholder",
+  "getByText",
+  "getByAltText",
+  "getByTitle",
+  "getByTestId",
+  "filter",
+  "frameLocator",
+  "locator",
+  "nth",
+  "null"
+];
+List<String> availableStepTypes = [
+  "AwaitExpression",
+  "VariableDeclaration",
+  "IfLoop",
+  "ForLoop",
+  "VerificationStatement",
+  "TestOptions"
+];
+List<String> availableActions = [
+  "goto",
+  "click",
+  "tap",
+  "fill",
+  "selectOption",
+  "selectText",
+  "check",
+  "setChecked",
+  "uncheck",
+  "hover",
+  "dispatchEvent",
+  "type",
+  "press",
+  "setInputFiles",
+  "waitForEvent",
+  "waitFor",
+  "waitForTimeout",
+  "dragTo",
+  "all",
+  "allInnerTexts",
+  "allTextContents",
+  "boundingBox",
+  "clear",
+  "count",
+  "dblclick",
+  "toBe",
+  "first",
+  "last",
+  "focus",
+  "getAttribute",
+  "highlight",
+  "innerHTML",
+  "innerText",
+  "inputValue",
+  "isChecked",
+  "isDisabled",
+  "isEditable",
+  "isEnabled",
+  "scrollIntoViewIfNeeded",
+  "textContent"
+];
