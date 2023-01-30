@@ -28,10 +28,10 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
 
   Future<void> _getData() async {
     projectDataList = [];
-    var projectsUrl = Uri.parse("http://localhost:1337/projects/getProjects");
+    var projectsUrl = Uri.parse("http://127.0.0.1:1337/projects/getProjects");
     var activeProjectUrl =
-        Uri.parse("http://localhost:1337/projects/getActiveProject");
-    var gitUrl = Uri.parse("http://localhost:1337/system/checkGitVersion");
+        Uri.parse("http://127.0.0.1:1337/projects/getActiveProject");
+    var gitUrl = Uri.parse("http://127.0.0.1:1337/system/checkGitVersion");
     final responses = await Future.wait(
         [http.get(projectsUrl), http.get(activeProjectUrl), http.get(gitUrl)]);
     if (responses[0].statusCode == 200 && responses[1].statusCode == 200) {
@@ -67,8 +67,8 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
     });
     final headers = {'Content-Type': 'application/json'};
     var projectCreationUrl =
-        Uri.parse("http://localhost:1337/projects/createProject");
-    var projectsUrl = Uri.parse("http://localhost:1337/projects/getProjects");
+        Uri.parse("http://127.0.0.1:1337/projects/createProject");
+    var projectsUrl = Uri.parse("http://127.0.0.1:1337/projects/getProjects");
     final creationResponse = await Future.wait([
       http.post(
         projectCreationUrl,
@@ -78,7 +78,7 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
       )
     ]);
     var activateProjectUrl = Uri.parse(
-        "http://localhost:1337/projects/activate/${json.decode(creationResponse[0].body)['id']}");
+        "http://127.0.0.1:1337/projects/activate/${json.decode(creationResponse[0].body)['id']}");
     await http.put(activateProjectUrl);
     await _getData();
     setState(() {

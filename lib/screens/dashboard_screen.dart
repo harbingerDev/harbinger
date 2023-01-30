@@ -4,7 +4,6 @@ import 'package:harbinger/screens/home_screen.dart';
 import 'package:harbinger/screens/test_lab_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
 import 'package:harbinger/screens/test_reports_screen.dart';
-import 'package:process_run/shell.dart';
 
 import '../assets/constants.dart';
 import '../helpers/helper_functions.dart';
@@ -21,7 +20,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
   bool loading = false;
   bool isFirstTime = true;
-  var shell = Shell();
 
   @override
   void initState() {
