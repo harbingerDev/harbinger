@@ -12,7 +12,8 @@ class TestSteps {
       this.locatorStrategy3,
       this.locatorValue3,
       this.action,
-      this.actionArgument);
+      this.actionArgument,
+      this.addStep);
 
   String type,
       variableName,
@@ -24,7 +25,8 @@ class TestSteps {
       locatorStrategy3,
       locatorValue3,
       action,
-      actionArgument;
+      actionArgument,
+      addStep;
 
   DataGridRow getDataGridRow() {
     return DataGridRow(cells: <DataGridCell>[
@@ -43,6 +45,7 @@ class TestSteps {
       DataGridCell<String>(columnName: 'Action', value: action),
       DataGridCell<String>(
           columnName: 'Action argument', value: actionArgument),
+      DataGridCell<String>(columnName: 'Add step', value: addStep),
     ]);
   }
 }

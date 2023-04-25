@@ -1,10 +1,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:harbinger/main.dart';
 import 'package:harbinger/widgets/TestPlan/editor_views.dart';
 import 'package:harbinger/widgets/TestPlan/show_code.dart';
+import 'package:harbinger/widgets/TestPlan/show_code_GPT.dart';
 import 'package:harbinger/widgets/TestPlan/show_steps.dart';
+import 'package:harbinger/widgets/TestPlan/show_steps_updated.dart';
 
 class SpecCard extends StatefulWidget {
   const SpecCard(
@@ -65,6 +69,24 @@ class _SpecCardState extends State<SpecCard> {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
+                    // widget.tab == "plan"
+                    //     ? Tooltip(
+                    //         message: "View script GPT",
+                    //         child: IconButton(
+                    //             padding: EdgeInsets.zero,
+                    //             icon: Icon(Icons.code),
+                    //             onPressed: () {
+                    //               Navigator.push(
+                    //                 context,
+                    //                 MaterialPageRoute(
+                    //                   builder: (context) => ShowCodeGPT(
+                    //                     filePath: widget.script,
+                    //                   ),
+                    //                 ),
+                    //               );
+                    //             }),
+                    //       )
+                    //     : Container(),
                     widget.tab == "plan"
                         ? Tooltip(
                             message: "View script",
@@ -83,6 +105,49 @@ class _SpecCardState extends State<SpecCard> {
                                 }),
                           )
                         : Container(),
+                    widget.tab == "plan"
+                        ? Consumer(
+                            builder: (_, WidgetRef ref, __) {
+                              return Tooltip(
+                                message: "View script updated",
+                                child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(Icons.code),
+                                    onPressed: () {
+                                      ref.read(screenProvider.notifier).state =
+                                          "Code";
+                                      ref
+                                          .read(filePathProvider.notifier)
+                                          .state = widget.script;
+                                    }),
+                              );
+                            },
+                          )
+                        : Container(),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    widget.tab == "plan"
+                        ? Tooltip(
+                            message: "new edit view",
+                            child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(Icons.edit_note_outlined),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShowStepsUpdated(
+                                        filePath: widget.script,
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          )
+                        : Container(),
+                    SizedBox(
+                      width: 20,
+                    ),
                     SizedBox(
                       width: 20,
                     ),

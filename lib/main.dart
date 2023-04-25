@@ -3,17 +3,24 @@
 import 'package:flutter/material.dart';
 import 'package:harbinger/firebase_options.dart';
 import 'package:harbinger/models/projects.dart';
+import 'package:harbinger/models/testScriptModel.dart';
 import 'package:harbinger/screens/auth_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'widgets/Common/footer_widget.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final screenProvider = StateProvider<String>((ref) => "Nothing");
+final filePathProvider = StateProvider<String>((ref) => "Nothing");
+final selectedTabProvider = StateProvider<int>((ref) => 0);
+final godJSONProvider = StateProvider<TestScriptModel?>((ref) => null);
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.windows);
   await Hive.initFlutter();
   Hive.registerAdapter(ProjectsAdapter());
-  runApp(const MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

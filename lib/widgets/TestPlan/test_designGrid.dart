@@ -122,6 +122,14 @@ class _TestDesignGridState extends State<TestDesignGrid> {
                   'Action argument',
                   softWrap: true,
                 ))),
+        GridColumn(
+          columnName: 'button',
+          label: Container(
+            padding: const EdgeInsets.all(8.0),
+            alignment: Alignment.center,
+            child: const Text('Add step'),
+          ),
+        ),
       ],
     );
   }
@@ -140,7 +148,8 @@ class _TestDesignGridState extends State<TestDesignGrid> {
           testSteps[i][7],
           testSteps[i][8],
           testSteps[i][9],
-          testSteps[i][10]));
+          testSteps[i][10],
+          "Add step"));
     }
     return testStepList;
   }

@@ -66,6 +66,8 @@ dependencies:
   editable: ^2.0.0
   syncfusion_flutter_datagrid: ^20.4.44
   toggle_switch: ^2.0.1
+  webview_flutter: ^4.0.7
+  flutter_riverpod: ^2.3.5
 
 dev_dependencies:
   flutter_test:
