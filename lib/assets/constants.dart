@@ -111,5 +111,6 @@ List<String> availableActions = [
   "isEditable",
   "isEnabled",
   "scrollIntoViewIfNeeded",
-  "textContent"
+  "textContent",
+  "null"
 ];

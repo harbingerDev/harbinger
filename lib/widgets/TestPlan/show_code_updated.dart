@@ -83,19 +83,42 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
                                 "Number of test cases: //${testScriptModel.testBlockArray!.length}")),
                       ],
                     ),
-                    ElevatedButton(
-                      onPressed: () =>
-                          {ref.read(screenProvider.notifier).state = "Nothing"},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black87,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        textStyle: GoogleFonts.roboto(
-                            fontSize: 14,
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal),
-                      ),
-                      child: Text("Back to spec file"),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => {
+                            ref.read(screenProvider.notifier).state = "Nothing"
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            textStyle: GoogleFonts.roboto(
+                                fontSize: 14,
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal),
+                          ),
+                          child: Text("Save"),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        ElevatedButton(
+                          onPressed: () => {
+                            ref.read(screenProvider.notifier).state = "Nothing"
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black87,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            textStyle: GoogleFonts.roboto(
+                                fontSize: 14,
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal),
+                          ),
+                          child: Text("Back to spec file"),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -111,7 +134,8 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
                         testScriptModel: _testScriptModel,
                         testIndex: i,
                         moveUp: moveUp,
-                        moveDown: moveDown);
+                        moveDown: moveDown,
+                        deleteAt: deleteAt);
                   },
                 ),
               ),
@@ -163,6 +187,26 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
               .testBlockArray![testIndex].testStepsArray![index + 1];
       updatedTestScriptModel
           .testBlockArray![testIndex].testStepsArray![index + 1] = temp;
+      setState(() {
+        ref.read(godJSONProvider.notifier).state = updatedTestScriptModel;
+      });
+    }
+  }
+
+  void deleteAt(int testIndex, int index) {
+    if (index >= 0 &&
+        index <
+            ref
+                    .read(godJSONProvider.notifier)
+                    .state!
+                    .testBlockArray![testIndex]
+                    .testStepsArray!
+                    .length -
+                1) {
+      TestScriptModel? updatedTestScriptModel =
+          ref.read(godJSONProvider.notifier).state;
+      updatedTestScriptModel!.testBlockArray![testIndex].testStepsArray!
+          .removeAt(index);
       setState(() {
         ref.read(godJSONProvider.notifier).state = updatedTestScriptModel;
       });
