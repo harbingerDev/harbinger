@@ -11,7 +11,8 @@ import 'package:webview_windows/webview_windows.dart';
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class TestReportViewer extends StatefulWidget {
-  const TestReportViewer({super.key});
+  final String type;
+  const TestReportViewer({super.key, required this.type});
 
   @override
   State<TestReportViewer> createState() => _TestReportViewerState();
@@ -59,8 +60,9 @@ class _TestReportViewerState extends State<TestReportViewer> {
 
       await _controller.setBackgroundColor(Colors.transparent);
       await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-      await _controller.loadUrl(
-          '${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\playwright-report\\index.html');
+      await _controller.loadUrl(widget.type == "local"
+          ? '${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\playwright-report\\index.html'
+          : "http://10.10.90.150:8080/ui/#superadmin_personal/launches/all");
 
       if (!mounted) return;
       setState(() {});

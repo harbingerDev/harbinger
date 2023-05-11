@@ -227,7 +227,7 @@ class _TestScriptState extends State<TestScript> {
         : activeProjectId > 0 && scriptArray.isNotEmpty
             ? Column(children: [
                 SizedBox(
-                  height: 50,
+                  height: 10,
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),

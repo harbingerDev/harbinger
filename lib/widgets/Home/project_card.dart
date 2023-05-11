@@ -10,9 +10,13 @@ import '../../models/projects.dart';
 
 class ProjectCard extends StatelessWidget {
   const ProjectCard(
-      {super.key, required this.projects, required this.activeProject});
+      {super.key,
+      required this.projects,
+      required this.activeProject,
+      required this.activateProject});
   final Project projects;
   final int activeProject;
+  final Function(String) activateProject;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -162,6 +166,30 @@ class ProjectCard extends StatelessWidget {
                                       fontWeight: FontWeight.w500)),
                               Text("${projects.defaultTimeout}")
                             ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Transform(
+                            transform: Matrix4.identity()..scale(0.8),
+                            child: activeProject == projects.id
+                                ? Container()
+                                : InkWell(
+                                    onTap: () {
+                                      activateProject(projects.id.toString());
+                                    },
+                                    child: Chip(
+                                      elevation: 1,
+                                      label: Text(
+                                        "Set project active",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.roboto(
+                                            color: Colors.black, fontSize: 15),
+                                      ),
+                                      backgroundColor:
+                                          Colors.black87.withOpacity(.2),
+                                    ),
+                                  ),
                           ),
                         ),
                       ],

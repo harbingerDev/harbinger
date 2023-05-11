@@ -25,6 +25,29 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
   var gitVersion;
   List<Project> projectDataList = [];
   bool doProjectsExist = false;
+  void activateProjectCallback(String projectId) {
+    activateProject(projectId);
+  }
+
+  Future<void> activateProject(String projectId) async {
+    setState(() {
+      loaded = false;
+    });
+    final url = Uri.parse('http://localhost:1337/projects/activate/$projectId');
+    final response = await http.put(url);
+
+    if (response.statusCode == 200) {
+      // Success: the API call was successful
+      print('Project $projectId has been activated');
+      await _getData();
+      setState(() {
+        loaded = true;
+      });
+    } else {
+      // Error: the API call failed
+      print('Failed to activate project $projectId: ${response.reasonPhrase}');
+    }
+  }
 
   Future<void> _getData() async {
     projectDataList = [];
@@ -136,7 +159,7 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
                   Expanded(
                     child: GridView(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          childAspectRatio: .8,
+                          childAspectRatio: .75,
                           crossAxisCount:
                               MediaQuery.of(context).size.width > 1300
                                   ? 5
@@ -146,7 +169,10 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
                           crossAxisSpacing: 4),
                       children: projectDataList
                           .map((e) => ProjectCard(
-                              projects: e, activeProject: activeProject))
+                                projects: e,
+                                activeProject: activeProject,
+                                activateProject: activateProjectCallback,
+                              ))
                           .toList(),
                     ),
                   ),
