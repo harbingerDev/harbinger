@@ -3,6 +3,13 @@ const { resolve } = require("path");
 const confighelper = require("./configHelper");
 const fs = require("fs");
 var esprima = require("esprima");
+const astring = require("astring");
+const humanReadable = require("./humanReadable");
+const objectRepo = require("./objectRepoHelper");
+const promiseHandler = require("./promiseHelper");
+const dataRepo = require("./dataRepoHelper");
+const envHelper = require("./environmentHelper");
+const { Console } = require("console");
 
 //project functions
 async function createProjectOnDisk(req) {
@@ -12,12 +19,19 @@ async function createProjectOnDisk(req) {
   return new Promise((resolve, reject) => {
     const updatedProjectName = req.project_name.replaceAll(" ", "_");
     exec(
-      `mkdir ${req.project_path}\\${updatedProjectName} && cd ${req.project_path}\\${updatedProjectName} && npm init -y && npm i -D @playwright/test && npx playwright install && mkdir tests && ${configCommand}`,
+      `mkdir ${req.project_path}\\${updatedProjectName} && cd ${req.project_path}\\${updatedProjectName} && npm init -y && npm i -D @playwright/test && npx playwright install && npm install dotenv && git init && mkdir tests && ${configCommand}`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
           reject(error);
         }
+        objectRepo.createObjectRepositoryFile(
+          `${req.project_path}\\${updatedProjectName}`
+        );
+        dataRepo.createDataRepositoryFile(
+          `${req.project_path}\\${updatedProjectName}`
+        );
+        envHelper.createEnvFile(`${req.project_path}\\${updatedProjectName}`);
         console.log(`stdout: ${stdout}`);
         resolve(true);
       }
@@ -40,28 +54,54 @@ async function createScript(req) {
         resolve(true);
       }
     );
-  }).then(async () => {
-    if (
-      await fs.existsSync(
+  })
+    .then(async () => {
+      if (
+        await fs.existsSync(
+          `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
+        )
+      ) {
+        await replaceAndAppend(
+          `${req.project_path}\\${req.project_name}\\tests\\${temp}`,
+          `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`,
+          "'test', async",
+          `'${req.test_name} ${req.tags}', async`,
+          "import { test, expect } from '@playwright/test';"
+        );
+      } else {
+        await replaceAndRename(
+          `${req.project_path}\\${req.project_name}\\tests\\${temp}`,
+          `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`,
+          "'test', async",
+          `'${req.test_name} ${req.tags}', async`
+        );
+
+        await promiseHandler
+          .replacePatternInFile(
+            `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
+          )
+          .then(async () => {
+            console.log("File modified and saved successfully!");
+            await promiseHandler.replaceAsyncPage(
+              `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
+            );
+          })
+          .catch((err) => {
+            console.error("Error modifying file:", err);
+          });
+      }
+    })
+    .then(async () => {
+      const godJSON = await getGodJSONInternal(
         `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
-      )
-    ) {
-      await replaceAndAppend(
-        `${req.project_path}\\${req.project_name}\\tests\\${temp}`,
-        `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`,
-        "'test', async",
-        `'${req.test_name} ${req.tags}', async`,
-        "import { test, expect } from '@playwright/test';"
       );
-    } else {
-      await replaceAndRename(
-        `${req.project_path}\\${req.project_name}\\tests\\${temp}`,
+      await objectRepo.getControlsFromGodJSON(
+        godJSON,
+        `${req.project_path}\\${req.project_name}\\objectRepository.js`,
         `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`,
-        "'test', async",
-        `'${req.test_name} ${req.tags}', async`
+        `${req.project_path}\\${req.project_name}\\dataRepository.json`
       );
-    }
-  });
+    });
 }
 
 async function replaceAndAppend(
@@ -176,7 +216,138 @@ async function checkGitVersion() {
   });
 }
 
-// AST specific
+// *** AST specific
+
+function extractValuesFromAst(node) {
+  const values = [];
+
+  function traverse(node, parentNode = null) {
+    if (!node) return;
+
+    if (node.type === "ExpressionStatement") {
+      traverse(node.expression, node);
+    } else if (node.type === "VariableDeclaration") {
+      values.push(node.kind);
+      node.declarations.forEach((decl) => traverse(decl, node));
+    } else if (node.type === "VariableDeclarator") {
+      traverse(node.id, node);
+      traverse(node.init, node);
+    } else if (node.type === "AwaitExpression") {
+      values.push("await");
+      traverse(node.argument, node);
+    } else if (node.type === "Identifier") {
+      values.push(node.name);
+    } else if (node.type === "Literal") {
+      values.push(
+        JSON.stringify(
+          node.value.replace(/\[id="\\\\([0-9])([^\]]+)\]/g, (match, p1) => p1)
+        )
+      );
+    } else if (node.type === "CallExpression") {
+      traverse(node.callee, node);
+
+      const argsValues = node.arguments
+        .map((arg) => extractValuesFromAst(arg))
+        .flat();
+      if (argsValues.length > 0) {
+        if (parentNode && parentNode.type === "CallExpression") {
+          values.push(...argsValues);
+        } else {
+          values.push(argsValues.join(", "));
+        }
+      }
+    } else if (node.type === "MemberExpression") {
+      traverse(node.object, node);
+      traverse(node.property, node);
+    } else if (node.type === "ObjectExpression") {
+      const properties = node.properties
+        .map((prop) => {
+          return `${prop.key.name}: ${JSON.stringify(prop.value.value)}`;
+        })
+        .join(", ");
+      values.push(`{ ${properties} }`);
+    }
+  }
+
+  traverse(node);
+  return values;
+}
+
+function getPreTestBlock(astBody) {
+  let preTestBlockArray = [];
+  astBody.forEach((block, index) => {
+    let requiredObject = {};
+    if (block.type === "ImportDeclaration") {
+      requiredObject["type"] = "ImportDeclaration";
+      requiredObject["statement"] = astring.generate(block);
+    } else if (block.type === "VariableDeclaration") {
+      requiredObject["type"] = "VariableDeclaration";
+      requiredObject["statement"] = astring.generate(block);
+    }
+    if (Object.keys(requiredObject).length !== 0) {
+      preTestBlockArray.push(requiredObject);
+    }
+  });
+
+  return preTestBlockArray;
+}
+
+function getTestBlocks(astBody) {
+  let testBlockArray = [];
+  astBody.forEach((block, index) => {
+    let requiredObject = {};
+    if (block.type === "ExpressionStatement") {
+      if (block.expression.hasOwnProperty("callee")) {
+        if (block.expression.callee.name === "test") {
+          requiredObject["type"] = "test";
+          const regex = /@?[\w\s]+/g;
+          const matches = block.expression.arguments[0].value.match(regex);
+          requiredObject["testName"] = matches[0];
+          requiredObject["testTags"] = matches.slice(1);
+          requiredObject["testStepsArray"] = getTestStepsBlocks(
+            block.expression.arguments[1].body.body
+          );
+        }
+      }
+    }
+    if (Object.keys(requiredObject).length !== 0) {
+      testBlockArray.push(requiredObject);
+    }
+  });
+  return testBlockArray;
+}
+function getTestStepsBlocks(astBody) {
+  let testStepsArray = [];
+  astBody.forEach((block, index) => {
+    let requiredObject = {};
+    requiredObject["statement"] = astring.generate(block);
+    requiredObject["tokens"] = extractValuesFromAst(block);
+    requiredObject["humanReadableStatement"] = humanReadable.getHumanReadable(
+      requiredObject["tokens"]
+    );
+    testStepsArray.push(requiredObject);
+  });
+  return testStepsArray;
+}
+
+async function getGodJSON(req) {
+  const file = fs.readFileSync(req.path, "utf-8");
+  const ast = esprima.parseModule(file, { loc: true });
+  let godJSON = {};
+  godJSON["preTestBlock"] = getPreTestBlock(ast.body);
+  godJSON["testBlockArray"] = getTestBlocks(ast.body);
+  return godJSON;
+}
+async function getGodJSONInternal(filePath) {
+  const file = fs.readFileSync(filePath, "utf-8");
+  const ast = esprima.parseModule(file, { loc: true });
+  let godJSON = {};
+  godJSON["preTestBlock"] = getPreTestBlock(ast.body);
+  godJSON["testBlockArray"] = getTestBlocks(ast.body);
+  return godJSON;
+}
+
+//*** AST previous functions
 async function getASTFromFile(req) {
   const file = fs.readFileSync(req.path, "utf-8");
   let requiredOutput = [];
@@ -223,4 +394,5 @@ module.exports = {
   getScripts,
   executeScripts,
   getASTFromFile,
+  getGodJSON,
 };
