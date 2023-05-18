@@ -106,9 +106,33 @@ class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
                               children: [
                                 Expanded(
                                   child: TextFormField(
+                                    readOnly: true,
                                     decoration: InputDecoration(
-                                      hintText: 'Enter data parameter name',
-                                      labelText: 'Enter data parameter name',
+                                      hintText: 'Data parameter name',
+                                      labelText: 'Data parameter name',
+                                      labelStyle: TextStyle(color: Colors.grey),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Color(0xffE95622),
+                                        ),
+                                      ),
+                                    ),
+                                    initialValue: dataKey,
+                                    onChanged: (newValue) {
+                                      setState(() {
+                                        dataRepo[key][newValue] =
+                                            dataRepo[key][dataKey];
+                                        dataRepo[key].remove(dataKey);
+                                      });
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8.0),
+                                Expanded(
+                                  child: TextFormField(
+                                    decoration: InputDecoration(
+                                      hintText: 'New data parameter name',
+                                      labelText: 'New data parameter name',
                                       labelStyle: TextStyle(color: Colors.grey),
                                       focusedBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(
@@ -131,8 +155,8 @@ class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
                                   child: TextFormField(
                                     initialValue: dataRepo[key][dataKey],
                                     decoration: InputDecoration(
-                                      hintText: 'Enter data parameter value',
-                                      labelText: 'Enter data parameter value',
+                                      hintText: 'Value',
+                                      labelText: 'Value',
                                       labelStyle: TextStyle(color: Colors.grey),
                                       focusedBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(
