@@ -90,19 +90,24 @@ List<String> availableActions = [
   "waitFor",
   "waitForTimeout",
   "dragTo",
-  "all",
-  "allInnerTexts",
-  "allTextContents",
-  "boundingBox",
   "clear",
-  "count",
   "dblclick",
   "toBe",
   "first",
   "last",
   "focus",
-  "getAttribute",
   "highlight",
+  "scrollIntoViewIfNeeded",
+  "null"
+];
+
+List<String> availableExtractions = [
+  "count",
+  "all",
+  "allInnerTexts",
+  "allTextContents",
+  "boundingBox",
+  "getAttribute",
   "innerHTML",
   "innerText",
   "inputValue",
@@ -110,7 +115,17 @@ List<String> availableActions = [
   "isDisabled",
   "isEditable",
   "isEnabled",
-  "scrollIntoViewIfNeeded",
   "textContent",
   "null"
+];
+List<String> assertions = [
+  "toBe",
+  "toEqual",
+  "toBeTruthy",
+  "toBeFalsy",
+  "toBeGreaterThan",
+  "toBeLessThan",
+  "toBeGreaterThanOrEqual",
+  "toBeLessThanOrEqual",
+  "toContain"
 ];

@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_auth
+  flutter_desktop_audio_recorder
   url_launcher_windows
   webview_windows
 )

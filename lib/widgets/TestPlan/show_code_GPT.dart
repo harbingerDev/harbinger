@@ -52,12 +52,10 @@ class _ShowCodeGPTState extends State<ShowCodeGPT> {
   }
 
   Future<String> generateCode(String prompt) async {
-    final String apiKey = 'your_api_key_here';
-    final String apiUrl = 'https://api.openai.com/v1/completions';
+    const String apiUrl = 'https://api.openai.com/v1/completions';
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization':
-          'Bearer ',
+      'Authorization': 'Bearer ',
     };
     final body = json.encode({
       'model': "text-davinci-002",

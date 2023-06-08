@@ -115,6 +115,12 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
     _getData();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   void onClickDone(Map<String, dynamic> projectObject) async {
     await _postAndGetProject(projectObject);
   }
@@ -159,7 +165,7 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
                   Expanded(
                     child: GridView(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          childAspectRatio: .75,
+                          childAspectRatio: .65,
                           crossAxisCount:
                               MediaQuery.of(context).size.width > 1300
                                   ? 5

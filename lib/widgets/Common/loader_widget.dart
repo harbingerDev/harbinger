@@ -12,7 +12,7 @@ class LoaderWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        LoadingAnimationWidget.dotsTriangle(color: Color(0xff285981), size: 50)
+        LoadingAnimationWidget.hexagonDots(color: Color(0xffE95622), size: 50)
       ],
     );
   }

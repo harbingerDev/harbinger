@@ -68,6 +68,9 @@ dependencies:
   toggle_switch: ^2.0.1
   webview_flutter: ^4.0.7
   flutter_riverpod: ^2.3.5
+  flutter_sound: ^9.2.13
+  speech_to_text: ^6.1.1
+  flutter_desktop_audio_recorder: ^0.0.1
 
 dev_dependencies:
   flutter_test:

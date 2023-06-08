@@ -87,29 +87,12 @@ class _SpecCardState extends State<SpecCard> {
                     //             }),
                     //       )
                     //     : Container(),
-                    widget.tab == "plan"
-                        ? Tooltip(
-                            message: "View script",
-                            child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(Icons.code),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ShowCode(
-                                        filePath: widget.script,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                          )
-                        : Container(),
+
                     widget.tab == "plan"
                         ? Consumer(
                             builder: (_, WidgetRef ref, __) {
                               return Tooltip(
-                                message: "View script updated",
+                                message: "View test",
                                 child: IconButton(
                                     padding: EdgeInsets.zero,
                                     icon: Icon(Icons.code),
@@ -122,51 +105,6 @@ class _SpecCardState extends State<SpecCard> {
                                     }),
                               );
                             },
-                          )
-                        : Container(),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    widget.tab == "plan"
-                        ? Tooltip(
-                            message: "new edit view",
-                            child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(Icons.edit_note_outlined),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ShowStepsUpdated(
-                                        filePath: widget.script,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                          )
-                        : Container(),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    widget.tab == "plan"
-                        ? Tooltip(
-                            message: "Edit script",
-                            child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(Icons.edit_note_outlined),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EditorViews(
-                                        filePath: widget.script,
-                                      ),
-                                    ),
-                                  );
-                                }),
                           )
                         : Container(),
                     SizedBox(

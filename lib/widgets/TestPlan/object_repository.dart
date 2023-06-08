@@ -45,7 +45,6 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
 
       if (response.statusCode == 200) {
         setState(() {
-          print(response.body);
           objectRepository = jsonDecode(response.body);
           loaded = true;
         });
@@ -126,7 +125,6 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
         getActiveProject();
         loaded = true;
       });
-      print("Page added successfully.");
     } else {
       throw Exception("Failed to add page: ${response.body}");
     }
@@ -247,7 +245,6 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
       );
 
       if (response.statusCode == 200) {
-        print('Locator name updated successfully.');
       } else {
         final jsonResponse = jsonDecode(response.body);
         print('Failed to rename locator: ${jsonResponse['message']}');
@@ -443,7 +440,6 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
                                                 // Handle the Rename action here
                                               } else if (value ==
                                                   'change_locator_value') {
-                                                print('Change locator value');
                                                 // Handle the Change locator value action here
                                               }
                                             },
