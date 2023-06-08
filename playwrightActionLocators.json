@@ -54,7 +54,7 @@
     "setChecked": "Check x-locator",
     "tap": "Tap on x-locator",
     "uncheck": "Uncheck x-locator",
-    "goto": "Naigate to x-url"
+    "goto": "Navigate to x-url"
   },
 
   "gettersAndVerifiers": {

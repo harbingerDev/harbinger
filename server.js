@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const glob = require("glob");
 const { parse } = require("path");
+const requireFromString = require("require-from-string");
 const path = require("path");
 const app = express();
 const bodyParser = require("body-parser");
@@ -88,6 +89,11 @@ app.post("/ast/getASTFromFile", async (req, res) => {
 });
 app.post("/ast/getGodJSON", async (req, res) => {
   const ast = await db.getGodJSON(req.body);
+  res.status(201).json(ast);
+});
+
+app.post("/ast/getSpecificJSON", async (req, res) => {
+  const ast = await db.getSpecificJSON(req.body);
   res.status(201).json(ast);
 });
 //*********************************** */
@@ -302,6 +308,109 @@ app.post("/dataRepository/getContent", (req, res) => {
   const parsedContent = JSON.parse(content);
 
   res.status(200).json(parsedContent);
+});
+
+app.post("/dataRepository/updateData", async (req, res) => {
+  const path = req.body.path;
+  const data = req.body.data;
+  console.log(JSON.stringify(req.body.path));
+  // Validate the inputs
+  if (typeof path !== "string" || typeof data !== "object") {
+    res.status(400).send({ error: "Invalid input" });
+    return;
+  }
+
+  // Write data to file
+  try {
+    await fs.writeFile(path, JSON.stringify(data, null, 2), (err) => {
+      if (err) {
+        console.error(err);
+        // handle error...
+      } else {
+        console.log("File written successfully");
+        // perform other actions...
+      }
+    });
+    res.status(200).send({ message: "Data successfully written to file" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Failed to write to file" });
+  }
+});
+
+function replaceValuesInFiles(folderPath, valuesToReplace) {
+  // Check if the path exists
+  if (!fs.existsSync(folderPath)) {
+    console.log("The provided path does not exist");
+    return;
+  }
+
+  // Check if the path is a directory
+  if (!fs.lstatSync(folderPath).isDirectory()) {
+    console.log("The provided path is not a directory");
+    return;
+  }
+
+  // Read all files in the directory
+  fs.readdirSync(folderPath).forEach((file) => {
+    const filePath = path.join(folderPath, file);
+    // Check if the path is a file
+    if (fs.lstatSync(filePath).isFile()) {
+      let fileContent = fs.readFileSync(filePath, "utf-8");
+
+      // Replace the old values with the new values
+      for (const [oldValue, newValue] of Object.entries(valuesToReplace)) {
+        const regex = new RegExp(oldValue, "g");
+        fileContent = fileContent.replace(regex, newValue);
+      }
+
+      // Write the new content to the file
+      fs.writeFileSync(filePath, fileContent);
+    }
+  });
+}
+
+app.post("/dataRepository/replaceValues", async (req, res) => {
+  const dirPath = req.body.path;
+  const replacements = req.body.data;
+
+  // Validate the inputs
+  if (typeof dirPath !== "string" || typeof replacements !== "object") {
+    res.status(400).send({ error: "Invalid input" });
+    return;
+  }
+
+  try {
+    await replaceValuesInFiles(dirPath, replacements);
+    res.status(200).send({ message: "Data successfully replaced in files" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Failed to replace data in files" });
+  }
+});
+app.post("/objectRepository/getObjectsForUser", (req, res) => {
+  const filePath = req.body.filePath;
+  if (!filePath) {
+    return res.status(400).send("File path is required");
+  }
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send(err);
+    }
+
+    const objectRepository = requireFromString(data);
+    let result = [];
+
+    for (let page in objectRepository) {
+      for (let key in objectRepository[page]) {
+        result.push(`objectRepository.${page}.${key}`);
+      }
+    }
+
+    res.json(result);
+  });
 });
 
 app.listen(1337, () => console.log("server running on port 1337"));

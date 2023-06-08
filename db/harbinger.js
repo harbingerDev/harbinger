@@ -73,6 +73,10 @@ async function getASTFromFile(req) {
   const ast = await projectHelper.getASTFromFile(req);
   return ast;
 }
+async function getSpecificJSON(req) {
+  const ast = await projectHelper.getSpecificAstJSON(req);
+  return ast;
+}
 
 async function getGodJSON(req) {
   const ast = await projectHelper.getGodJSON(req);
@@ -94,4 +98,5 @@ module.exports = {
   executeScripts,
   getASTFromFile,
   getGodJSON,
+  getSpecificJSON,
 };

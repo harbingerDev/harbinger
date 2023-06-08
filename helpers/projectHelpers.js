@@ -19,7 +19,7 @@ async function createProjectOnDisk(req) {
   return new Promise((resolve, reject) => {
     const updatedProjectName = req.project_name.replaceAll(" ", "_");
     exec(
-      `mkdir ${req.project_path}\\${updatedProjectName} && cd ${req.project_path}\\${updatedProjectName} && npm init -y && npm i -D @playwright/test && npx playwright install && npm install dotenv && git init && mkdir tests && ${configCommand}`,
+      `mkdir ${req.project_path}\\${updatedProjectName} && cd ${req.project_path}\\${updatedProjectName} && npm init -y && npm i -D @playwright/test && npm i @reportportal/agent-js-playwright && npx playwright install && npm install dotenv && git init && mkdir tests && ${configCommand}`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
@@ -338,6 +338,123 @@ async function getGodJSON(req) {
   godJSON["testBlockArray"] = getTestBlocks(ast.body);
   return godJSON;
 }
+function extractExpectSpecicValuesFromAst(ast) {
+  const values = [];
+
+  function traverse(node, parentNode = null) {
+    if (!node) return;
+
+    if (node.type === "ExpressionStatement") {
+      traverse(node.expression, node);
+    } else if (node.type === "VariableDeclaration") {
+      node.declarations.forEach((decl) => traverse(decl, node));
+    } else if (node.type === "VariableDeclarator") {
+      traverse(node.id, node);
+      traverse(node.init, node);
+    } else if (node.type === "Identifier") {
+      values.push(node.name);
+    } else if (node.type === "Literal") {
+      values.push(JSON.stringify(node.value));
+    } else if (node.type === "CallExpression") {
+      traverse(node.callee, node);
+      node.arguments.forEach((arg) => traverse(arg, node));
+    } else if (node.type === "MemberExpression") {
+      traverse(node.object, node);
+      traverse(node.property, node);
+    }
+  }
+
+  traverse(ast[0]);
+  return values;
+}
+
+function extracSpecicValuesFromAstActionAndExtract(ast) {
+  const values = [];
+
+  function traverse(node) {
+    if (!node) return;
+
+    if (node.type === "CallExpression") {
+      traverse(node.callee);
+      node.arguments.forEach(traverse);
+    } else if (node.type === "MemberExpression") {
+      traverse(node.object);
+      traverse(node.property);
+    } else if (node.type === "Identifier") {
+      values.push(node.name);
+    } else if (node.type === "Literal") {
+      values.push(JSON.stringify(node.value));
+    }
+  }
+
+  if (ast.length > 0) {
+    ast.forEach((statement) => {
+      if (statement.type === "ExpressionStatement") {
+        traverse(statement.expression);
+      } else if (statement.type === "VariableDeclaration") {
+        statement.declarations.forEach((declaration) => traverse(declaration));
+      }
+    });
+  }
+  return values;
+}
+function extracSpecicValuesFromAstDeclaration(ast) {
+  const values = [];
+
+  function traverse(node) {
+    if (!node) return;
+
+    if (node.type === "CallExpression") {
+      traverse(node.callee);
+      node.arguments.forEach(traverse);
+    } else if (node.type === "MemberExpression") {
+      traverse(node.object);
+      traverse(node.property);
+    } else if (node.type === "Identifier") {
+      values.push(node.name);
+    } else if (node.type === "Literal") {
+      values.push(JSON.stringify(node.value));
+    }
+  }
+
+  if (ast.length > 0) {
+    ast.forEach((declaration) => {
+      if (declaration.type === "VariableDeclaration") {
+        values.push(declaration.kind);
+        declaration.declarations.forEach((declarator) => {
+          traverse(declarator.id);
+          traverse(declarator.init);
+        });
+      }
+    });
+  }
+  return values;
+}
+
+async function getSpecificAstJSON(req) {
+  const ast = esprima.parseScript(req.statement, { loc: true });
+  let requiredObject = {};
+  requiredObject["statement"] = req.statement;
+
+  if (req.statement.startsWith("expect")) {
+    const result = extractExpectSpecicValuesFromAst(ast.body);
+    requiredObject["tokens"] = result;
+  } else if (req.statement.startsWith("const")) {
+    const result = extracSpecicValuesFromAstDeclaration(ast.body);
+    result.splice(2, 0, "await");
+    requiredObject["tokens"] = result;
+  } else {
+    const result = extracSpecicValuesFromAstActionAndExtract(ast.body);
+    result.splice(0, 0, "await");
+    requiredObject["tokens"] = result;
+  }
+
+  requiredObject["humanReadableStatement"] = humanReadable.getHumanReadable(
+    requiredObject["tokens"]
+  );
+
+  return requiredObject;
+}
 async function getGodJSONInternal(filePath) {
   const file = fs.readFileSync(filePath, "utf-8");
   const ast = esprima.parseModule(file, { loc: true });
@@ -395,4 +512,5 @@ module.exports = {
   executeScripts,
   getASTFromFile,
   getGodJSON,
+  getSpecificAstJSON,
 };

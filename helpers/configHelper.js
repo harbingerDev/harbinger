@@ -1,5 +1,25 @@
 function getRequiredConfigAndWriteToFile(req) {
   let baseConfig = `const { devices } = require("@playwright/test");
+  const RPconfig = {
+    enabled: false,
+    includeTestSteps: true,
+    token: "c7c26122-2def-42b0-a6af-baf17cd1b204",
+    endpoint: "http://10.10.90.150:8080/api/v1",
+    project: "Howard-Hughes",
+    launch: "Howard-Hughes - Demo dashboard execution",
+    restClientConfig: {
+      timeout: 120000,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    },
+    attributes: [
+      {
+        key: "environment",
+        value: "qa",
+      },
+    ],
+    description: "Automation execution for Howard-Hughes",
+  };
 const config = {
   testDir: "./tests",
   timeout: defaultTimeout,
@@ -10,7 +30,12 @@ const config = {
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [["html", { open: 'never' }]],
+  reporter: [
+    ["junit", { outputFile: "test-results/results.xml" }],
+    ["html"],
+
+    ["@reportportal/agent-js-playwright", RPconfig],
+  ],
   use: {
     screenshot: "only-on-failure",
     actionTimeout: 0,

@@ -21,6 +21,7 @@
     "js-tokens": "^8.0.1",
     "knex": "^2.4.1",
     "prettier": "^2.8.8",
+    "require-from-string": "^2.0.2",
     "sqlite3": "^5.1.4"
   }
 }
