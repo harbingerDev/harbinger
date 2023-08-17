@@ -54,17 +54,18 @@ class LaunchText extends StatelessWidget {
           ),
           showLogin
               ? Container()
-              : ElevatedButton(
+              : ElevatedButton.icon(
                   onPressed: () => {showLoginBox()},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff285981),
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    textStyle: GoogleFonts.roboto(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal),
-                  ),
-                  child: Text("Get started"),
+                  // style: ElevatedButton.styleFrom(
+                  //   backgroundColor: Color(0xff285981),
+                  //   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  //   textStyle: GoogleFonts.roboto(
+                  //       fontSize: 18,
+                  //       color: Colors.white,
+                  //       fontWeight: FontWeight.normal),
+                  // ),
+                  label: Text("Get started"),
+                  icon: Icon(Icons.arrow_forward_ios_rounded),
                 )
         ],
       ),

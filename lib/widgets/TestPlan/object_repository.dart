@@ -17,6 +17,7 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
   int activeProjectId = 0;
   late List<Map<String, dynamic>> activeProject;
   String dropDownPageName = "default";
+  List<String> pageNames = ["default"];
 
   Future<void> getActiveProject() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -46,6 +47,7 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
       if (response.statusCode == 200) {
         setState(() {
           objectRepository = jsonDecode(response.body);
+          pageNames = objectRepository.keys.toList();
           loaded = true;
         });
       } else {
@@ -115,7 +117,7 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         "filePath":
-            "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\objectRepository.js",
+            "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/objectRepository.js",
         "pageName": pageName
       }),
     );
@@ -145,7 +147,7 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
       },
       body: jsonEncode(<String, String>{
         'filePath':
-            "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\objectRepository.js",
+            "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/objectRepository.js",
         'pageName': pageName,
         'locatorName': locatorName,
         'locatorValue': locatorValue,
@@ -254,6 +256,112 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
     }
   }
 
+  Future<void> moveLocatorToNewPage({
+    required String filePath,
+    required String fileName,
+    required String pageName,
+    required String locatorName,
+    required String newPageName,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:1337/objectRepository/moveLocator'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'filePath': filePath,
+          'fileName': fileName,
+          'pageName': pageName,
+          'locatorName': locatorName,
+          'newPageName': newPageName,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+      } else {
+        final jsonResponse = jsonDecode(response.body);
+        print('Failed to move locator: ${jsonResponse['message']}');
+      }
+    } catch (error) {
+      print('Failed to call API: $error');
+    }
+  }
+
+  Future<void> showMoveLocatorToNewPageDialog({
+    required BuildContext context,
+    required String locatorName,
+    required String pageName,
+    required List<String> pageNames,
+  }) async {
+    // State for DropdownButton
+    String? _selectedPageName;
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Move locator to new page'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Old page Name: $pageName'),
+                  DropdownButton<String>(
+                    value: _selectedPageName,
+                    hint: Text('Select a new page'),
+                    items: pageNames.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedPageName = newValue;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (_selectedPageName != null &&
+                        _selectedPageName!.isNotEmpty) {
+                      // Call the renameLocator function with the appropriate values
+                      await moveLocatorToNewPage(
+                        filePath:
+                            "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}",
+                        fileName: 'objectRepository.js',
+                        pageName: pageName,
+                        locatorName: locatorName,
+                        newPageName: _selectedPageName!,
+                      );
+
+                      Navigator.of(context).pop();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('Please select a new locator name.')),
+                      );
+                    }
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> showRenameLocatorDialog(
       {required BuildContext context,
       required String oldLocatorName,
@@ -288,7 +396,7 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
                   // Call the renameLocator function with the appropriate values
                   await renameLocator(
                     filePath:
-                        "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}",
+                        "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}",
                     fileName: 'objectRepository.js',
                     pageName: pageName,
                     locatorOldName: oldLocatorName,
@@ -341,35 +449,36 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          onPressed: () => _showUpdateLocatorPopup(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black87,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            textStyle: GoogleFonts.roboto(
-                                fontSize: 14,
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal),
-                          ),
-                          child: Text("Add new locator"),
-                        ),
+                        child: ElevatedButton.icon(
+                            onPressed: () => _showUpdateLocatorPopup(context),
+                            // style: ElevatedButton.styleFrom(
+                            //   backgroundColor: Colors.black87,
+                            //   padding: EdgeInsets.symmetric(
+                            //       horizontal: 10, vertical: 10),
+                            //   textStyle: GoogleFonts.roboto(
+                            //       fontSize: 14,
+                            //       color: Colors.white,
+                            //       fontWeight: FontWeight.normal),
+                            // ),
+                            label: Text("Add new locator"),
+                            icon: Icon(Icons.add_box)),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          onPressed: () => _showAddPageDialog(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black87,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            textStyle: GoogleFonts.roboto(
-                                fontSize: 14,
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal),
-                          ),
-                          child: Text("Add new page"),
-                        ),
+                        child: ElevatedButton.icon(
+                            onPressed: () => _showAddPageDialog(context),
+                            // style: ElevatedButton.styleFrom(
+                            //   backgroundColor: Colors.black87,
+                            //   padding: EdgeInsets.symmetric(
+                            //       horizontal: 10, vertical: 10),
+                            //   textStyle: GoogleFonts.roboto(
+                            //       fontSize: 14,
+                            //       color: Colors.white,
+                            //       fontWeight: FontWeight.normal),
+                            // ),
+
+                            label: Text("Add new page"),
+                            icon: Icon(Icons.pages)),
                       ),
                     ],
                   )
@@ -451,8 +560,16 @@ class _ObjectRepositoryState extends State<ObjectRepository> {
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
-                                            child: Icon(
-                                                Icons.drive_file_move_outlined),
+                                            child: InkWell(
+                                              onTap: () =>
+                                                  showMoveLocatorToNewPageDialog(
+                                                      context: context,
+                                                      locatorName: entry.key,
+                                                      pageName: key,
+                                                      pageNames: pageNames),
+                                              child: Icon(Icons
+                                                  .drive_file_move_outlined),
+                                            ),
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),

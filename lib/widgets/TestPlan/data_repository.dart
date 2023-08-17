@@ -29,7 +29,7 @@ class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
     });
     Map<String, dynamic> dataPayload = {
       "path":
-          "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\dataRepository.json",
+          "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/dataRepository.json",
       "data": dataRepo
     };
     final response = await http.post(
@@ -41,7 +41,7 @@ class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
     if (response.statusCode == 200) {
       Map<String, dynamic> replaceDataPayload = {
         "path":
-            "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\tests",
+            "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/tests",
         "data": renamingMap
       };
 
@@ -86,7 +86,7 @@ class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
         Uri.parse('http://localhost:1337/dataRepository/getContent'),
         body: {
           'filePath':
-              "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}"
+              "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}"
         },
       );
 
@@ -193,21 +193,21 @@ class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(right: 8, left: 8),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          await _updateDataInDataRepoFile();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
-                          textStyle: GoogleFonts.roboto(
-                              fontSize: 14,
-                              color: Colors.white,
-                              fontWeight: FontWeight.normal),
-                        ),
-                        child: Text("Save"),
-                      ),
+                      child: ElevatedButton.icon(
+                          onPressed: () async {
+                            await _updateDataInDataRepoFile();
+                          },
+                          // style: ElevatedButton.styleFrom(
+                          //   backgroundColor: Colors.green,
+                          //   padding: EdgeInsets.symmetric(
+                          //       horizontal: 10, vertical: 10),
+                          //   textStyle: GoogleFonts.roboto(
+                          //       fontSize: 14,
+                          //       color: Colors.white,
+                          //       fontWeight: FontWeight.normal),
+                          // ),
+                          label: Text("Save"),
+                          icon: Icon(Icons.save)),
                     )
                   ],
                 ),
@@ -246,90 +246,94 @@ class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
                                     .keys
                                     .elementAt(index);
 
-                                return Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        readOnly: true,
-                                        decoration: InputDecoration(
-                                          hintText: 'Data parameter name',
-                                          labelText: 'Data parameter name',
-                                          labelStyle:
-                                              TextStyle(color: Colors.grey),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE95622),
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          readOnly: true,
+                                          decoration: InputDecoration(
+                                            hintText: 'Data parameter name',
+                                            labelText: 'Data parameter name',
+                                            labelStyle:
+                                                TextStyle(color: Colors.grey),
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Color(0xffE95622),
+                                              ),
+                                            ),
+                                          ),
+                                          initialValue: dataKey,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8.0),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller:
+                                              _dataParameterNameControllers[
+                                                      dropdownValue]!
+                                                  .elementAt(index),
+                                          decoration: InputDecoration(
+                                            hintText: 'New data parameter name',
+                                            labelText:
+                                                'New data parameter name',
+                                            labelStyle:
+                                                TextStyle(color: Colors.grey),
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Color(0xffE95622),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                        initialValue: dataKey,
                                       ),
-                                    ),
-                                    const SizedBox(width: 8.0),
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller:
-                                            _dataParameterNameControllers[
-                                                    dropdownValue]!
-                                                .elementAt(index),
-                                        decoration: InputDecoration(
-                                          hintText: 'New data parameter name',
-                                          labelText: 'New data parameter name',
-                                          labelStyle:
-                                              TextStyle(color: Colors.grey),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE95622),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                        onPressed: () {
-                                          renameParameterName(
-                                              dataKey,
-                                              _dataParameterNameControllers[
-                                                      dropdownValue]!
-                                                  .elementAt(index)
-                                                  .text);
-
-                                          renamingMap[dataKey] =
-                                              _dataParameterNameControllers[
-                                                      dropdownValue]!
-                                                  .elementAt(index)
-                                                  .text;
-                                        },
-                                        icon: Icon(Icons.check,
-                                            color:
+                                      IconButton(
+                                          onPressed: () {
+                                            renameParameterName(
+                                                dataKey,
                                                 _dataParameterNameControllers[
-                                                                dropdownValue]!
-                                                            .elementAt(index)
-                                                            .text !=
-                                                        dataKey
-                                                    ? Colors.green
-                                                    : Colors.grey)),
-                                    const SizedBox(width: 8.0),
-                                    Expanded(
-                                      child: TextFormField(
-                                        initialValue: dataRepo[dropdownValue]
-                                            [dataKey],
-                                        decoration: InputDecoration(
-                                          hintText: 'Value',
-                                          labelText: 'Value',
-                                          labelStyle:
-                                              TextStyle(color: Colors.grey),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE95622),
+                                                        dropdownValue]!
+                                                    .elementAt(index)
+                                                    .text);
+
+                                            renamingMap[dataKey] =
+                                                _dataParameterNameControllers[
+                                                        dropdownValue]!
+                                                    .elementAt(index)
+                                                    .text;
+                                          },
+                                          icon: Icon(Icons.check,
+                                              color:
+                                                  _dataParameterNameControllers[
+                                                                  dropdownValue]!
+                                                              .elementAt(index)
+                                                              .text !=
+                                                          dataKey
+                                                      ? Colors.green
+                                                      : Colors.grey)),
+                                      const SizedBox(width: 8.0),
+                                      Expanded(
+                                        child: TextFormField(
+                                          initialValue: dataRepo[dropdownValue]
+                                              [dataKey],
+                                          decoration: InputDecoration(
+                                            hintText: 'Value',
+                                            labelText: 'Value',
+                                            labelStyle:
+                                                TextStyle(color: Colors.grey),
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Color(0xffE95622),
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 );
                               },
                             ),

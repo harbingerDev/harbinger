@@ -28,16 +28,16 @@ class _TestPlanScreenState extends State<TestPlanScreen> {
       child: Column(
         children: [
           Container(
-            color: Colors.black38,
+            color: Colors.white,
             child: TabBar(
-              dividerColor: Colors.white,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white.withOpacity(0.7),
-              indicatorColor: Color(0xffE95622),
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                color: Color(0xffE95622),
-              ),
+              // dividerColor: Colors.white,
+              // labelColor: Colors.white,
+              // unselectedLabelColor: Colors.white.withOpacity(0.7),
+              // indicatorColor: Color(0xffE95622),
+              // indicator: BoxDecoration(
+              //   borderRadius: BorderRadius.circular(4),
+              //   color: Color(0xffE95622),
+              // ),
               tabs: [
                 Tab(
                     icon: Text("Scripts",

@@ -1,7 +1,6 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
@@ -9,7 +8,6 @@ class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black87,
       height: MediaQuery.of(context).size.height * .03,
       width: double.infinity,
       child: Center(
@@ -18,17 +16,14 @@ class Footer extends StatelessWidget {
         children: [
           Text(
             "Powered by",
-            style: GoogleFonts.roboto(
-                fontSize: 12,
-                color: Colors.white,
-                fontWeight: FontWeight.normal),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
           ),
           SizedBox(
             width: 2,
           ),
           Text(
             "Feuji Inc.",
-            style: GoogleFonts.roboto(
+            style: TextStyle(
                 fontSize: 14,
                 color: Color(0xffE95622),
                 fontWeight: FontWeight.bold),

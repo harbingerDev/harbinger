@@ -45,19 +45,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Color(0xffE95622), width: 0.0),
-                      ),
                       label: Text(
                         "Username",
-                        style: GoogleFonts.roboto(color: Colors.grey),
+                        style: TextStyle(color: Colors.grey),
                       ),
-                      focusColor: Color(0xffE95622),
-                      fillColor: Colors.white,
-                      hoverColor: Color(0xffE95622),
                     ),
-                    cursorColor: Color(0xffE95622),
                     expands: false,
                   ),
                   SizedBox(
@@ -67,17 +59,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Color(0xffE95622), width: 0.0),
-                      ),
                       label: Text(
                         "Password",
-                        style: GoogleFonts.roboto(color: Colors.grey),
+                        style: TextStyle(color: Colors.grey),
                       ),
-                      focusColor: Color(0xffE95622),
                     ),
-                    cursorColor: Color(0xffE95622),
                     expands: false,
                   ),
                   SizedBox(
@@ -109,22 +95,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      textStyle: GoogleFonts.roboto(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Text(
-                        "Login",
-                        style: GoogleFonts.roboto(
-                          fontSize: 16,
-                        ),
+                    child: Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 16,
                       ),
                     ),
                   ),

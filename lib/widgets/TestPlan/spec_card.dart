@@ -57,7 +57,7 @@ class _SpecCardState extends State<SpecCard> {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    widget.script.split("\\").last,
+                    widget.script.split("/").last,
                     style: GoogleFonts.roboto(
                       fontSize: 18,
                       color: Colors.black87,
@@ -118,7 +118,7 @@ class _SpecCardState extends State<SpecCard> {
                                 icon: Icon(Icons.add_task_outlined),
                                 onPressed: () async {
                                   await widget.showPopup(widget.script
-                                      .split("\\")
+                                      .split("/")
                                       .last
                                       .split(".")
                                       .first);
@@ -133,7 +133,7 @@ class _SpecCardState extends State<SpecCard> {
                                 icon: Icon(Icons.play_arrow_outlined),
                                 onPressed: () async {
                                   await widget.executeScript(
-                                      widget.script.split("\\").last);
+                                      widget.script.split("/").last);
                                 }))
                         : Container()
                   ],

@@ -7,6 +7,7 @@ import 'package:harbinger/models/testScriptModel.dart';
 import 'package:harbinger/screens/auth_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:yaru/yaru.dart';
 import 'widgets/Common/footer_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,11 +29,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Harbinger - your own automation copilot',
-      home: const MyHomePage(title: 'Harbinger - your own automation copilot'),
-    );
+    return YaruTheme(builder: (context, yaru, child) {
+      return MaterialApp(
+        theme: yaru.theme,
+        darkTheme: yaru.darkTheme,
+        debugShowCheckedModeBanner: false,
+        title: 'Harbinger - your own automation copilot',
+        home:
+            const MyHomePage(title: 'Harbinger - your own automation copilot'),
+      );
+    });
   }
 }
 

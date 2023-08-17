@@ -47,15 +47,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       SizedBox(height: 10),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.network(
-                              "https://xsgames.co/randomusers/avatar.php?g=male",
-                              height: 50,
-                              width: 50,
-                            )),
-                      ),
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.account_box,
+                            size: 50,
+                          )),
                       SizedBox(height: 10),
                       Padding(
                         padding: const EdgeInsets.all(8.0),

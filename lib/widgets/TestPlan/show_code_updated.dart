@@ -36,7 +36,9 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
         body: json.encode(executeScriptPayload),
         encoding: Encoding.getByName('utf-8'),
         headers: headers,
-      )
+      ),
+      http.post(Uri.parse('http://localhost:1337/readFile'),
+          body: {'path': widget.filePath})
     ]);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int activeProjectId = prefs.getInt('activeProject')!;
@@ -49,14 +51,13 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
             .toList()
         : [];
     objectsList = await getObjectPaths(
-        "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\objectRepository.js");
-    print(objectsList);
+        "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/objectRepository.js");
     setState(() {
       final testScriptModelResponse = json.decode(getGodJSONResponse[0].body);
       testScriptModel = TestScriptModel.fromJson(testScriptModelResponse);
       ref.read(godJSONProvider.notifier).state = testScriptModel;
     });
-    return File(widget.filePath).readAsString();
+    return getGodJSONResponse[0].body;
   }
 
   Future<List<String>> getObjectPaths(String path) async {
@@ -109,7 +110,7 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
                       children: [
                         Chip(
                             label: Text(
-                                "Spec file name: ${widget.filePath.split("\\")[widget.filePath.split("\\").length - 1].split(".")[0]}")),
+                                "Spec file name: ${widget.filePath.split("/")[widget.filePath.split("/").length - 1].split(".")[0]}")),
                         SizedBox(
                           width: 10,
                         ),
@@ -120,39 +121,41 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
                     ),
                     Row(
                       children: [
-                        ElevatedButton(
-                          onPressed: () => {
-                            ref.read(screenProvider.notifier).state = "Nothing"
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            textStyle: GoogleFonts.roboto(
-                                fontSize: 14,
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal),
-                          ),
-                          child: Text("Save"),
-                        ),
+                        ElevatedButton.icon(
+                            onPressed: () => {
+                                  ref.read(screenProvider.notifier).state =
+                                      "Nothing"
+                                },
+                            // style: ElevatedButton.styleFrom(
+                            //   backgroundColor: Colors.green,
+                            //   padding: EdgeInsets.symmetric(
+                            //       horizontal: 10, vertical: 10),
+                            //   textStyle: GoogleFonts.roboto(
+                            //       fontSize: 14,
+                            //       color: Colors.white,
+                            //       fontWeight: FontWeight.normal),
+                            // ),
+                            label: Text("Save"),
+                            icon: Icon(Icons.save)),
                         SizedBox(
                           width: 10,
                         ),
-                        ElevatedButton(
-                          onPressed: () => {
-                            ref.read(screenProvider.notifier).state = "Nothing"
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black87,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            textStyle: GoogleFonts.roboto(
-                                fontSize: 14,
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal),
-                          ),
-                          child: Text("Back to spec file"),
-                        ),
+                        ElevatedButton.icon(
+                            onPressed: () => {
+                                  ref.read(screenProvider.notifier).state =
+                                      "Nothing"
+                                },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              textStyle: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            label: Text("Back to spec file"),
+                            icon: Icon(Icons.arrow_back_ios)),
                       ],
                     ),
                   ],

@@ -131,54 +131,66 @@ class _TestScriptState extends State<TestScript> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  readOnly: specName == "" ? false : true,
-                  controller: _controller,
-                  decoration: InputDecoration(hintText: "Enter spec name"),
-                  onChanged: (value) {
-                    scriptName = value;
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    readOnly: specName == "" ? false : true,
+                    controller: _controller,
+                    decoration: InputDecoration(hintText: "Enter spec name"),
+                    onChanged: (value) {
+                      scriptName = value;
+                    },
+                  ),
                 ),
-                TextField(
-                  decoration: InputDecoration(hintText: "Enter test name"),
-                  onChanged: (value) {
-                    testName = value;
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    decoration: InputDecoration(hintText: "Enter test name"),
+                    onChanged: (value) {
+                      testName = value;
+                    },
+                  ),
                 ),
-                TextField(
-                  decoration: InputDecoration(
-                      hintText:
-                          "Enter tags for test (eg. @smoke,@functionalComponent)"),
-                  onChanged: (value) {
-                    tags = value;
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                        hintText:
+                            "Enter tags for test (eg. @smoke,@functionalComponent)"),
+                    onChanged: (value) {
+                      tags = value;
+                    },
+                  ),
                 ),
-                TextField(
-                  decoration:
-                      InputDecoration(hintText: "Enter application url"),
-                  onChanged: (value) {
-                    url = value;
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    decoration:
+                        InputDecoration(hintText: "Enter application url"),
+                    onChanged: (value) {
+                      url = value;
+                    },
+                  ),
                 ),
               ],
             ),
           ),
           actions: <Widget>[
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await recordScript();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black87,
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                textStyle: GoogleFonts.roboto(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.normal),
-              ),
-              child: Text("Start recording"),
-            ),
+            ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await recordScript();
+                },
+                // style: ElevatedButton.styleFrom(
+                //   backgroundColor: Colors.black87,
+                //   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                //   textStyle: GoogleFonts.roboto(
+                //       fontSize: 14,
+                //       color: Colors.white,
+                //       fontWeight: FontWeight.normal),
+                // ),
+                label: Text("Start recording"),
+                icon: Icon(Icons.fiber_manual_record)),
           ],
         );
       },
@@ -247,34 +259,34 @@ class _TestScriptState extends State<TestScript> {
                         ],
                       ),
                       widget.tab == "plan"
-                          ? ElevatedButton(
+                          ? ElevatedButton.icon(
                               onPressed: () async => {_showPopup("")},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black87,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
-                                textStyle: GoogleFonts.roboto(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                              child: Text("Create new script"),
-                            )
+                              // style: ElevatedButton.styleFrom(
+                              //   backgroundColor: Colors.black87,
+                              //   padding: EdgeInsets.symmetric(
+                              //       horizontal: 10, vertical: 10),
+                              //   textStyle: GoogleFonts.roboto(
+                              //       fontSize: 14,
+                              //       color: Colors.white,
+                              //       fontWeight: FontWeight.normal),
+                              // ),
+                              label: Text("Create new script"),
+                              icon: Icon(Icons.add))
                           : widget.tab == "lab"
-                              ? ElevatedButton(
+                              ? ElevatedButton.icon(
                                   onPressed: () async =>
                                       {await executeScripts()},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black87,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 10),
-                                    textStyle: GoogleFonts.roboto(
-                                        fontSize: 14,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                  child: Text("Execute scripts"),
-                                )
+                                  // style: ElevatedButton.styleFrom(
+                                  //   backgroundColor: Colors.black87,
+                                  //   padding: EdgeInsets.symmetric(
+                                  //       horizontal: 10, vertical: 10),
+                                  //   textStyle: GoogleFonts.roboto(
+                                  //       fontSize: 14,
+                                  //       color: Colors.white,
+                                  //       fontWeight: FontWeight.normal),
+                                  // ),
+                                  label: Text("Execute scripts"),
+                                  icon: Icon(Icons.play_arrow))
                               : Container(),
                     ],
                   ),
@@ -286,9 +298,11 @@ class _TestScriptState extends State<TestScript> {
                   child: ListView.builder(
                     itemCount: scriptArray.length,
                     itemBuilder: (context, i) {
+                      print(
+                          "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/tests/${scriptArray[i]}");
                       return SpecCard(
                         script:
-                            "${activeProject[0]["project_path"]}\\${activeProject[0]["project_name"]}\\tests\\${scriptArray[i]}",
+                            "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/tests/${scriptArray[i]}",
                         tab: widget.tab,
                         activeProject: activeProject,
                         executeScript: executeScript,

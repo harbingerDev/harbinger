@@ -30,12 +30,13 @@ class _AddStepPopupState extends State<AddStepPopup> {
                   .map((field) => _buildFormField(field))
                   .toList(),
               SizedBox(height: 16),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () {
                   print(formValues);
                   Navigator.pop(context);
                 },
-                child: Text('Save'),
+                label: Text('Save'),
+                icon: Icon(Icons.save),
               ),
             ],
           ),
@@ -47,36 +48,45 @@ class _AddStepPopupState extends State<AddStepPopup> {
   Widget _buildFormField(FormData field) {
     switch (field.type) {
       case 'text':
-        return TextFormField(
-          decoration: InputDecoration(labelText: field.name),
-          initialValue: field.defaultValue,
-          onChanged: (value) {
-            formValues[field.name] = value;
-          },
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            decoration: InputDecoration(labelText: field.name),
+            initialValue: field.defaultValue,
+            onChanged: (value) {
+              formValues[field.name] = value;
+            },
+          ),
         );
       case 'list':
-        return DropdownButtonFormField<String>(
-          decoration: InputDecoration(labelText: field.name),
-          value: field.defaultValue,
-          items: field.values!.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (value) {
-            formValues[field.name] = value;
-          },
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DropdownButtonFormField<String>(
+            decoration: InputDecoration(labelText: field.name),
+            value: field.defaultValue,
+            items: field.values!.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (value) {
+              formValues[field.name] = value;
+            },
+          ),
         );
       case 'checkbox':
-        return CheckboxListTile(
-          title: Text(field.name),
-          value: formValues[field.name] ?? false,
-          onChanged: (bool? value) {
-            setState(() {
-              formValues[field.name] = value;
-            });
-          },
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CheckboxListTile(
+            title: Text(field.name),
+            value: formValues[field.name] ?? false,
+            onChanged: (bool? value) {
+              setState(() {
+                formValues[field.name] = value;
+              });
+            },
+          ),
         );
       default:
         return SizedBox.shrink();

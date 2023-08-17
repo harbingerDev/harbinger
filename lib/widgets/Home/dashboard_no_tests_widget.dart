@@ -19,6 +19,7 @@ class NoTestsWidget extends StatefulWidget {
 }
 
 class _NoTestsWidgetState extends State<NoTestsWidget> {
+  late String projectPath;
   bool loaded = false;
   var projects;
   var activeProject;
@@ -55,8 +56,13 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
     var activeProjectUrl =
         Uri.parse("http://127.0.0.1:1337/projects/getActiveProject");
     var gitUrl = Uri.parse("http://127.0.0.1:1337/system/checkGitVersion");
-    final responses = await Future.wait(
-        [http.get(projectsUrl), http.get(activeProjectUrl), http.get(gitUrl)]);
+    var documentUrl = Uri.parse('http://localhost:1337/documentsPath');
+    final responses = await Future.wait([
+      http.get(projectsUrl),
+      http.get(activeProjectUrl),
+      http.get(gitUrl),
+      http.get(documentUrl)
+    ]);
     if (responses[0].statusCode == 200 && responses[1].statusCode == 200) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('projectsObject', responses[0].body);
@@ -76,6 +82,7 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
               ? json.decode(responses[1].body)[0]['id']
               : 0;
           gitVersion = json.decode(responses[2].body)["gitVersion"];
+          projectPath = responses[3].body;
           loaded = true;
         }
       });
@@ -152,10 +159,10 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
                       Padding(
                         padding: const EdgeInsets.all(32),
                         child: CreateImportButtons(
-                          onClickDone: onClickDone,
-                          projectDataLength: projectDataList.length,
-                          calledFrom: "home",
-                        ),
+                            onClickDone: onClickDone,
+                            projectDataLength: projectDataList.length,
+                            calledFrom: "home",
+                            projectPath: projectPath),
                       ),
                     ],
                   ),
@@ -197,6 +204,7 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
                     onClickDone: onClickDone,
                     projectDataLength: projectDataList.length,
                     calledFrom: "home",
+                    projectPath: projectPath,
                   )
                 ],
               );

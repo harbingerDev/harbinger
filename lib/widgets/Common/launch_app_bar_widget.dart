@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AppbarLaunch extends StatelessWidget with PreferredSizeWidget {
+class AppbarLaunch extends StatelessWidget implements PreferredSizeWidget {
   const AppbarLaunch({super.key});
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);

@@ -9,8 +9,12 @@ import 'package:google_fonts/google_fonts.dart';
 class ProjectPopup extends StatefulWidget {
   final Function(Map<String, dynamic> projectObject) onClickedDone;
   final bool isAdd;
+  final String projectPath;
   const ProjectPopup(
-      {super.key, required this.onClickedDone, required this.isAdd});
+      {super.key,
+      required this.onClickedDone,
+      required this.isAdd,
+      required this.projectPath});
 
   @override
   State<ProjectPopup> createState() => _ProjectPopupState();
@@ -24,7 +28,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
   final environmentValueController = TextEditingController();
   final workerNumberController = TextEditingController();
   Map<String, dynamic> projectObject = {};
-  String? projectPath = "";
+
   List<String> tags = [];
   List<String> options = ['Chrome', 'Safari', 'Edge'];
   Map<String, String> environments = {};
@@ -83,7 +87,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
                 Text("Project path: ",
                     style: GoogleFonts.roboto(
                         color: Colors.black87, fontSize: 14)),
-                Text("C:\\exp\\",
+                Text('${widget.projectPath}/harbingerProjects',
                     style: GoogleFonts.roboto(
                         color: Colors.black87,
                         fontWeight: FontWeight.w500,
@@ -259,7 +263,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
             await FilePicker.platform
                 .getDirectoryPath(
                     dialogTitle: "Select folder to create project")
-                .then(((value) => setState(() => {projectPath = value})))
+                .then(((value) => setState(() => {})))
           },
       child: Text('Chose a file'));
   Widget buildAddButton(BuildContext context) {
@@ -276,7 +280,8 @@ class _ProjectPopupState extends State<ProjectPopup> {
 
         if (isValid) {
           projectObject["project_name"] = projectNameController.text;
-          projectObject["project_path"] = "C:\\exp";
+          projectObject["project_path"] =
+              '${widget.projectPath}/harbingerProjects';
           projectObject["default_timeout"] = defaultTimeOutController.text;
           projectObject["environments"] = environments;
           projectObject["parallel_execution"] = parallel.toString();

@@ -142,17 +142,13 @@ class _TestBlockCardState extends State<TestBlockCard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              print(formValues);
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Save'),
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.green, // Set the button color
-                              onPrimary: Colors.white, // Set the text color
-                            ),
-                          ),
+                          ElevatedButton.icon(
+                              onPressed: () {
+                                print(formValues);
+                                Navigator.of(context).pop();
+                              },
+                              label: Text('Save'),
+                              icon: Icon(Icons.save)),
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
@@ -194,235 +190,291 @@ class _TestBlockCardState extends State<TestBlockCard> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      DropdownButtonFormField(
-                        value: _selectedStepType,
-                        items: _stepTypes.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedStepType = newValue as String?;
-                            _selectedObject = null;
-                            _selectedAction = null;
-                            _selectedExtraction = null;
-                            _selectedVerification = null;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          labelText: "Select step type",
-                          labelStyle: TextStyle(color: Colors.black),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xffE95622)),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DropdownButtonFormField(
+                          value: _selectedStepType,
+                          items: _stepTypes.map((type) {
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Text(type),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedStepType = newValue as String?;
+                              _selectedObject = null;
+                              _selectedAction = null;
+                              _selectedExtraction = null;
+                              _selectedVerification = null;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: "Select step type",
+                            labelStyle: TextStyle(color: Colors.black),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xffE95622)),
+                            ),
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a step type';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please select a step type';
-                          }
-                          return null;
-                        },
                       ),
                       if (_selectedStepType == 'Add action') ...[
-                        DropdownButtonFormField(
-                          value: _selectedObject,
-                          items: widget.objectList.map((object) {
-                            return DropdownMenuItem(
-                              value: object,
-                              child: Text(object),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedObject = newValue as String?;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Select Object",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownButtonFormField(
+                            value: _selectedObject,
+                            items: widget.objectList.map((object) {
+                              return DropdownMenuItem(
+                                value: object,
+                                child: Text(object),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedObject = newValue as String?;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Select Object",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        TextFormField(
-                          controller: actionPageController,
-                          decoration: InputDecoration(
-                            labelText: "Enter page",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: actionPageController,
+                            decoration: InputDecoration(
+                              labelText: "Enter page",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        DropdownButtonFormField(
-                          value: _selectedAction,
-                          items: _actions.map((action) {
-                            return DropdownMenuItem(
-                              value: action,
-                              child: Text(action),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedAction = newValue as String?;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Select Action",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownButtonFormField(
+                            value: _selectedAction,
+                            items: _actions.map((action) {
+                              return DropdownMenuItem(
+                                value: action,
+                                child: Text(action),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedAction = newValue as String?;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Select Action",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        TextFormField(
-                          controller: actionArgumentController,
-                          decoration: InputDecoration(
-                            labelText: "Enter Action Arguments",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: actionArgumentController,
+                            decoration: InputDecoration(
+                              labelText: "Enter Action Arguments",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
                       ],
                       if (_selectedStepType == 'Add extraction step') ...[
-                        TextFormField(
-                          controller: extractVariableController,
-                          decoration: InputDecoration(
-                            labelText: "Enter Variable Name",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: extractVariableController,
+                            decoration: InputDecoration(
+                              labelText: "Enter Variable Name",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        DropdownButtonFormField(
-                          value: _selectedObject,
-                          items: widget.objectList.map((object) {
-                            return DropdownMenuItem(
-                              value: object,
-                              child: Text(object),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedObject = newValue as String?;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Select Object",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownButtonFormField(
+                            value: _selectedObject,
+                            items: widget.objectList.map((object) {
+                              return DropdownMenuItem(
+                                value: object,
+                                child: Text(object),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedObject = newValue as String?;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Select Object",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        TextFormField(
-                          controller: extractionPageController,
-                          decoration: InputDecoration(
-                            labelText: "Enter page",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: extractionPageController,
+                            decoration: InputDecoration(
+                              labelText: "Enter page",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        DropdownButtonFormField(
-                          value: _selectedExtraction,
-                          items: _extractions.map((extraction) {
-                            return DropdownMenuItem(
-                              value: extraction,
-                              child: Text(extraction),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedExtraction = newValue as String?;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Select Extraction",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownButtonFormField(
+                            value: _selectedExtraction,
+                            items: _extractions.map((extraction) {
+                              return DropdownMenuItem(
+                                value: extraction,
+                                child: Text(extraction),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedExtraction = newValue as String?;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Select Extraction",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        TextFormField(
-                          controller: extractArgumentController,
-                          decoration: InputDecoration(
-                            labelText: "Enter Arguments",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: extractArgumentController,
+                            decoration: InputDecoration(
+                              labelText: "Enter Arguments",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
                       ],
                       if (_selectedStepType == 'Add Verification') ...[
-                        DropdownButtonFormField(
-                          value: _selectedVerificationType,
-                          items: ["expect", "expect.soft"].map((verification) {
-                            return DropdownMenuItem(
-                              value: verification,
-                              child: Text(verification),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedVerificationType = newValue as String?;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Select verification type",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownButtonFormField(
+                            value: _selectedVerificationType,
+                            items:
+                                ["expect", "expect.soft"].map((verification) {
+                              return DropdownMenuItem(
+                                value: verification,
+                                child: Text(verification),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedVerificationType = newValue as String?;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Select verification type",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        TextFormField(
-                          controller: verificationVariableController,
-                          decoration: InputDecoration(
-                            labelText: "Enter Variable",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: verificationVariableController,
+                            decoration: InputDecoration(
+                              labelText: "Enter Variable",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        DropdownButtonFormField(
-                          value: _selectedVerification,
-                          items: _verifications.map((verification) {
-                            return DropdownMenuItem(
-                              value: verification,
-                              child: Text(verification),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedVerification = newValue as String?;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Select verification strategy",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownButtonFormField(
+                            value: _selectedVerification,
+                            items: _verifications.map((verification) {
+                              return DropdownMenuItem(
+                                value: verification,
+                                child: Text(verification),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedVerification = newValue as String?;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Select verification strategy",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
-                        TextFormField(
-                          controller: verificationArgumentController,
-                          decoration: InputDecoration(
-                            labelText: "Enter Expected Values",
-                            labelStyle: TextStyle(color: Colors.black),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xffE95622)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: verificationArgumentController,
+                            decoration: InputDecoration(
+                              labelText: "Enter Expected Values",
+                              labelStyle: TextStyle(color: Colors.black),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xffE95622)),
+                              ),
                             ),
                           ),
                         ),
@@ -434,9 +486,9 @@ class _TestBlockCardState extends State<TestBlockCard> {
             },
           ),
           actions: [
-            ElevatedButton(
-              child: Text('Submit'),
-              style: ElevatedButton.styleFrom(primary: Color(0xffE95622)),
+            ElevatedButton.icon(
+              label: Text('Add'),
+              icon: Icon(Icons.add),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   if (_selectedStepType == "Add action") {
@@ -493,9 +545,8 @@ class _TestBlockCardState extends State<TestBlockCard> {
                 }
               },
             ),
-            ElevatedButton(
+            TextButton(
               child: Text('Cancel'),
-              style: ElevatedButton.styleFrom(primary: Color(0xffE95622)),
               onPressed: () {
                 setState(() {
                   _selectedStepType = null;
@@ -515,57 +566,66 @@ class _TestBlockCardState extends State<TestBlockCard> {
 
   Widget _buildFormField(FormData field, StateSetter setState) {
     if (field.type == 'text') {
-      return TextFormField(
-        initialValue: field.defaultValue,
-        onChanged: (value) {
-          formValues[field.name] = value;
-        },
-        decoration: InputDecoration(
-          labelText: field.name,
-          focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-                color: Color(0xffE95622)), // Set the focused border color
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextFormField(
+          initialValue: field.defaultValue,
+          onChanged: (value) {
+            formValues[field.name] = value;
+          },
+          decoration: InputDecoration(
+            labelText: field.name,
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                  color: Color(0xffE95622)), // Set the focused border color
+            ),
           ),
         ),
       );
     }
 
     if (field.type == 'list') {
-      return DropdownButtonFormField(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        menuMaxHeight: 300,
-        value: formValues[field.name] ?? field.defaultValue,
-        onChanged: (dynamic value) {
-          setState(() {
-            formValues[field.name] = value;
-          });
-        },
-        items: field.values!
-            .map<DropdownMenuItem>((value) => DropdownMenuItem(
-                  value: value,
-                  child: Text(value),
-                ))
-            .toList(),
-        decoration: InputDecoration(
-          labelText: field.name,
-          focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-                color: Color(0xffE95622)), // Set the focused border color
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: DropdownButtonFormField(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          menuMaxHeight: 300,
+          value: formValues[field.name] ?? field.defaultValue,
+          onChanged: (dynamic value) {
+            setState(() {
+              formValues[field.name] = value;
+            });
+          },
+          items: field.values!
+              .map<DropdownMenuItem>((value) => DropdownMenuItem(
+                    value: value,
+                    child: Text(value),
+                  ))
+              .toList(),
+          decoration: InputDecoration(
+            labelText: field.name,
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                  color: Color(0xffE95622)), // Set the focused border color
+            ),
           ),
         ),
       );
     }
 
     if (field.type == 'checkbox') {
-      return CheckboxListTile(
-        title: Text(field.name),
-        value: formValues[field.name] ?? field.defaultValue == 'checked',
-        onChanged: (bool? value) {
-          setState(() {
-            formValues[field.name] = value!;
-          });
-        },
-        activeColor: Color(0xffE95622), // Set the selected checkbox color
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CheckboxListTile(
+          title: Text(field.name),
+          value: formValues[field.name] ?? field.defaultValue == 'checked',
+          onChanged: (bool? value) {
+            setState(() {
+              formValues[field.name] = value!;
+            });
+          },
+          activeColor: Color(0xffE95622), // Set the selected checkbox color
+        ),
       );
     }
 
@@ -609,7 +669,8 @@ class _TestBlockCardState extends State<TestBlockCard> {
                       TextButton(
                         child: Icon(Icons.copy, color: Color(0xffE95622)),
                         onPressed: () {
-                          Clipboard.setData(ClipboardData(text: snapshot.data));
+                          Clipboard.setData(
+                              ClipboardData(text: snapshot.data!));
                         },
                       ),
                       TextButton(

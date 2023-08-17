@@ -56,7 +56,7 @@ npx playwright test tests\\first_script.spec.js --headed --project=chromium
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  widget.specName.split("\\")[1].replaceAll("'", ""),
+                  widget.specName.split("/")[1].replaceAll("'", ""),
                   style: GoogleFonts.roboto(
                       fontSize: 18, color: Color(0xff285981)),
                 ),
