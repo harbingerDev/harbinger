@@ -256,12 +256,70 @@ async function removeQuotes(filePath) {
 
   fs.writeFileSync(filePath, updatedContent);
 }
+function getLocatorName(input) {
+  // Extract the type
+  let typeRegex =
+    /getBy(Role|Label|Text|TestId|Placeholder)\("|page\.locator\("/;
+  let typeMatch = input.match(typeRegex);
+  let type = typeMatch ? typeMatch[1] && typeMatch[1].toLowerCase() : null;
+
+  // Extract the label, name, or selector
+  let labelRegex = /getByLabel\("(.+?)"(, { exact: true })?\)/;
+  let roleRegex = /getByRole\(".+?", { name: "(.+?)"(, exact: true)? }\)/;
+  let textRegex = /getByText\("(.+?)"(, { exact: true })?\)/;
+  let placeholderRegex = /getByPlaceholder\("(.+?)"\)/;
+  let locatorRegex = /page\.locator\("([.#]?)(.+?)"\)/;
+
+  let match =
+    input.match(labelRegex) ||
+    input.match(roleRegex) ||
+    input.match(textRegex) ||
+    input.match(placeholderRegex) ||
+    input.match(locatorRegex);
+
+  if (!match) {
+    return "unknown_locator_name";
+  }
+
+  let label = match[2] || match[1];
+
+  // Format the extracted string
+  switch (type) {
+    case "role":
+      let roleTypeRegex = /getByRole\("(.+?)",/;
+      let roleTypeMatch = input.match(roleTypeRegex);
+      type = roleTypeMatch ? roleTypeMatch[1].toLowerCase() : null;
+      label = label
+        .replace(/[^\w\s]+/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_");
+      break;
+    case "label":
+    case "text":
+    case "placeholder":
+      label = label
+        .replace(/[^\w\s]+/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_");
+      break;
+    case "testid":
+      // you can add any specific format here if needed
+      break;
+    default:
+      // For locators, just return the label directly
+      return label;
+  }
+
+  return `${type}_${label}`;
+}
+
 async function getControlsFromGodJSON(
   godJSON,
   repoPath,
   scriptPath,
   dataRepoPath
 ) {
+  let locatorNameMap = {};
   let locatorJSONArray = [];
   let replacementJSONArray = [];
   godJSON["testBlockArray"].forEach((testBlock) => {
@@ -269,6 +327,9 @@ async function getControlsFromGodJSON(
       if (testStep["tokens"].includes("goto")) {
       } else if (
         testStep["tokens"][testStep["tokens"].length - 1] === "pagePromise"
+      ) {
+      } else if (
+        testStep["tokens"][testStep["tokens"].length - 1] === "page1Promise"
       ) {
       } else if (
         testStep["tokens"][testStep["tokens"].length - 1] === "waitForLoadState"
@@ -297,7 +358,17 @@ async function getControlsFromGodJSON(
         )};`;
         // .split('\\"')
         // .join('"');
-        const locatorName = generateLocatorName();
+        let locatorName = getLocatorName(overallControl);
+        if (locatorName === "unknown_locator_name") {
+          locatorName = generateLocatorName();
+        } else {
+          //logic to check if the locatorName is there in locatorNameMap and if it is there then add a number to it
+          if (locatorNameMap[locatorName]) {
+            locatorName = locatorName + "_" + locatorNameMap[locatorName];
+            locatorNameMap[locatorName] = locatorNameMap[locatorName] + 1;
+          }
+        }
+
         const controlToBeReplaced =
           `${operator}.${joinWithAlternatingParentheses(
             testStep["tokens"],

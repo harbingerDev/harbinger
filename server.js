@@ -8,6 +8,8 @@ const app = express();
 const bodyParser = require("body-parser");
 const db = require("./db/harbinger");
 const cors = require("cors");
+const os = require("os");
+const { exec } = require("child_process");
 app.use(
   cors({
     origin: "*",
@@ -296,6 +298,64 @@ app.post("/objectRepository/renameLocator", async (req, res) => {
       .json({ message: "Failed to rename locator.", error: error.message });
   }
 });
+app.post("/objectRepository/moveLocator", async (req, res) => {
+  try {
+    const { filePath, fileName, pageName, locatorName, newPageName } = req.body;
+    const objectRepositoryPath = path.join(filePath, fileName);
+
+    // Read the objectRepository and update the locator
+    let objectRepository = require(objectRepositoryPath);
+
+    // Check if the page and locator exist
+    if (objectRepository[pageName] && objectRepository[pageName][locatorName]) {
+      // Rename the locator
+      objectRepository[newPageName][locatorName] =
+        objectRepository[pageName][locatorName];
+      delete objectRepository[pageName][locatorName];
+
+      // Update the objectRepository file
+      let objectRepositoryString = "const objectRepository = {\n";
+      for (const pageKey in objectRepository) {
+        objectRepositoryString += `  "${pageKey}": {\n`;
+        for (const locatorKey in objectRepository[pageKey]) {
+          objectRepositoryString += `    "${locatorKey}": ${objectRepository[
+            pageKey
+          ][locatorKey].toString()},\n`;
+        }
+        objectRepositoryString += "  },\n";
+      }
+      objectRepositoryString += "}\nmodule.exports = objectRepository;";
+
+      fs.writeFileSync(objectRepositoryPath, objectRepositoryString, "utf8");
+
+      // Replace the old locator name with the new one in all the files under the tests folder
+      const testsFolderPath = path.join(filePath, "tests");
+      const testFiles = fs.readdirSync(testsFolderPath);
+
+      testFiles.forEach((testFile) => {
+        const testFilePath = path.join(testsFolderPath, testFile);
+        let fileContent = fs.readFileSync(testFilePath, "utf8");
+        const oldPattern = `${pageName}.${locatorName}`;
+        const newPattern = `${newPageName}.${locatorName}`;
+        const regex = new RegExp(`\\b${oldPattern}\\b`, "g");
+        fileContent = fileContent.replace(regex, newPattern);
+        fs.writeFileSync(testFilePath, fileContent, "utf8");
+      });
+
+      res.json({ message: "Locator renamed successfully." });
+    } else {
+      res.status(400).json({
+        message: "Failed to move locator.",
+        error: "Locator or page not found.",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Failed to rename locator.", error: error.message });
+  }
+});
 
 app.post("/dataRepository/getContent", (req, res) => {
   const filePath = `${req.body.filePath}/dataRepository.json`;
@@ -336,6 +396,48 @@ app.post("/dataRepository/updateData", async (req, res) => {
     console.error(err);
     res.status(500).send({ error: "Failed to write to file" });
   }
+});
+app.post("/data/updateDataFiles", (req, res) => {
+  const folderPath = req.body.folderPath;
+  const oldNewKeys = req.body.oldNewKeys;
+
+  // Check for required parameters
+  if (!folderPath || !oldNewKeys) {
+    return res.status(400).send("folderPath and oldNewKeys are required.");
+  }
+
+  fs.readdir(folderPath, (err, files) => {
+    if (err) {
+      return res.status(500).send("Error reading directory.");
+    }
+
+    files.forEach((file) => {
+      const filePath = path.join(folderPath, file);
+
+      fs.readFile(filePath, "utf-8", (err, data) => {
+        if (err) {
+          return res.status(500).send("Error reading file.");
+        }
+
+        let updatedData = data;
+
+        oldNewKeys.forEach((keyMap) => {
+          updatedData = updatedData.replace(
+            new RegExp(keyMap.oldKey, "g"),
+            keyMap.newKey
+          );
+        });
+
+        fs.writeFile(filePath, updatedData, "utf-8", (err) => {
+          if (err) {
+            return res.status(500).send("Error writing to file.");
+          }
+        });
+      });
+    });
+
+    res.status(200).send("Files updated successfully.");
+  });
 });
 
 function replaceValuesInFiles(folderPath, valuesToReplace) {
@@ -410,6 +512,90 @@ app.post("/objectRepository/getObjectsForUser", (req, res) => {
     }
 
     res.json(result);
+  });
+});
+
+// get documents path
+app.get("/documentsPath", (req, res) => {
+  const documentsPath = path.join(os.homedir(), "Documents");
+  res.send(documentsPath);
+});
+
+// read file content
+app.post("/readFile", (req, res) => {
+  const filePath = req.body.path;
+
+  if (!filePath) {
+    return res.status(400).send({ error: "Path is required." });
+  }
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).send({ error: "Failed to read the file." });
+    }
+    res.send(data);
+  });
+});
+
+const executeGitCommand = (cmd, path, callback) => {
+  exec(cmd, { cwd: path }, (error, stdout, stderr) => {
+    if (error) {
+      console.warn(error);
+      callback(error, null);
+      return;
+    }
+    callback(null, stdout ? stdout : stderr);
+  });
+};
+
+app.post("/git/add", (req, res) => {
+  const { folderPath } = req.body;
+  const cmd = "git add .";
+  executeGitCommand(cmd, folderPath, (error, result) => {
+    if (error) {
+      res.status(500).send({ error: "Failed to add files" });
+    } else {
+      res.send({ message: "Files added successfully", result });
+    }
+  });
+});
+
+app.post("/git/commit", (req, res) => {
+  const { folderPath, commitMessage } = req.body;
+  if (!commitMessage) {
+    res.status(400).send({ error: "Commit message is required" });
+    return;
+  }
+  const cmd = `git commit -m "${commitMessage}"`;
+  executeGitCommand(cmd, folderPath, (error, result) => {
+    if (error) {
+      res.status(500).send({ error: "Failed to commit files" });
+    } else {
+      res.send({ message: "Files committed successfully", result });
+    }
+  });
+});
+
+app.post("/git/push", (req, res) => {
+  const { folderPath } = req.body;
+  const cmd = "git push -u origin master";
+  executeGitCommand(cmd, folderPath, (error, result) => {
+    if (error) {
+      res.status(500).send({ error: "Failed to push files" });
+    } else {
+      res.send({ message: "Files pushed successfully", result });
+    }
+  });
+});
+app.post("/git/status", (req, res) => {
+  const { folderPath } = req.body;
+  const cmd = "git status";
+  executeGitCommand(cmd, folderPath, (error, result) => {
+    if (error) {
+      res.status(500).send({ error: "Failed to fetch git status" });
+    } else {
+      res.send({ message: "Git status fetched successfully", result });
+    }
   });
 });
 

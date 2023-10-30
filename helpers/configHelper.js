@@ -5,8 +5,8 @@ function getRequiredConfigAndWriteToFile(req) {
     includeTestSteps: true,
     token: "c7c26122-2def-42b0-a6af-baf17cd1b204",
     endpoint: "http://10.10.90.150:8080/api/v1",
-    project: "Howard-Hughes",
-    launch: "Howard-Hughes - Demo dashboard execution",
+    project: "Trinet",
+    launch: "Trinet - Demo execution",
     restClientConfig: {
       timeout: 120000,
       maxContentLength: Infinity,
@@ -18,7 +18,7 @@ function getRequiredConfigAndWriteToFile(req) {
         value: "qa",
       },
     ],
-    description: "Automation execution for Howard-Hughes",
+    description: "Automation execution for Trinet",
   };
 const config = {
   testDir: "./tests",
@@ -39,7 +39,10 @@ const config = {
   use: {
     screenshot: "only-on-failure",
     actionTimeout: 0,
-    trace: "on-first-retry",
+    trace: "on",
+    launchOptions:{
+      slowMo: 1000
+    },
   },
   projects: [
     chromeConfiguration

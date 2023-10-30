@@ -1,7 +1,8 @@
 const { exec } = require("child_process");
+const fs = require("fs-extra");
 const { resolve } = require("path");
+const path = require("path");
 const confighelper = require("./configHelper");
-const fs = require("fs");
 var esprima = require("esprima");
 const astring = require("astring");
 const humanReadable = require("./humanReadable");
@@ -9,42 +10,81 @@ const objectRepo = require("./objectRepoHelper");
 const promiseHandler = require("./promiseHelper");
 const dataRepo = require("./dataRepoHelper");
 const envHelper = require("./environmentHelper");
+const os = require("os");
 const { Console } = require("console");
 
 //project functions
 async function createProjectOnDisk(req) {
-  const configurator = confighelper.getRequiredConfigAndWriteToFile(req);
-  const configuratorFileName = "playwright.config.js";
-  const configCommand = `echo ${configurator} > ${configuratorFileName}`;
-  return new Promise((resolve, reject) => {
+  try {
+    // Setup paths and filenames
+    const separator = path.sep; // Use Node.js's path module to get the OS-specific separator
     const updatedProjectName = req.project_name.replaceAll(" ", "_");
-    exec(
-      `mkdir ${req.project_path}\\${updatedProjectName} && cd ${req.project_path}\\${updatedProjectName} && npm init -y && npm i -D @playwright/test && npm i @reportportal/agent-js-playwright && npx playwright install && npm install dotenv && git init && mkdir tests && ${configCommand}`,
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          reject(error);
+    const projectDir = path.join(req.project_path, updatedProjectName);
+    const configuratorFileName = path.join(projectDir, "playwright.config.js");
+
+    // Get configurator content
+    const configurator = confighelper.getRequiredConfigAndWriteToFile(req);
+
+    // Create directory and setup project
+    await fs.ensureDir(path.join(projectDir, "tests")); // This also creates the parent directories if they don't exist
+    process.chdir(projectDir); // Change to project directory
+
+    await new Promise((resolve, reject) => {
+      // Initialize npm and install packages
+      exec(
+        "npm init -y && npm i -D @playwright/test @reportportal/agent-js-playwright dotenv && npx playwright install && git init && git remote add origin git@github.com:codetesta2z/kilimanjaro.git",
+        (error, stdout) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return reject(error);
+          }
+          console.log(`stdout: ${stdout}`);
+          resolve();
         }
-        objectRepo.createObjectRepositoryFile(
-          `${req.project_path}\\${updatedProjectName}`
-        );
-        dataRepo.createDataRepositoryFile(
-          `${req.project_path}\\${updatedProjectName}`
-        );
-        envHelper.createEnvFile(`${req.project_path}\\${updatedProjectName}`);
-        console.log(`stdout: ${stdout}`);
-        resolve(true);
-      }
-    );
+      );
+    });
+
+    // Write the configuration to the file
+    fs.writeFileSync(configuratorFileName, configurator);
+
+    // Create additional files
+    createGitignore(projectDir);
+    objectRepo.createObjectRepositoryFile(projectDir);
+    dataRepo.createDataRepositoryFile(projectDir);
+    envHelper.createEnvFile(projectDir);
+
+    return true;
+  } catch (error) {
+    console.error(`Error in createProjectOnDisk: ${error}`);
+    throw error;
+  }
+}
+function createGitignore(folderName) {
+  const content = `
+node_modules/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+`;
+
+  const gitignorePath = path.join(folderName, ".gitignore");
+
+  fs.writeFile(gitignorePath, content.trim(), (err) => {
+    if (err) {
+      console.error("Error writing .gitignore file:", err);
+    } else {
+      console.log(".gitignore file has been created successfully!");
+    }
   });
 }
 
 //script functions
 async function createScript(req) {
+  const separator = os.platform() === "win32" ? "\\" : "/";
   const temp = "tempScript.spec.js";
   return new Promise((resolve, reject) => {
     exec(
-      `npx playwright codegen -o "${req.project_path}\\${req.project_name}\\tests\\${temp}" ${req.url}`,
+      `npx playwright codegen -o "${req.project_path}${separator}${req.project_name}${separator}tests${separator}${temp}" ${req.url}`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
@@ -58,32 +98,32 @@ async function createScript(req) {
     .then(async () => {
       if (
         await fs.existsSync(
-          `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
+          `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`
         )
       ) {
         await replaceAndAppend(
-          `${req.project_path}\\${req.project_name}\\tests\\${temp}`,
-          `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`,
+          `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${temp}`,
+          `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`,
           "'test', async",
           `'${req.test_name} ${req.tags}', async`,
           "import { test, expect } from '@playwright/test';"
         );
       } else {
         await replaceAndRename(
-          `${req.project_path}\\${req.project_name}\\tests\\${temp}`,
-          `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`,
+          `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${temp}`,
+          `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`,
           "'test', async",
           `'${req.test_name} ${req.tags}', async`
         );
 
         await promiseHandler
           .replacePatternInFile(
-            `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
+            `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`
           )
           .then(async () => {
             console.log("File modified and saved successfully!");
             await promiseHandler.replaceAsyncPage(
-              `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
+              `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`
             );
           })
           .catch((err) => {
@@ -93,13 +133,13 @@ async function createScript(req) {
     })
     .then(async () => {
       const godJSON = await getGodJSONInternal(
-        `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`
+        `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`
       );
       await objectRepo.getControlsFromGodJSON(
         godJSON,
-        `${req.project_path}\\${req.project_name}\\objectRepository.js`,
-        `${req.project_path}\\${req.project_name}\\tests\\${req.script_name}`,
-        `${req.project_path}\\${req.project_name}\\dataRepository.json`
+        `${req.project_path}${separator}${req.project_name}${separator}objectRepository.js`,
+        `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`,
+        `${req.project_path}${separator}${req.project_name}${separator}dataRepository.json`
       );
     });
 }
@@ -143,9 +183,10 @@ async function replaceAndRename(
 }
 
 async function getScripts(req) {
+  const separator = os.platform() === "win32" ? "\\" : "/";
   return new Promise((resolve, reject) => {
     fs.readdir(
-      `${req.project_path}\\${req.project_name}\\tests`,
+      `${req.project_path}${separator}${req.project_name}${separator}tests`,
       (err, fileNames) => {
         if (err) {
           reject(err);
@@ -159,9 +200,10 @@ async function getScripts(req) {
 
 //execution functions
 async function executeScript(req) {
+  const separator = os.platform() === "win32" ? "\\" : "/";
   return new Promise((resolve, reject) => {
     exec(
-      `cd ${req.project_path}\\${req.project_name} && npx playwright test tests/${req.script_name} --headed`,
+      `cd ${req.project_path}${separator}${req.project_name} && npx playwright test tests/${req.script_name} --headed`,
       (error, stdout, stderr) => {
         console.log(`stdout: ${stdout}`);
         resolve(true);
@@ -170,9 +212,10 @@ async function executeScript(req) {
   });
 }
 async function executeScripts(req) {
+  const separator = os.platform() === "win32" ? "\\" : "/";
   return new Promise((resolve, reject) => {
     exec(
-      `cd ${req.project_path}\\${req.project_name} && npx playwright test --headed`,
+      `cd ${req.project_path}${separator}${req.project_name} && npx playwright test --headed`,
       (error, stdout, stderr) => {
         console.log(`stdout: ${stdout}`);
         resolve(true);
@@ -238,6 +281,7 @@ function extractValuesFromAst(node) {
     } else if (node.type === "Identifier") {
       values.push(node.name);
     } else if (node.type === "Literal") {
+      console.log("value", node.value);
       values.push(
         JSON.stringify(
           node.value.replace(/\[id="\\\\([0-9])([^\]]+)\]/g, (match, p1) => p1)

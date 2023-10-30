@@ -43,7 +43,17 @@ function getHumanReadable(tokenAray) {
     );
     return base;
   } else {
-    if (tokenAray[0] === "expect" && tokenAray[1] === "soft") {
+    if (
+      tokenAray.includes('"popup"') &&
+      (tokenAray.includes("page1Promise") || tokenAray.includes("pagePromise"))
+    ) {
+      return "Creating popup/page promise";
+    } else if (
+      !tokenAray.includes("popup") &&
+      (tokenAray.includes("page1Promise") || tokenAray.includes("pagePromise"))
+    ) {
+      return "Expecting popup/page promise to complete";
+    } else if (tokenAray[0] === "expect" && tokenAray[1] === "soft") {
       if (tokenAray.length === 5) {
         return `Soft assert ${tokenAray[2]} ${splitCamelCase(tokenAray[3])} ${
           tokenAray[4]
