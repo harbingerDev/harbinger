@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, deprecated_member_use, prefer_collection_literals, prefer_const_literals_to_create_immutables
-
+import 'package:file_picker/file_picker.dart';
+import 'package:harbinger/models/Endpoint.dart';
+import 'package:harbinger/widgets/TestPlan/choose_endpointspopup.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,7 +10,7 @@ import 'package:harbinger/widgets/TestPlan/spec_card.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:toggle_switch/toggle_switch.dart';
 import '../Common/loader_widget.dart';
 
 class TestScript extends StatefulWidget {
@@ -118,9 +120,283 @@ class _TestScriptState extends State<TestScript> {
   late String url;
   late String testName;
   late String tags;
+
+  _showInitPopup() async {
+    ValueNotifier<bool> isUiScript = ValueNotifier<bool>(true);
+
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Script Type"),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.44,
+            height: MediaQuery.of(context).size.height * 0.31,
+            child: Column(
+              children: [
+                Row(mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text("Please select the type of script you'd like to work with:",style: TextStyle(fontSize: 13),),
+
+                  ],
+                ),
+                   SizedBox(height: 5,),
+                ToggleSwitch(
+                  minWidth: MediaQuery.of(context).size.width * 0.218,
+                  minHeight: MediaQuery.of(context).size.height * 0.18,
+                  fontSize: 20.0,
+                  initialLabelIndex: isUiScript.value ? 0 : 1,
+                  labels: ["UI Script", "API Script"],
+                  onToggle: (index) {
+                    isUiScript.value = index == 0;
+                  },
+                  cornerRadius: 10,
+                  activeBgColor: [Color(0xFFF3752E)],
+                  inactiveBgColor: Color(0xFFE8E8E8),
+                  activeFgColor: Colors.black,
+                  inactiveFgColor: Colors.black,
+                ),
+                SizedBox(height: 20),
+                ValueListenableBuilder(
+                  valueListenable: isUiScript,
+                  builder: (BuildContext context, bool value, Widget? child) {
+                    return value
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                            
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  "Close",
+                                  selectionColor:
+                                      const Color.fromARGB(255, 204, 204, 204),
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                             
+                              IconButton(
+                                style: IconButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5)),
+                                    backgroundColor:
+                                        Color.fromARGB(255, 3, 129, 7)),
+                                hoverColor: Color.fromARGB(255, 5, 152, 10),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _showPopup(""); // Handle "Record Ui Script"
+                                },
+                                icon: Row(
+                                  children: [
+                                    Icon(Icons.fiber_manual_record,
+                                        color: Colors.white),
+                                    Text(
+                                      "Record",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  "Close",
+                                  selectionColor:
+                                      const Color.fromARGB(255, 204, 204, 204),
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                              
+                              IconButton(
+                                style: IconButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5)),
+                                    backgroundColor:
+                                        Color.fromARGB(255, 3, 129, 7)),
+                                hoverColor: Color.fromARGB(255, 5, 152, 10),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _showUploadPopup(context);
+                                },
+                                icon: Row(
+                                  children: [
+                                    Icon(Icons.api,
+                                        color: Colors.white),
+                                    Text(
+                                      "Use OpenApi template",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  _showUploadPopup(BuildContext context) async {
+    bool showSpinner = false;
+    FilePickerResult? result;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(title: Text("Upload file"),
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.38,
+                height: MediaQuery.of(context).size.height * 0.29,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Icon(Icons.cloud_upload_outlined,
+                            color: Color.fromARGB(255, 218, 216, 216),
+                            size: 100.0),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Upload the project openapi.json file",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(height: 17),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _showInitPopup();
+                          },
+                          child: Row(
+                            children: [
+                              // Icon(Icons.arrow_back, color: const Color.fromARGB(255, 0, 0, 0)),
+                              Text(
+                                "Back",
+                                style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          style: IconButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5)),
+                              backgroundColor: Color.fromARGB(255, 3, 129, 7)),
+                          hoverColor: Color.fromARGB(255, 5, 152, 10),
+                          onPressed: () async {
+                            print("uploading....");
+                            final result = await FilePicker.platform.pickFiles(
+                              type: FileType.custom,
+                              allowedExtensions: ['json'],
+                            );
+                            if (result != null && result.files.isNotEmpty) {
+                              setState(() {
+                                showSpinner = true;
+                              });
+                              String serverUrl =
+                                  "http://127.0.0.1:8001/uploadapiinfo/";
+                              final selectedFile = result.files.first;
+                              // Create an HTTP request to your backend
+                              final request = http.MultipartRequest(
+                                  'POST', Uri.parse(serverUrl));
+
+                              // Convert the Uint8List to List<int>
+                              final byteList = selectedFile.bytes!.toList();
+
+                              // Create a Stream from the List<int>
+                              final fileStream =
+                                  Stream<List<int>>.fromIterable([byteList]);
+                              // Create a MultipartFile from the selected file
+                              final multipartFile =
+                                  http.MultipartFile.fromBytes('file', byteList,
+                                      filename: selectedFile.name);
+
+                              // Add the file to the request
+                              request.files.add(multipartFile);
+
+                              // Send the request
+                              final response = await request.send();
+                              print("response: $response");
+                              if (response.statusCode == 200) {
+                                //make to next screen and send the data u got
+                                setState(() {
+                                  showSpinner = true;
+                                });
+
+                                final List<dynamic> responseData = json.decode(
+                                    await response.stream.bytesToString());
+                                final List<Endpoint> endpoints = responseData
+                                    .map((e) => Endpoint.fromJson(e))
+                                    .toList();
+
+                                Navigator.of(context).pop();
+                                _showchooseendpointsPopup(endpoints);
+
+                                print('image uploaded');
+                              } else {
+                                print('failed');
+                                setState(() {
+                                  showSpinner = false;
+                                });
+                              }
+                            } else {
+                              print("No file selected.");
+                            }
+                          },
+                          icon: Row(
+                            children: [
+                              Icon(Icons.upload_rounded, color: Colors.white),
+                              Text(
+                                "Upload",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  _showchooseendpointsPopup(List<Endpoint> endpoints) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return EndpointWidget(endpoints:endpoints);
+        });
+  }
+
   _showPopup(String specName) async {
-    var _controller = new TextEditingController(text: specName);
-    scriptName = _controller.text;
+    var controller = TextEditingController(text: specName);
+    scriptName = controller.text;
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -135,7 +411,7 @@ class _TestScriptState extends State<TestScript> {
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
                     readOnly: specName == "" ? false : true,
-                    controller: _controller,
+                    controller: controller,
                     decoration: InputDecoration(hintText: "Enter spec name"),
                     onChanged: (value) {
                       scriptName = value;
@@ -176,21 +452,43 @@ class _TestScriptState extends State<TestScript> {
             ),
           ),
           actions: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () async {
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              IconButton(
+                style: IconButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Color.fromARGB(255, 3, 129, 7)),
+                hoverColor: Color.fromARGB(255, 5, 152, 10),
+                onPressed: () {
                   Navigator.of(context).pop();
-                  await recordScript();
+                  _showInitPopup();
                 },
-                // style: ElevatedButton.styleFrom(
-                //   backgroundColor: Colors.black87,
-                //   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                //   textStyle: GoogleFonts.roboto(
-                //       fontSize: 14,
-                //       color: Colors.white,
-                //       fontWeight: FontWeight.normal),
-                // ),
-                label: Text("Start recording"),
-                icon: Icon(Icons.fiber_manual_record)),
+                icon: Row(
+                  children: [
+                    Icon(Icons.arrow_back, color: Colors.white),
+                    Text(
+                      "Back",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton.icon(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await recordScript();
+                  },
+                  // style: ElevatedButton.styleFrom(
+                  //   backgroundColor: Colors.black87,
+                  //   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  //   textStyle: GoogleFonts.roboto(
+                  //       fontSize: 14,
+                  //       color: Colors.white,
+                  //       fontWeight: FontWeight.normal),
+                  // ),
+                  label: Text("Start recording"),
+                  icon: Icon(Icons.fiber_manual_record)),
+            ]),
           ],
         );
       },
@@ -260,7 +558,7 @@ class _TestScriptState extends State<TestScript> {
                       ),
                       widget.tab == "plan"
                           ? ElevatedButton.icon(
-                              onPressed: () async => {_showPopup("")},
+                              onPressed: () async => {_showInitPopup()},
                               // style: ElevatedButton.styleFrom(
                               //   backgroundColor: Colors.black87,
                               //   padding: EdgeInsets.symmetric(
@@ -384,7 +682,7 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
   String selectedChoice = "";
   _buildChoiceList() {
     List<Widget> choices = [];
-    widget.browserList.forEach((item) {
+    for (var item in widget.browserList) {
       choices.add(Container(
         padding: const EdgeInsets.all(2.0),
         child: ChoiceChip(
@@ -397,7 +695,7 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
           },
         ),
       ));
-    });
+    }
     return choices;
   }
 

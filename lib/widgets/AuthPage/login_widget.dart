@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.of(context).size.width * .30,
                 child: Column(children: <Widget>[
                   SizedBox(
