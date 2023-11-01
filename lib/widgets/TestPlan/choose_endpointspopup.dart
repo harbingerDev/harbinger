@@ -298,7 +298,7 @@ class ModalWithStepperState extends State<ModalWithStepper> {
               content: SingleChildScrollView(
                   child: SizedBox(
                       width: 2000,
-                      height: MediaQuery.of(context).size.height * .85,
+                      height: MediaQuery.of(context).size.height *2,
                       child: ApiTesting(
                           onSave: addToTheMapAndMoveToNextStepper,
                           endpointPath: widget.dataMap[index]["endpointPath"],
@@ -309,6 +309,9 @@ class ModalWithStepperState extends State<ModalWithStepper> {
                   ),
             );
           }),
+          controlsBuilder: (context, details) {
+            return Container();
+          },
         ),
       ),
       actions: [
@@ -321,18 +324,17 @@ class ModalWithStepperState extends State<ModalWithStepper> {
         //     },
         //     child: const Text("Next"),
         //   ),
-        // if (currentPage == widget.dataMap.length - 1)
-        //   ElevatedButton(
-        //     onPressed: () {
-        //       finalmap[currentPage] = ApiTestingState().performApiRequest();
-        //       print(
-        //           "lastmap need to generate++++$currentPage+++printing map++$finalmap");
+        if (currentPage == widget.dataMap.length - 1)
+          ElevatedButton(
+            onPressed: () {
+              print(
+                  "lastmap need to generate++++$currentPage+++printing map++$finalmap");
 
-        //       // Generate button action
-        //       // You can perform an action here when the user clicks "Generate."
-        //     },
-        //     child: const Text("Generate"),
-        //   ),
+              // Generate button action
+              // You can perform an action here when the user clicks "Generate."
+            },
+            child: const Text("Generate"),
+          ),
       ],
     );
   }
@@ -342,8 +344,10 @@ class ModalWithStepperState extends State<ModalWithStepper> {
     finalmap[currentPage] = map;
     print("first final map $finalmap");
     print(currentPage);
-    setState(() {
-      currentPage++;
-    });
+    if (currentPage != widget.dataMap.length - 1) {
+      setState(() {
+        currentPage++;
+      });
+    }
   }
 }

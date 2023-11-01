@@ -3,9 +3,10 @@ import 'package:harbinger/models/response_model.dart';
 import 'package:harbinger/widgets/TestPlan/choose_endpointspopup.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:accordion/accordion.dart';
 
 class ApiTesting extends StatefulWidget {
-  final void Function(Map<String, String>) onSave;
+  final void Function(Map<String, dynamic>) onSave;
   final String? reqBody;
   final List<RequestParameter>? queryParam;
   final String? endpointPath;
@@ -38,13 +39,11 @@ class ApiTestingState extends State<ApiTesting> {
   String selectedBaseUrl = 'https://example.com'; // Default BASEURL
 
   String expandedSection = "";
-
-  bool statusSelected = false;
-  bool extractKeySelected = false;
-  bool keySelected = false;
-  late ValueChanged<bool> onStatusSelected;
-  late ValueChanged<bool> onExtractKeySelected;
-  late ValueChanged<bool> onKeySelected;
+  TextEditingController statusController = TextEditingController();
+  TextEditingController keyController = TextEditingController();
+  TextEditingController valueController = TextEditingController();
+  TextEditingController keyOfVariableController = TextEditingController();
+  TextEditingController variableController = TextEditingController();
 
   @override
   void initState() {
@@ -64,285 +63,347 @@ class ApiTestingState extends State<ApiTesting> {
           key: formKey,
           child: Column(
             children: [
+              Accordion(children: [
+                AccordionSection(headerBorderWidth: 1,headerBorderColor:Color.fromARGB(255, 199, 199, 199) ,
+                  headerBackgroundColorOpened:
+                      Color.fromARGB(255, 255, 255, 255),
+                  headerBackgroundColor: Color.fromARGB(255, 236, 236, 236),
+                  contentBackgroundColor: Color.fromARGB(255, 255, 255, 255),
+                  header: const Text("Select here to give validation"),
+                  isOpen: false,
+                  leftIcon:
+                      const Icon(Icons.circle_outlined, color: Colors.black54),
+                  rightIcon: const Icon(Icons.keyboard_arrow_down,
+                      color: Colors.black54, size: 20),
+                  content: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Accordion(children: [
+                          AccordionSection(headerBorderColor:Color.fromARGB(255, 199, 199, 199) ,headerBorderWidth: 1,
+                            headerBackgroundColor:
+                                Color.fromARGB(255, 255, 255, 255),
+                            header: const Text("Status Validation"),
+                            isOpen: false,
+                            leftIcon: const Icon(Icons.circle_outlined,
+                                color: Colors.black54),
+                            rightIcon: const Icon(Icons.keyboard_arrow_down,
+                                color: Colors.black54, size: 20),
+                            content: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextField(
+                                    controller: statusController,
+                                    decoration: InputDecoration(
+                                        labelText: 'Status Code'),
+                                  ),
+                                ]),
+                          )
+                        ]),
+                        Accordion(children: [
+                          AccordionSection(headerBorderColor:Color.fromARGB(255, 199, 199, 199) ,headerBorderWidth: 1,
+                            headerBackgroundColor:
+                                Color.fromARGB(255, 255, 255, 255),
+                            header: const Text(" Key-Value Validation"),
+                            isOpen: false,
+                            leftIcon: const Icon(Icons.circle_outlined,
+                                color: Colors.black54),
+                            rightIcon: const Icon(Icons.keyboard_arrow_down,
+                                color: Colors.black54, size: 20),
+                            content: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextField(
+                                    controller: keyController,
+                                    decoration:
+                                        InputDecoration(labelText: 'Key'),
+                                  ),
+                                  TextField(
+                                    controller: valueController,
+                                    decoration: InputDecoration(
+                                        labelText: 'Expected Value'),
+                                  ),
+                                ]),
+                          )
+                        ]),
+                        Accordion(children: [
+                          AccordionSection(headerBorderColor:Color.fromARGB(255, 199, 199, 199) ,headerBorderWidth: 1,
+                            headerBackgroundColor:
+                                Color.fromARGB(255, 255, 255, 255),
+                            header:
+                                const Text("Extract Key and Set in Variable"),
+                            isOpen: false,
+                            leftIcon: const Icon(Icons.circle_outlined,
+                                color: Colors.black54),
+                            rightIcon: const Icon(Icons.keyboard_arrow_down,
+                                color: Colors.black54, size: 20),
+                            content: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextField(
+                                    controller: keyOfVariableController,
+                                    decoration:
+                                        InputDecoration(labelText: 'Key'),
+                                  ),
+                                  TextField(
+                                    controller: variableController,
+                                    decoration: InputDecoration(
+                                        labelText:
+                                            'Variable Name in which you want to store'),
+                                  ),
+                                ]),
+                          )
+                        ]),
+                      ]),
+                )
+              ]),
               Row(
                 children: [
-                  Checkbox(
-                    value: statusSelected,
-                    fillColor: MaterialStateProperty.all(Colors.white),
-                    checkColor: Colors.black, // Set fill color to white
-                    onChanged: (selected) {
-                      setState(() {
-                        statusSelected = selected ?? false;
-                      });
-                    },
-                  ),
-                  const Text('Status Validation'),
-                  Checkbox(
-                    value: extractKeySelected,
-                    fillColor: MaterialStateProperty.all(Colors.white),
-                    checkColor: Colors.black, // Set fill color to white
-                    onChanged: (selected) {
-                      setState(() {
-                        extractKeySelected = selected ?? false;
-                      });
-                    },
-                  ),
-                  const Text('Extract Key'),
-                  Checkbox(
-                    value: keySelected,
-                    fillColor: MaterialStateProperty.all(Colors.white),
-                    checkColor: Colors.black, // Set fill color to white
-                    onChanged: (selected) {
-                      setState(() {
-                        keySelected = selected ?? false;
-                      });
-                    },
-                  ),
-                  const Text('Key Validation'),
-                ],
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    // Navigation bar or method selection
-                    Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 216, 215, 215),
-                            width: 2.0,
-                          ),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                              width: 15,
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        // Navigation bar or method selection
+                        Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 216, 215, 215),
+                                width: 2.0,
+                              ),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10.0)),
                             ),
-                            DropdownButton<String>(
-                              value: selectedHttpMethod,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedHttpMethod = newValue!;
-                                });
-                              },
-                              items: const [
-                                DropdownMenuItem<String>(
-                                  value: 'get',
-                                  child: Text('GET'),
+                            child: Row(
+                              children: [
+                                const SizedBox(
+                                  width: 15,
                                 ),
-                                DropdownMenuItem<String>(
-                                  value: 'post',
-                                  child: Text('POST'),
+                                DropdownButton<String>(
+                                  value: selectedHttpMethod,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedHttpMethod = newValue!;
+                                    });
+                                  },
+                                  items: const [
+                                    DropdownMenuItem<String>(
+                                      value: 'get',
+                                      child: Text('GET'),
+                                    ),
+                                    DropdownMenuItem<String>(
+                                      value: 'post',
+                                      child: Text('POST'),
+                                    ),
+                                    DropdownMenuItem<String>(
+                                      value: 'put',
+                                      child: Text('PUT'),
+                                    ),
+                                    DropdownMenuItem<String>(
+                                      value: 'delete',
+                                      child: Text('DELETE'),
+                                    ),
+                                    DropdownMenuItem<String>(
+                                      value: 'patch',
+                                      child: Text('PATCH'),
+                                    ),
+                                  ],
                                 ),
-                                DropdownMenuItem<String>(
-                                  value: 'put',
-                                  child: Text('PUT'),
+                                const SizedBox(
+                                  width: 15,
                                 ),
-                                DropdownMenuItem<String>(
-                                  value: 'delete',
-                                  child: Text('DELETE'),
+                                Expanded(
+                                  child: DropdownButton<String>(
+                                    value: selectedBaseUrl,
+                                    onChanged: (newValue) {
+                                      setState(() {
+                                        selectedBaseUrl = newValue!;
+                                      });
+                                    },
+                                    items: const [
+                                      DropdownMenuItem<String>(
+                                        value: 'BASEURL',
+                                        child: Text('BASEURL'),
+                                      ),
+                                      DropdownMenuItem<String>(
+                                        value: 'https://example.com',
+                                        child: Text('https://example.com'),
+                                      ),
+                                      DropdownMenuItem<String>(
+                                        value: 'https://example2.com',
+                                        child: Text('https://example2.com'),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                DropdownMenuItem<String>(
-                                  value: 'patch',
-                                  child: Text('PATCH'),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                Expanded(
+                                  child: TextField(
+                                    controller: urlController,
+                                    decoration:
+                                        const InputDecoration(labelText: 'URL'),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 15,
                                 ),
                               ],
                             ),
-                            const SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: DropdownButton<String>(
-                                value: selectedBaseUrl,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    selectedBaseUrl = newValue!;
-                                  });
-                                },
-                                items: const [
-                                  DropdownMenuItem<String>(
-                                    value: 'BASEURL',
-                                    child: Text('BASEURL'),
-                                  ),
-                                  DropdownMenuItem<String>(
-                                    value: 'https://example.com',
-                                    child: Text('https://example.com'),
-                                  ),
-                                  DropdownMenuItem<String>(
-                                    value: 'https://example2.com',
-                                    child: Text('https://example2.com'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: urlController,
-                                decoration:
-                                    const InputDecoration(labelText: 'URL'),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 15,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 19.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            ' ',
-                            style: TextStyle(
-                                color: Color.fromARGB(255, 34, 197, 40)),
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 100,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color:
-                                      const Color.fromARGB(255, 212, 211, 211),
-                                  width: 1.0,
-                                ),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10.0)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextField(
-                                  controller: headersController,
-                                  maxLines: 4,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Headers',
-                                    //labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                        const Padding(
+                          padding: EdgeInsets.only(right: 19.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                ' ',
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 34, 197, 40)),
+                              )
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                          255, 212, 211, 211),
+                                      width: 1.0,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10.0)),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextField(
+                                      controller: headersController,
+                                      maxLines: 4,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Headers',
+                                        //labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Container(
-                              height: 100,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color:
-                                      const Color.fromARGB(255, 224, 223, 223),
-                                  width: 1.0,
-                                ),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10.0)),
+                              const SizedBox(
+                                width: 10,
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextField(
-                                  controller: requestparamController,
-                                  maxLines: 4,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Request param',
-                                    // labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                              Expanded(
+                                child: Container(
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                          255, 224, 223, 223),
+                                      width: 1.0,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10.0)),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextField(
+                                      controller: requestparamController,
+                                      maxLines: 4,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Request param',
+                                        // labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                          255, 223, 222, 222),
+                                      width: 1.0,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10.0)),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextField(
+                                      controller: requestBodyController,
+                                      maxLines:
+                                          8, // Make it multiline (expanded)
+                                      decoration: const InputDecoration(
+                                        labelText: 'Request Body',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height:
+                                      200, // Adjust the height as needed to double the original size
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                          255, 224, 223, 223),
+                                      width: 1.0,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10.0)),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextField(
+                                      controller: responseBodyController,
+                                      maxLines:
+                                          10, // Make it multiline (expanded)
+                                      decoration: const InputDecoration(
+                                        labelText: 'Response Body',
+                                        //labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 200,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color:
-                                      const Color.fromARGB(255, 223, 222, 222),
-                                  width: 1.0,
-                                ),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10.0)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextField(
-                                  controller: requestBodyController,
-                                  maxLines: 8, // Make it multiline (expanded)
-                                  decoration: const InputDecoration(
-                                    labelText: 'Request Body',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Container(
-                              height:
-                                  200, // Adjust the height as needed to double the original size
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color:
-                                      const Color.fromARGB(255, 224, 223, 223),
-                                  width: 1.0,
-                                ),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10.0)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextField(
-                                  controller: responseBodyController,
-                                  maxLines: 10, // Make it multiline (expanded)
-                                  decoration: const InputDecoration(
-                                    labelText: 'Response Body',
-                                    //labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        print("button$baseurlController");
-                        performApiRequest();
-                      },
-                      child: Text("Next")),
+                  ),
                 ],
-              )
+              ),
+               Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                          onPressed: () {
+                            print("button$baseurlController");
+                            performApiRequest();
+                          },
+                          child: const Text("Next")),
+                    ],
+                  )
             ],
           ),
         ),
@@ -350,25 +411,50 @@ class ApiTestingState extends State<ApiTesting> {
     );
   }
 
-   performApiRequest() {
+  performApiRequest() {
     String httpMethod = selectedHttpMethod;
     String url = baseurlController.text + urlController.text;
     String requestBody = requestBodyController.text;
     String path = urlController.text;
     String headers = headersController.text;
     String queryParams = requestparamController.text;
+    String expectedStatusCode = statusController.text;
+    String expectedkey= keyController.text;
+    String expectedvalue = valueController.text;
+    String expectedkeyOfVariable = keyOfVariableController.text;
+    String expectedvariable = variableController.text;
+
+    bool isStatusValdiation=false;
+    bool isKeyValueValidation=false;
+    bool isExtractkeyValidation=false;
+
+    if (expectedStatusCode != "" || expectedStatusCode.trim() != "") {
+      isStatusValdiation = true;
+    }
+    if (expectedkey != "" || expectedkey.trim() != "") {
+      isKeyValueValidation = true;
+    }
+    if (expectedkeyOfVariable != "" || expectedkeyOfVariable.trim() != "") {
+      isKeyValueValidation = true;
+    }
 
     print(
         "Making API request with method: $httpMethod, URL: $url, and request body: $requestBody");
-    Map<String, String> map = {
+    Map<String, dynamic> map = {
       'method': httpMethod,
       'url': url,
       'path': path,
       'requestBody': requestBody,
       'headers': headers,
-      'queryParams': queryParams
+      'queryParams': queryParams,
+      'isStatusValdiation': isStatusValdiation,
+      'isKeyValueValidation':isKeyValueValidation,
+      'isExtractkeyValidation':isExtractkeyValidation,
+      'expectedStatusCode':expectedStatusCode,
+      'expectedKeyValue':{expectedkey:expectedvalue},
+      'expectedkeyAndVariableName':{expectedkeyOfVariable:expectedvariable}
     };
-     widget.onSave(map);
+    widget.onSave(map);
 
     // return map;
   }
