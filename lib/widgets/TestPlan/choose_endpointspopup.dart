@@ -13,10 +13,10 @@ class EndpointWidget extends StatefulWidget {
   const EndpointWidget({super.key, required this.endpoints});
 
   @override
-  _EndpointWidgetState createState() => _EndpointWidgetState();
+  EndpointWidgetState createState() => EndpointWidgetState();
 }
 
-class _EndpointWidgetState extends State<EndpointWidget> {
+class EndpointWidgetState extends State<EndpointWidget> {
   List<int> selectedEndpoints = [];
 
   List<Endpoint> selectedEndpointsList = [];
@@ -274,10 +274,11 @@ class ModalWithStepper extends StatefulWidget {
   const ModalWithStepper(this.dataMap, {super.key});
 
   @override
-  _ModalWithStepperState createState() => _ModalWithStepperState();
+  ModalWithStepperState createState() => ModalWithStepperState();
 }
 
-class _ModalWithStepperState extends State<ModalWithStepper> {
+class ModalWithStepperState extends State<ModalWithStepper> {
+  Map<int, dynamic> finalmap = {};
   int currentPage = 0;
 
   @override
@@ -297,8 +298,9 @@ class _ModalWithStepperState extends State<ModalWithStepper> {
               content: SingleChildScrollView(
                   child: SizedBox(
                       width: 2000,
-                      height: 2000,
+                      height: MediaQuery.of(context).size.height * .85,
                       child: ApiTesting(
+                          onSave: addToTheMapAndMoveToNextStepper,
                           endpointPath: widget.dataMap[index]["endpointPath"],
                           httpMethod: widget.dataMap[index]["httpMethod"],
                           queryParam: widget.dataMap[index]["queryParam"],
@@ -310,24 +312,38 @@ class _ModalWithStepperState extends State<ModalWithStepper> {
         ),
       ),
       actions: [
-        if (currentPage < widget.dataMap.length - 1)
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                currentPage++;
-              });
-            },
-            child: const Text("Next"),
-          ),
-        if (currentPage == widget.dataMap.length - 1)
-          ElevatedButton(
-            onPressed: () {
-              // Generate button action
-              // You can perform an action here when the user clicks "Generate."
-            },
-            child: const Text("Generate"),
-          ),
+        // if (currentPage < widget.dataMap.length - 1)
+        //   ElevatedButton(
+        //     onPressed: () {
+        //       setState(() {
+        //         currentPage++;
+        //       });
+        //     },
+        //     child: const Text("Next"),
+        //   ),
+        // if (currentPage == widget.dataMap.length - 1)
+        //   ElevatedButton(
+        //     onPressed: () {
+        //       finalmap[currentPage] = ApiTestingState().performApiRequest();
+        //       print(
+        //           "lastmap need to generate++++$currentPage+++printing map++$finalmap");
+
+        //       // Generate button action
+        //       // You can perform an action here when the user clicks "Generate."
+        //     },
+        //     child: const Text("Generate"),
+        //   ),
       ],
     );
+  }
+
+  addToTheMapAndMoveToNextStepper(map) {
+    print("first final map $finalmap");
+    finalmap[currentPage] = map;
+    print("first final map $finalmap");
+    print(currentPage);
+    setState(() {
+      currentPage++;
+    });
   }
 }

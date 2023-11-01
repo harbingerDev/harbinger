@@ -131,7 +131,7 @@ class _TestScriptState extends State<TestScript> {
           title: Text("Script Type"),
           content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.44,
-            height: MediaQuery.of(context).size.height * 0.31,
+            height: MediaQuery.of(context).size.height * 0.34,
             child: Column(
               children: [
                 Row(mainAxisAlignment: MainAxisAlignment.start,
@@ -143,7 +143,7 @@ class _TestScriptState extends State<TestScript> {
                    SizedBox(height: 5,),
                 ToggleSwitch(
                   minWidth: MediaQuery.of(context).size.width * 0.218,
-                  minHeight: MediaQuery.of(context).size.height * 0.18,
+                  minHeight: MediaQuery.of(context).size.height * 0.17,
                   fontSize: 20.0,
                   initialLabelIndex: isUiScript.value ? 0 : 1,
                   labels: ["UI Script", "API Script"],
@@ -262,7 +262,7 @@ class _TestScriptState extends State<TestScript> {
             return AlertDialog(title: Text("Upload file"),
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.38,
-                height: MediaQuery.of(context).size.height * 0.29,
+                height: MediaQuery.of(context).size.height * 0.32,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
