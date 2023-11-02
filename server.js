@@ -600,9 +600,38 @@ app.post("/git/status", (req, res) => {
 });
 
 // generate api script
-app.post("/api/generateScript", (req, res) => {
-  const tests = req.body;
-  const playwrightScript = convertToPlaywright(tests);
+app.post("/api/generateScript", async (req, res) => {
+  // const tests = req.body;
+  const { finalmap, filename }  = req.body;
+
+  console.log("finalmap"+finalmap);
+  console.log("filename"+filename);
+
+
+ const  playwrightScript =  convertToPlaywright(finalmap);
+ console.log(playwrightScript);
+
+ const documentsPath = path.join(os.homedir(), "Documents");
+ const scriptsPath = path.join(documentsPath,"harbingerProjects")
+ const filepath = path.join(scriptsPath, filename);
+ 
+ try {
+   // Ensure the directory exists
+   if (!fs.existsSync(documentsPath)) {
+     fs.mkdirSync(documentsPath, { recursive: true }); // Create the directory and its parents if they don't exist.
+   }
+ 
+   // Write the file
+   fs.writeFileSync(filepath+".txt", playwrightScript);
+   console.log('File created and content written to:', filepath);
+ } catch (err) {
+   console.error('Error:', err);
+ }
+ 
+
+
+  // await 
+
   res.type("application/javascript");
   res.send(playwrightScript);
 });
