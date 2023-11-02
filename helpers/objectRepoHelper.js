@@ -326,10 +326,9 @@ async function getControlsFromGodJSON(
     testBlock["testStepsArray"].forEach((testStep) => {
       if (testStep["tokens"].includes("goto")) {
       } else if (
-        testStep["tokens"][testStep["tokens"].length - 1] === "pagePromise"
-      ) {
-      } else if (
-        testStep["tokens"][testStep["tokens"].length - 1] === "page1Promise"
+        /^(page\d*Promise)$/.test(
+          testStep["tokens"][testStep["tokens"].length - 1]
+        )
       ) {
       } else if (
         testStep["tokens"][testStep["tokens"].length - 1] === "waitForLoadState"
@@ -368,7 +367,7 @@ async function getControlsFromGodJSON(
             locatorNameMap[locatorName] = locatorNameMap[locatorName] + 1;
           }
         }
-
+        console.log("*******", testStep["tokens"]);
         const controlToBeReplaced =
           `${operator}.${joinWithAlternatingParentheses(
             testStep["tokens"],

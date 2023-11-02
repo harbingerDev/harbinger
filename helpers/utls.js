@@ -1,9 +1,9 @@
 function findValueByKeyInArray(jsonObj, keysArray) {
-  if (keysArray[0] === "const" && keysArray[1] === "pagePromise") {
+  if (keysArray[0] === "const" && /^(page\d+Promise)$/.test(keysArray[1])) {
     return "Promise to return new page";
   } else if (
     keysArray[0] === "const" &&
-    keysArray[keysArray.length - 1] === "pagePromise"
+    /^(page\d+Promise)$/.test(keysArray[keysArray.length - 1])
   ) {
     return "Opening new page";
   } else if (

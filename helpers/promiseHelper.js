@@ -6,7 +6,7 @@ function replaceAsyncPage(filePath) {
   const fileContents = fs.readFileSync(filePath, "utf8");
   let addedObjectRequire = fileContents.replace(
     'import { test, expect } from "@playwright/test";',
-    'import { test, expect } from "@playwright/test";\nconst objectRepository = require("../objectRepository")\nconst dataRepository = require("../dataRepository.json")\nrequire("dotenv").config()'
+    'import { test, expect, request } from "@playwright/test";\nconst objectRepository = require("../objectRepository")\nconst dataRepository = require("../dataRepository.json")\nrequire("dotenv").config()'
   );
   // Replace all occurrences of async ({ page }) with async ({ page, context })
   const replacedContents = addedObjectRequire.replace(
@@ -33,10 +33,12 @@ function replacePatternInFile(filePath) {
 
       // /const \[(\w+)\] = await Promise\.all\(\[\s*([^,]+),[\s\S]*?([^,]+)\s*\]\);/;
       let match;
+      let i = 1;
       while ((match = pattern.exec(data)) !== null) {
         const [, pageName, statement1, statement2] = match;
-        const replacement = `const pagePromise = context.waitForEvent('page');\nawait ${statement2};\nconst ${pageName} = await pagePromise;\nawait ${pageName}.waitForLoadState();`;
+        const replacement = `const page${i}Promise = context.waitForEvent('page');\nawait ${statement2};\nconst ${pageName} = await page${i}Promise;\nawait ${pageName}.waitForLoadState();`;
         data = data.replace(match[0], replacement);
+        i++;
       }
 
       // format the modified file with Prettier

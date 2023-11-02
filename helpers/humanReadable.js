@@ -2,7 +2,6 @@ const utils = require("./utls");
 const locActions = require("../playwrightActionLocators.json");
 
 function getHumanReadable(tokenAray) {
-  console.log(JSON.stringify(tokenAray));
   let base = "";
   if (tokenAray.includes("objectRepository") && tokenAray[0] === "const") {
     base = utils.findValueByKeyInArray(
@@ -45,12 +44,12 @@ function getHumanReadable(tokenAray) {
   } else {
     if (
       tokenAray.includes('"popup"') &&
-      (tokenAray.includes("page1Promise") || tokenAray.includes("pagePromise"))
+      tokenAray.some((token) => /^(page\d*Promise)$/.test(token))
     ) {
       return "Creating popup/page promise";
     } else if (
       !tokenAray.includes("popup") &&
-      (tokenAray.includes("page1Promise") || tokenAray.includes("pagePromise"))
+      tokenAray.some((token) => /^(page\d*Promise)$/.test(token))
     ) {
       return "Expecting popup/page promise to complete";
     } else if (tokenAray[0] === "expect" && tokenAray[1] === "soft") {
