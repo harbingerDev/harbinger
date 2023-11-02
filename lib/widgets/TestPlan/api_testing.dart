@@ -437,9 +437,12 @@ class ApiTestingState extends State<ApiTesting> {
                     children: [
                       ElevatedButton(
                           onPressed: () {
-                            print(widget.page);
-                            print("button$baseurlController");
-                            performApiRequest();
+                            // if (widget.page != "next") {
+                              
+                            // }
+                             createMapAndAdd();
+
+                            //  if(widget.page != "next")performApiRequest();
                           },
                           child: widget.page == "next"
                               ? Text("Next")
@@ -455,7 +458,7 @@ class ApiTestingState extends State<ApiTesting> {
     );
   }
 
-  performApiRequest() {
+  createMapAndAdd() {
     String httpMethod = selectedHttpMethod;
     String url = baseurlController.text + urlController.text;
     String requestBody = requestBodyController.text;
@@ -482,21 +485,19 @@ class ApiTestingState extends State<ApiTesting> {
       isKeyValueValidation = true;
     }
 
-    print(
-        "Making API request with method: $httpMethod, URL: $url, and request body: $requestBody");
     Map<String, dynamic> map = {
-      'method': httpMethod,
-      'url': url,
-      'path': path,
-      'requestBody': requestBody,
-      'headers': headers,
-      'queryParams': queryParams,
-      'isStatusValdiation': isStatusValdiation,
-      'isKeyValueValidation': isKeyValueValidation,
-      'isExtractkeyValidation': isExtractkeyValidation,
-      'expectedStatusCode': expectedStatusCode,
-      'expectedKeyValue': {expectedkey: expectedvalue},
-      'expectedkeyAndVariableName': {expectedkeyOfVariable: expectedvariable}
+      "method": httpMethod,
+      "url": url,
+      "path": path,
+      "requestBody": requestBody,
+      "headers": headers,
+      "queryParams": queryParams,
+      "isStatusValdiation": isStatusValdiation,
+      "isKeyValueValidation": isKeyValueValidation,
+      "isExtractkeyValidation": isExtractkeyValidation,
+      "expectedStatusCode": expectedStatusCode,
+      "expectedKeyValue": {expectedkey: expectedvalue},
+      "expectedkeyAndVariableName": {expectedkeyOfVariable: expectedvariable}
     };
     widget.onSave(map);
 

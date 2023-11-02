@@ -629,7 +629,7 @@ class _TestScriptState extends State<TestScript> {
                         height: 20,
                       ),
                       ElevatedButton(
-                        onPressed: () async => {_showPopup("")},
+                        onPressed: () async => {_showInitPopup()},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black87,
                           padding: EdgeInsets.symmetric(
