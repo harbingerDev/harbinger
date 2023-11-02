@@ -599,4 +599,58 @@ app.post("/git/status", (req, res) => {
   });
 });
 
+// generate api script
+app.post("/api/generateScript", (req, res) => {
+  const tests = req.body;
+  const playwrightScript = convertToPlaywright(tests);
+  res.type("application/javascript");
+  res.send(playwrightScript);
+});
+
+function convertToPlaywright(tests) {
+  let script = `const { test, expect } = require('@playwright/test');\n\n`;
+
+  for (let key in tests) {
+    const testConfig = tests[key];
+    if (testConfig.method && testConfig.url) {
+      script += generatePlaywrightTest(testConfig, key);
+    }
+  }
+
+  return script;
+}
+
+function generatePlaywrightTest(testConfig, key) {
+  const method = testConfig.method.toLowerCase();
+  const url = testConfig.url;
+  const requestBody = JSON.stringify(testConfig.requestBody || {});
+  const headers = JSON.stringify(testConfig.headers || {});
+  const statusCode = testConfig.expectedStatusCode;
+
+  let testCode = `test('${method.toUpperCase()} ${url}', async ({ request }) => {\n`;
+  testCode += `  const response = await request.${method}('${url}', {\n`;
+
+  if (testConfig.headers) {
+    testCode += `    headers: ${headers},\n`;
+  }
+  if (Object.keys(testConfig.requestBody || {}).length > 0) {
+    testCode += `    data: ${requestBody},\n`;
+  }
+
+  testCode += `  });\n\n`;
+
+  if (testConfig.isStatusValdiation && statusCode) {
+    testCode += `  expect(response.status()).toBe(${statusCode});\n`;
+  }
+
+  if (testConfig.isKeyValueValidation && testConfig.expectedKeyValue) {
+    for (let [key, value] of Object.entries(testConfig.expectedKeyValue)) {
+      testCode += `  expect(await response.json()).toHaveProperty('${key}', '${value}');\n`;
+    }
+  }
+
+  testCode += `});\n\n`;
+  return testCode;
+}
+
 app.listen(1337, () => console.log("server running on port 1337"));
