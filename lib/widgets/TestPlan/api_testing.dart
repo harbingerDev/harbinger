@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:accordion/accordion.dart';
 
 class ApiTesting extends StatefulWidget {
+  final String? page;
   final void Function(Map<String, dynamic>) onSave;
   final String? reqBody;
   final List<RequestParameter>? queryParam;
@@ -16,6 +17,7 @@ class ApiTesting extends StatefulWidget {
   // final String? responseSchema;
 
   const ApiTesting({
+    required this.page,
     required this.onSave,
     required this.reqBody,
     required this.queryParam,
@@ -435,10 +437,13 @@ class ApiTestingState extends State<ApiTesting> {
                     children: [
                       ElevatedButton(
                           onPressed: () {
+                            print(widget.page);
                             print("button$baseurlController");
                             performApiRequest();
                           },
-                          child: const Text("Next")),
+                          child: widget.page == "next"
+                              ? Text("Next")
+                              : Text("Generate")),
                     ],
                   ),
                 ],

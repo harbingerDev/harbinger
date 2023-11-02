@@ -295,6 +295,9 @@ class ModalWithStepperState extends State<ModalWithStepper> {
               title: Text('Page ${index + 1}'),
               isActive: currentPage == index,
               content: ApiTesting(
+                  page:widget.dataMap.length - 1== currentPage 
+                      ? "generate"
+                      : "next",
                   onSave: addToTheMapAndMoveToNextStepper,
                   endpointPath: widget.dataMap[index]["endpointPath"],
                   httpMethod: widget.dataMap[index]["httpMethod"],
@@ -311,15 +314,16 @@ class ModalWithStepperState extends State<ModalWithStepper> {
       //   if (currentPage == widget.dataMap.length - 1)
       //     ElevatedButton(
       //       onPressed: () {
-      //         print(
-      //             "lastmap need to generate++++$currentPage+++printing map++$finalmap");
+      //         print(widget.dataMap.length-1);
+
+      //         print(currentPage);
 
       //         // Generate button action
       //         // You can perform an action here when the user clicks "Generate."
       //       },
       //       child: const Text("Generate"),
       //     ),
-      //],
+      // ],
     );
   }
 
