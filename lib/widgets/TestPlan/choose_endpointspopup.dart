@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:harbinger/models/Endpoint.dart';
 import 'package:harbinger/models/response_model.dart';
@@ -295,18 +294,12 @@ class ModalWithStepperState extends State<ModalWithStepper> {
             return Step(
               title: Text('Page ${index + 1}'),
               isActive: currentPage == index,
-              content: SingleChildScrollView(
-                  child: SizedBox(
-                      width: 2000,
-                      height: MediaQuery.of(context).size.height *2,
-                      child: ApiTesting(
-                          onSave: addToTheMapAndMoveToNextStepper,
-                          endpointPath: widget.dataMap[index]["endpointPath"],
-                          httpMethod: widget.dataMap[index]["httpMethod"],
-                          queryParam: widget.dataMap[index]["queryParam"],
-                          reqBody: widget.dataMap[index]["reqBody"]))
-                  // child:Container(width: 2000,height: 2000,)
-                  ),
+              content: ApiTesting(
+                  onSave: addToTheMapAndMoveToNextStepper,
+                  endpointPath: widget.dataMap[index]["endpointPath"],
+                  httpMethod: widget.dataMap[index]["httpMethod"],
+                  queryParam: widget.dataMap[index]["queryParam"],
+                  reqBody: widget.dataMap[index]["reqBody"]),
             );
           }),
           controlsBuilder: (context, details) {
@@ -314,40 +307,32 @@ class ModalWithStepperState extends State<ModalWithStepper> {
           },
         ),
       ),
-      actions: [
-        // if (currentPage < widget.dataMap.length - 1)
-        //   ElevatedButton(
-        //     onPressed: () {
-        //       setState(() {
-        //         currentPage++;
-        //       });
-        //     },
-        //     child: const Text("Next"),
-        //   ),
-        if (currentPage == widget.dataMap.length - 1)
-          ElevatedButton(
-            onPressed: () {
-              print(
-                  "lastmap need to generate++++$currentPage+++printing map++$finalmap");
+      // actions: [
+      //   if (currentPage == widget.dataMap.length - 1)
+      //     ElevatedButton(
+      //       onPressed: () {
+      //         print(
+      //             "lastmap need to generate++++$currentPage+++printing map++$finalmap");
 
-              // Generate button action
-              // You can perform an action here when the user clicks "Generate."
-            },
-            child: const Text("Generate"),
-          ),
-      ],
+      //         // Generate button action
+      //         // You can perform an action here when the user clicks "Generate."
+      //       },
+      //       child: const Text("Generate"),
+      //     ),
+      //],
     );
   }
 
   addToTheMapAndMoveToNextStepper(map) {
-    print("first final map $finalmap");
-    finalmap[currentPage] = map;
-    print("first final map $finalmap");
-    print(currentPage);
     if (currentPage != widget.dataMap.length - 1) {
+      finalmap[currentPage] = map;
       setState(() {
         currentPage++;
       });
     }
+    if (currentPage == widget.dataMap.length - 1) {
+      finalmap[currentPage] = map;
+    }
+    print("final map $finalmap");
   }
 }
