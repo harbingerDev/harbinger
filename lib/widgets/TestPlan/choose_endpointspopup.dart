@@ -5,7 +5,6 @@ import 'package:harbinger/models/Endpoint.dart';
 import 'package:harbinger/models/response_model.dart';
 import 'package:harbinger/widgets/TestPlan/api_testing.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 
 class EndpointWidget extends StatefulWidget {
   final List<Endpoint> endpoints;
@@ -24,9 +23,10 @@ class EndpointWidgetState extends State<EndpointWidget> {
   @override
   Widget build(BuildContext context) {
     String? reqBody;
-    // RequestParameter? headers;
+    String? responseSchema;
     List<RequestParameter>? pathvariable;
     List<RequestParameter>? queryparam;
+    String? headers;
 
     Future<Map<String, dynamic>> makeApiCallAndNavigateToApiScreen(
         Endpoint endpoint) async {
@@ -67,15 +67,33 @@ class EndpointWidgetState extends State<EndpointWidget> {
           }
           reqBody = bodystart + bodyend;
         }
+        if (responseModel.responseschema != null) {
+          String bodystart = "{";
+          String bodyend = "\n}";
+          for (RequestParameter parameter in responseModel.responseschema!) {
+            if (parameter.type == 'string') {
+              bodystart += '\n"${parameter.name}" : "string",';
+            } else if (parameter.type == 'boolean') {
+              bodystart += '\n"${parameter.name}" : true,';
+            } else {
+              bodystart += '\n"${parameter.name}" : 0,';
+            }
+          }
+
+          if (bodystart != '{') {
+            bodystart = bodystart.substring(0, bodystart.length - 1);
+          }
+          responseSchema = bodystart + bodyend;
+        }
         if (responseModel.pathvariable != null) {
           pathvariable = responseModel.pathvariable;
         }
         if (responseModel.queryparam != null) {
           queryparam = responseModel.queryparam;
         }
-        // if (responseModel.pathvariable != null) {
-        //   headers = responseModel.securityparameters;
-        // }
+        if (responseModel.securityparameters != null) {
+          headers = jsonEncode(responseModel.securityparameters);
+        }
 
         Map<String, dynamic> map = HashMap<String, dynamic>();
         map.addAll({
@@ -83,7 +101,8 @@ class EndpointWidgetState extends State<EndpointWidget> {
           "queryParam": queryparam,
           "endpointPath": endpoint.path,
           "httpMethod": endpoint.httpMethod,
-          // "headers": headers
+          "headers": headers,
+          "responseSchema": responseSchema
         });
 
         return map;
@@ -103,13 +122,6 @@ class EndpointWidgetState extends State<EndpointWidget> {
       }
       return map;
     }
-
-    List<String> tags = [];
-    List<String> options = [
-      'status code validation',
-      'key validation',
-      'schema vaildation'
-    ];
 
     void showSelectedEndpointsDialog() {
       showDialog(
@@ -304,7 +316,10 @@ class ModalWithStepperState extends State<ModalWithStepper> {
                   endpointPath: widget.dataMap[index]["endpointPath"],
                   httpMethod: widget.dataMap[index]["httpMethod"],
                   queryParam: widget.dataMap[index]["queryParam"],
-                  reqBody: widget.dataMap[index]["reqBody"]),
+                  reqBody: widget.dataMap[index]["reqBody"],
+                  responseSchema: widget.dataMap[index]["responseSchema"],
+                  headers: widget.dataMap[index]["headers"],
+                  baseUrl: "http://localhost:8080"),
             );
           }),
           controlsBuilder: (context, details) {
@@ -372,23 +387,21 @@ class ModalWithStepperState extends State<ModalWithStepper> {
 
       const url = 'http://localhost:1337/api/generateScript';
       final headers = {"Content-type": "application/json"};
-      final jsonBody = jsonEncode({"finalmap":finalmap,"filename":testscriptNameController.text});
+      final jsonBody = jsonEncode(
+          {"finalmap": finalmap, "filename": testscriptNameController.text});
       print("jsonBody$jsonBody");
       final response =
           await http.post(Uri.parse(url), headers: headers, body: jsonBody);
 
       if (response.statusCode == 200) {
-
         print(
             "++++++++++++++++++++++ getting response as script${response.body}");
+
       } else {
         throw Exception('Failed to make request');
       }
-       Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
     print("final map $finalmap");
-   
   }
-
-
 }

@@ -14,7 +14,9 @@ class ApiTesting extends StatefulWidget {
   final List<RequestParameter>? queryParam;
   final String? endpointPath;
   final String? httpMethod;
-  // final String? responseSchema;
+  final String? responseSchema;
+  final String? baseUrl;
+  final String? headers;
 
   const ApiTesting({
     required this.page,
@@ -23,7 +25,9 @@ class ApiTesting extends StatefulWidget {
     required this.queryParam,
     required this.endpointPath,
     required this.httpMethod,
-    // required this.responseSchema,
+    required this.responseSchema,
+    required this.baseUrl,
+    required this.headers,
     Key? key,
   }) : super(key: key);
 
@@ -42,7 +46,9 @@ class ApiTestingState extends State<ApiTesting> {
   TextEditingController requestparamController = TextEditingController();
   TextEditingController headersController = TextEditingController();
   String selectedHttpMethod = 'get'; // Default HTTP method
-  String selectedBaseUrl = 'https://example.com'; // Default BASEURL
+  String selectedBaseUrl = 'https://example.com';
+
+  // Default BASEURL
 
   String expandedSection = "";
   TextEditingController statusController = TextEditingController();
@@ -55,7 +61,11 @@ class ApiTestingState extends State<ApiTesting> {
   void initState() {
     urlController.text = widget.endpointPath!;
     requestBodyController.text = widget.reqBody!;
+    responseBodyController.text = widget.responseSchema!;
     selectedHttpMethod = widget.httpMethod!;
+    selectedBaseUrl = widget.baseUrl!;
+    baseurlController.text=widget.baseUrl!;
+    headersController.text= widget.headers!;
 
     super.initState();
   }
@@ -114,7 +124,10 @@ class ApiTestingState extends State<ApiTesting> {
                                                 TextField(
                                                   controller: statusController,
                                                   decoration: InputDecoration(
-                                                      labelText: 'Status Code'),
+                                                      labelText:
+                                                          'Enter the expected Status Code'),
+                                                  style: TextStyle(
+                                                      color: Colors.black38),
                                                 ),
                                               ]),
                                         ),
@@ -124,7 +137,7 @@ class ApiTestingState extends State<ApiTesting> {
                                           header: Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: const Text(
-                                                " Key-Value Validation"),
+                                                "Key-Value Validation"),
                                           ),
                                           isOpen: false,
                                           content: Column(
@@ -134,7 +147,10 @@ class ApiTestingState extends State<ApiTesting> {
                                                 TextField(
                                                   controller: keyController,
                                                   decoration: InputDecoration(
-                                                      labelText: 'Key'),
+                                                      labelText:
+                                                          'Enter the Key for which value to be validated'),
+                                                  style: TextStyle(
+                                                      color: Colors.black38),
                                                 ),
                                                 SizedBox(
                                                   height: 5,
@@ -143,7 +159,9 @@ class ApiTestingState extends State<ApiTesting> {
                                                   controller: valueController,
                                                   decoration: InputDecoration(
                                                       labelText:
-                                                          'Expected Value'),
+                                                          'Enter the Expected Value'),
+                                                  style: TextStyle(
+                                                      color: Colors.black38),
                                                 ),
                                               ]),
                                         ),
@@ -165,7 +183,8 @@ class ApiTestingState extends State<ApiTesting> {
                                                   controller:
                                                       keyOfVariableController,
                                                   decoration: InputDecoration(
-                                                      labelText: 'Key'),
+                                                       labelText: 'Enter the Key to be extracted'),
+                                                      style: TextStyle(color: Colors.black26),
                                                 ),
                                                 SizedBox(
                                                   height: 5,
@@ -175,7 +194,8 @@ class ApiTestingState extends State<ApiTesting> {
                                                       variableController,
                                                   decoration: InputDecoration(
                                                       labelText:
-                                                          'Variable Name in which you want to store'),
+                                                          'Enter the Variable Name in which you want to store'),
+                                                          style: TextStyle(color: Colors.black26),
                                                 ),
                                               ]),
                                         )
@@ -242,26 +262,26 @@ class ApiTestingState extends State<ApiTesting> {
                                       ),
                                       Expanded(
                                         child: DropdownButton<String>(
-                                          value: selectedBaseUrl,
+                                          value: baseurlController.text,
                                           onChanged: (newValue) {
                                             setState(() {
-                                              selectedBaseUrl = newValue!;
+                                              baseurlController.text = newValue!;
                                             });
                                           },
-                                          items: const [
+                                          items:  [
                                             DropdownMenuItem<String>(
                                               value: 'BASEURL',
                                               child: Text('BASEURL'),
                                             ),
                                             DropdownMenuItem<String>(
-                                              value: 'https://example.com',
+                                              value: selectedBaseUrl,
                                               child:
-                                                  Text('https://example.com'),
+                                                  Text(selectedBaseUrl),
                                             ),
                                             DropdownMenuItem<String>(
-                                              value: 'https://example2.com',
+                                              value: 'https://example1.com',
                                               child:
-                                                  Text('https://example2.com'),
+                                                  Text('https://example1.com'),
                                             ),
                                           ],
                                         ),
@@ -405,11 +425,13 @@ class ApiTestingState extends State<ApiTesting> {
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: TextField(
+                                            enabled: false,
                                             controller: responseBodyController,
                                             maxLines:
                                                 10, // Make it multiline (expanded)
                                             decoration: const InputDecoration(
-                                              labelText: 'Response Body',
+                                              labelText:
+                                                  'Expected Response Schema',
                                               //labelStyle: TextStyle(fontWeight: FontWeight.bold),
                                             ),
                                           ),
@@ -438,9 +460,9 @@ class ApiTestingState extends State<ApiTesting> {
                       ElevatedButton(
                           onPressed: () {
                             // if (widget.page != "next") {
-                              
+
                             // }
-                             createMapAndAdd();
+                            createMapAndAdd();
 
                             //  if(widget.page != "next")performApiRequest();
                           },
@@ -461,7 +483,8 @@ class ApiTestingState extends State<ApiTesting> {
   createMapAndAdd() {
     String httpMethod = selectedHttpMethod;
     String url = baseurlController.text + urlController.text;
-    String requestBody = requestBodyController.text;
+    String requestBody =
+        requestBodyController.text;
     String path = urlController.text;
     String headers = headersController.text;
     String queryParams = requestparamController.text;

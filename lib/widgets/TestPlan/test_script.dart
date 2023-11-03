@@ -27,6 +27,7 @@ class _TestScriptState extends State<TestScript> {
   int activeProjectId = 0;
   late List<Map<String, dynamic>> activeProject;
 
+
   Future<void> executeScript(String scriptName) async {
     setState(() {
       loaded = false;
@@ -134,13 +135,18 @@ class _TestScriptState extends State<TestScript> {
             height: MediaQuery.of(context).size.height * 0.34,
             child: Column(
               children: [
-                Row(mainAxisAlignment: MainAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text("Please select the type of script you'd like to work with:",style: TextStyle(fontSize: 13),),
-
+                    Text(
+                      "Please select the type of script you'd like to work with:",
+                      style: TextStyle(fontSize: 13),
+                    ),
                   ],
                 ),
-                   SizedBox(height: 5,),
+                SizedBox(
+                  height: 5,
+                ),
                 ToggleSwitch(
                   minWidth: MediaQuery.of(context).size.width * 0.218,
                   minHeight: MediaQuery.of(context).size.height * 0.17,
@@ -164,7 +170,6 @@ class _TestScriptState extends State<TestScript> {
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                            
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
@@ -176,7 +181,6 @@ class _TestScriptState extends State<TestScript> {
                                   style: TextStyle(color: Colors.black),
                                 ),
                               ),
-                             
                               IconButton(
                                 style: IconButton.styleFrom(
                                     shape: RoundedRectangleBorder(
@@ -204,7 +208,6 @@ class _TestScriptState extends State<TestScript> {
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
@@ -216,7 +219,6 @@ class _TestScriptState extends State<TestScript> {
                                   style: TextStyle(color: Colors.black),
                                 ),
                               ),
-                              
                               IconButton(
                                 style: IconButton.styleFrom(
                                     shape: RoundedRectangleBorder(
@@ -230,8 +232,7 @@ class _TestScriptState extends State<TestScript> {
                                 },
                                 icon: Row(
                                   children: [
-                                    Icon(Icons.api,
-                                        color: Colors.white),
+                                    Icon(Icons.api, color: Colors.white),
                                     Text(
                                       "Use OpenApi template",
                                       style: TextStyle(color: Colors.white),
@@ -259,7 +260,8 @@ class _TestScriptState extends State<TestScript> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(title: Text("Upload file"),
+            return AlertDialog(
+              title: Text("Upload file"),
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.38,
                 height: MediaQuery.of(context).size.height * 0.32,
@@ -293,7 +295,8 @@ class _TestScriptState extends State<TestScript> {
                               // Icon(Icons.arrow_back, color: const Color.fromARGB(255, 0, 0, 0)),
                               Text(
                                 "Back",
-                                style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                style: TextStyle(
+                                    color: const Color.fromARGB(255, 0, 0, 0)),
                               ),
                             ],
                           ),
@@ -390,7 +393,7 @@ class _TestScriptState extends State<TestScript> {
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) {
-          return EndpointWidget(endpoints:endpoints);
+          return EndpointWidget(endpoints: endpoints);
         });
   }
 
