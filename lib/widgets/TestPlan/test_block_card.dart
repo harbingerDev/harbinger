@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_desktop_audio_recorder/flutter_desktop_audio_recorder.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/github.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:harbinger/main.dart';
 import 'package:harbinger/models/testScriptModel.dart';
 import 'package:harbinger/widgets/Common/loader_widget.dart';
 import 'package:harbinger/widgets/TestPlan/edit_step_popup.dart';
@@ -843,6 +845,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                       ),
                     ],
                   ),
+                  //  final filePath = ref.watch(filePathProvider);
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -852,86 +855,108 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             showDialog(
                               context: context,
                               builder: (context) {
-                                String scriptName =
-                                    ''; // Initialize an empty string to store the entered script name.
+                                return Consumer(builder: (context, ref, child) {
+                                  final filePath = ref.watch(filePathProvider);
+                                  String scriptName =
+                                      ''; // Initialize an empty string to store the entered script name.
 
-                                return AlertDialog(
-                                  title: Text("Test Script Name"),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize
-                                        .min, // To make the content size dynamic.
+                                  return AlertDialog(
+                                    title: Text("Test Script Name"),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize
+                                          .min, // To make the content size dynamic.
 
-                                    children: <Widget>[
-                                      // Text(
-                                      //   "Please enter the new script name",
-                                      //   style: TextStyle(fontSize: 13),
-                                      // ),
-                                      SizedBox(
-                                          height:
-                                              10), // Space between text and text input field
-                                      TextField(
-                                        onChanged: (value) {
-                                          scriptName =
-                                              value; // Update the scriptName variable as the user types.
+                                      children: <Widget>[
+                                        // Text(
+                                        //   "Please enter the new script name",
+                                        //   style: TextStyle(fontSize: 13),
+                                        // ),
+                                        SizedBox(
+                                            height:
+                                                10), // Space between text and text input field
+                                        TextField(
+                                          onChanged: (value) {
+                                            scriptName =
+                                                value; // Update the scriptName variable as the user types.
+                                          },
+                                          decoration: InputDecoration(
+                                            hintText: "Enter script name",
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          // Handle the Cancel button action here (if needed).
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog.
                                         },
-                                        decoration: InputDecoration(
-                                          hintText: "Enter script name",
+                                        child: Text(
+                                          "Cancel",
+                                          selectionColor: const Color.fromARGB(
+                                              255, 204, 204, 204),
+                                          style: TextStyle(color: Colors.black),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      
-                                      onPressed: () {
-                                        // Handle the Cancel button action here (if needed).
-                                        Navigator.of(context)
-                                            .pop(); // Close the dialog.
-                                      },
-                                      child: Text("Cancel",selectionColor:
-                                      const Color.fromARGB(255, 204, 204, 204),
-                                  style: TextStyle(color: Colors.black),),
-                                    ),
-                                    SizedBox(
-                                      width: 60,
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        print(scriptName);
+                                      SizedBox(
+                                        width: 60,
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          var renameScriptUrl = Uri.parse(
+                                              "http://localhost:1337/scripts/renameScript");
 
-                                        SharedPreferences prefs =
-                                            await SharedPreferences
-                                                .getInstance();
-                                        int activeProjectId =
-                                            prefs.getInt('activeProject')!;
-
-                                        //get active project id
-                                        var renameScriptUrl = Uri.parse(
-                                            "http://localhost:1337/scripts/renameScript/$activeProjectId");
-
-                                        final executeScriptResponse =
-                                            Future.wait([
-                                          http.post(
+                                          final executeScriptResponse =
+                                              await http.post(
                                             renameScriptUrl,
-                                            body: json.encode(
-                                                {"scriptName": scriptName}),
                                             headers: {
-                                              'Content-Type': 'application/json'
+                                              'Content-Type':
+                                                  'application/json',
                                             },
-                                          )
-                                        ]);
+                                            body: json.encode({
+                                              "scriptName": scriptName,
+                                              "oldFilePath": filePath,
+                                            }),
+                                          );
 
-                                        print("response$executeScriptResponse");
+                                          if (executeScriptResponse
+                                                  .statusCode ==
+                                              200) {
+                                            final responseJson = json.decode(
+                                                executeScriptResponse.body);
+                                            final regex = RegExp(
+                                                r'\\tests\\([^\\]+)\.spec\.js$');
+                                            final match =
+                                                regex.firstMatch(responseJson);
 
-                                        // Handle the OK button action here.
-                                        // You can use the 'scriptName' variable to access the entered script name.
-                                        Navigator.of(context)
-                                            .pop(); // Close the dialog.
-                                      },
-                                      child: Text("OK"),
-                                    ),
-                                  ],
-                                );
+                                            if (match != null) {
+                                              final result = match.group(1);
+                                              ref
+                                                .read(filePathProvider.notifier)
+                                                .state = result!;
+
+
+                                            } else {
+                                              print('Match not found');
+                                            }
+                                            
+                                            print("Response: $responseJson");
+                                          } else {
+                                            print(
+                                                "Error: HTTP Status ${executeScriptResponse.statusCode}");
+                                          }
+
+                                          // Handle the OK button action here.
+                                          // You can use the 'scriptName' variable to access the entered script name.
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog.
+                                        },
+                                        child: Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                });
                               },
                             )
                           },
