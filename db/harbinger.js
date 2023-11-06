@@ -1,3 +1,4 @@
+const path = require("path");
 const knex = require("./knex");
 const projectHelper = require("../helpers/projectHelpers");
 
@@ -21,6 +22,16 @@ function getActiveProject() {
 function deleteProject(id) {
   return knex("projects").where("id", id).del();
 }
+async function getProjectById(id) {
+  const project = await knex("projects").where("id", id).first();
+
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
+  return project;
+}
+
 
 function activateProject(id) {
   knex
@@ -46,6 +57,13 @@ async function createScript(req) {
 async function getScripts(req) {
   const scriptList = await projectHelper.getScripts(req);
   return scriptList;
+}
+async function renameScript(req,projectid){
+
+  const project = await getProjectById(projectid);
+  const completePath = path.join(project.project_path, project.project_name);
+  console.log(completePath)
+  projectHelper.renameScript(completePath, req.scriptName)
 }
 
 // everything related to runs
@@ -86,6 +104,8 @@ async function getGodJSON(req) {
 module.exports = {
   createProject,
   getAllProjects,
+  getProjectById,
+  renameScript,
   getActiveProject,
   deleteProject,
   activateProject,

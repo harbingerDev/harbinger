@@ -12,7 +12,6 @@ const dataRepo = require("./dataRepoHelper");
 const envHelper = require("./environmentHelper");
 const os = require("os");
 const { Console } = require("console");
-
 //project functions
 async function createProjectOnDisk(req) {
   try {
@@ -546,10 +545,53 @@ async function getASTFromFile(req) {
   return requiredOutput;
 }
 
+
+async function renameScript(folderPath, newScriptName) {
+  folderPath = path.join(folderPath, "tests");
+  console.log(folderPath, newScriptName);
+
+  // Define a regular expression to match symbols and numbers
+  const invalidCharsRegex = /[^a-zA-Z\s]/g;
+
+  // Replace invalid characters in the new script name
+  const sanitizedScriptName = newScriptName.replace(invalidCharsRegex, '');
+
+  try {
+    const files = await fs.promises.readdir(folderPath);
+    
+    if (files.length > 0) {
+      const firstFileName = files[0];
+      console.log('First file in the folder:', firstFileName);
+      
+      // Construct the old and new file paths
+      const oldFilePath = path.join(folderPath, firstFileName);
+      const fileExt = path.extname(oldFilePath);
+      const newFileName = `${sanitizedScriptName}${".spec.js"}`;
+      const newFilePath = path.join(folderPath, newFileName);
+
+      // Rename the file
+      fs.renameSync(oldFilePath, newFilePath);
+      console.log(`File renamed to: ${newFileName}`);
+      return newFilePath;
+    } else {
+      console.log('The folder is empty or contains only subdirectories.');
+    }
+  } catch (error) {
+    console.error('Error renaming file:', error);
+  }
+}
+
+
+
+
+
+
+
 module.exports = {
   createProjectOnDisk,
   createScript,
   executeScript,
+  renameScript,
   checkNodeVersion,
   checkGitVersion,
   getScripts,
