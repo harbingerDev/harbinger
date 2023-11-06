@@ -62,8 +62,8 @@ app.post("/scripts/getScripts", async (req, res) => {
   res.status(200).json(scripts);
 });
 
-app.post("/scripts/renameScript/:activeProjectId", async (req, res) => {
-  const renameScript = await db.renameScript(req.body,req.params.activeProjectId);
+app.post("/scripts/renameScript", async (req, res) => {
+  const renameScript = await db.renameScript(req.body);
   res.status(200).json(renameScript);
 });
 

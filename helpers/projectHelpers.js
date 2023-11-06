@@ -281,6 +281,7 @@ function extractValuesFromAst(node) {
       values.push(node.name);
     } else if (node.type === "Literal") {
       console.log("value", node.value);
+      
       values.push(
         JSON.stringify(
           node.value.replace(/\[id="\\\\([0-9])([^\]]+)\]/g, (match, p1) => p1)
@@ -545,41 +546,24 @@ async function getASTFromFile(req) {
   return requiredOutput;
 }
 
-
-async function renameScript(folderPath, newScriptName) {
-  folderPath = path.join(folderPath, "tests");
-  console.log(folderPath, newScriptName);
-
-  // Define a regular expression to match symbols and numbers
-  const invalidCharsRegex = /[^a-zA-Z\s]/g;
-
-  // Replace invalid characters in the new script name
-  const sanitizedScriptName = newScriptName.replace(invalidCharsRegex, '');
-
+async function renameScript(oldFilePath, newScriptName) {
   try {
-    const files = await fs.promises.readdir(folderPath);
-    
-    if (files.length > 0) {
-      const firstFileName = files[0];
-      console.log('First file in the folder:', firstFileName);
-      
-      // Construct the old and new file paths
-      const oldFilePath = path.join(folderPath, firstFileName);
-      const fileExt = path.extname(oldFilePath);
-      const newFileName = `${sanitizedScriptName}${".spec.js"}`;
-      const newFilePath = path.join(folderPath, newFileName);
+    const directoryPath = path.dirname(oldFilePath);
+    const oldScriptName = path.basename(oldFilePath);
 
-      // Rename the file
-      fs.renameSync(oldFilePath, newFilePath);
-      console.log(`File renamed to: ${newFileName}`);
-      return newFilePath;
-    } else {
-      console.log('The folder is empty or contains only subdirectories.');
-    }
+    // Construct the new file path by combining the directory path and the new file name
+    const newFileName = `${newScriptName}.spec.js`;
+    const newFilePath = path.join(directoryPath, newFileName);
+
+    // Rename the file
+    fs.renameSync(oldFilePath, newFilePath);
+    console.log(`File renamed to: ${newFileName}`);
+    return newFilePath;
   } catch (error) {
     console.error('Error renaming file:', error);
   }
 }
+
 
 
 

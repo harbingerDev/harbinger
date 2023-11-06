@@ -58,12 +58,9 @@ async function getScripts(req) {
   const scriptList = await projectHelper.getScripts(req);
   return scriptList;
 }
-async function renameScript(req,projectid){
+async function renameScript(req){
 
-  const project = await getProjectById(projectid);
-  const completePath = path.join(project.project_path, project.project_name);
-  console.log(completePath)
-  projectHelper.renameScript(completePath, req.scriptName)
+ return projectHelper.renameScript( req.oldFilePath,req.scriptName)
 }
 
 // everything related to runs
