@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, deprecated_member_use, prefer_collection_literals, prefer_const_literals_to_create_immutables
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:harbinger/main.dart';
 import 'package:harbinger/models/Endpoint.dart';
 import 'package:harbinger/widgets/TestPlan/choose_endpointspopup.dart';
 import 'dart:convert';
@@ -26,7 +28,6 @@ class _TestScriptState extends State<TestScript> {
   bool loaded = false;
   int activeProjectId = 0;
   late List<Map<String, dynamic>> activeProject;
-
 
   Future<void> executeScript(String scriptName) async {
     setState(() {
@@ -537,46 +538,38 @@ class _TestScriptState extends State<TestScript> {
   Widget build(BuildContext context) {
     return !loaded
         ? LoaderWidget()
-        : activeProjectId > 0 && scriptArray.isNotEmpty
-            ? Column(children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+        : Consumer(builder: (_, WidgetRef ref, __) {
+            final apiTestScript = ref.watch(apiTestScriptProvider);
+            if (apiTestScript != null) {
+              print(
+                  "**********+++++++++++++++++++++++++++****${apiTestScript.testName}");
+              scriptArray.add(apiTestScript.testName);
+            }
+            return activeProjectId > 0 && scriptArray.isNotEmpty
+                ? Column(children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Chip(
-                              label: Text(
-                                  "Project: ${activeProject[0]["project_name"]}")),
-                          SizedBox(width: 10),
-                          Chip(
-                              label: Text(
-                                  "Number of scripts: ${scriptArray.length}")),
-                        ],
-                      ),
-                      widget.tab == "plan"
-                          ? ElevatedButton.icon(
-                              onPressed: () async => {_showInitPopup()},
-                              // style: ElevatedButton.styleFrom(
-                              //   backgroundColor: Colors.black87,
-                              //   padding: EdgeInsets.symmetric(
-                              //       horizontal: 10, vertical: 10),
-                              //   textStyle: GoogleFonts.roboto(
-                              //       fontSize: 14,
-                              //       color: Colors.white,
-                              //       fontWeight: FontWeight.normal),
-                              // ),
-                              label: Text("Create new script"),
-                              icon: Icon(Icons.add))
-                          : widget.tab == "lab"
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Chip(
+                                  label: Text(
+                                      "Project: ${activeProject[0]["project_name"]}")),
+                              SizedBox(width: 10),
+                              Chip(
+                                  label: Text(
+                                      "Number of scripts: ${scriptArray.length}")),
+                            ],
+                          ),
+                          widget.tab == "plan"
                               ? ElevatedButton.icon(
-                                  onPressed: () async =>
-                                      {await executeScripts()},
+                                  onPressed: () async => {_showInitPopup()},
                                   // style: ElevatedButton.styleFrom(
                                   //   backgroundColor: Colors.black87,
                                   //   padding: EdgeInsets.symmetric(
@@ -586,88 +579,104 @@ class _TestScriptState extends State<TestScript> {
                                   //       color: Colors.white,
                                   //       fontWeight: FontWeight.normal),
                                   // ),
-                                  label: Text("Execute scripts"),
-                                  icon: Icon(Icons.play_arrow))
-                              : Container(),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: scriptArray.length,
-                    itemBuilder: (context, i) {
-                      print(
-                          "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/tests/${scriptArray[i]}");
-                      return SpecCard(
-                        script:
-                            "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/tests/${scriptArray[i]}",
-                        tab: widget.tab,
-                        activeProject: activeProject,
-                        executeScript: executeScript,
-                        showPopup: _showPopup,
+                                  label: Text("Create new script"),
+                                  icon: Icon(Icons.add))
+                              : widget.tab == "lab"
+                                  ? ElevatedButton.icon(
+                                      onPressed: () async =>
+                                          {await executeScripts()},
+                                      // style: ElevatedButton.styleFrom(
+                                      //   backgroundColor: Colors.black87,
+                                      //   padding: EdgeInsets.symmetric(
+                                      //       horizontal: 10, vertical: 10),
+                                      //   textStyle: GoogleFonts.roboto(
+                                      //       fontSize: 14,
+                                      //       color: Colors.white,
+                                      //       fontWeight: FontWeight.normal),
+                                      // ),
+                                      label: Text("Execute scripts"),
+                                      icon: Icon(Icons.play_arrow))
+                                  : Container(),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: scriptArray.length,
+                        itemBuilder: (context, i) {
+                          print(
+                              "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/tests/${scriptArray[i]}");
+                          return SpecCard(
+                            script:
+                                "${activeProject[0]["project_path"]}/${activeProject[0]["project_name"]}/tests/${scriptArray[i]}",
+                            tab: widget.tab,
+                            activeProject: activeProject,
+                            executeScript: executeScript,
+                            showPopup: _showPopup,
+                          );
+                        },
+                      ),
+                    ),
+                  ])
+                : scriptArray.isEmpty && activeProjectId > 0
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Lottie.asset('assets/images/noProjectFound.json',
+                              width: 100, height: 100),
+                          Text("No scripts found.", style: textStyle16WithBold),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "It seems you have not created any script yet.",
+                            style: textStyle16WithoutBold,
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async => {_showInitPopup()},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              textStyle: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            child: Text("Create new script"),
+                          ),
+                          SizedBox(
+                            height: 50,
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Lottie.asset('assets/images/noProjectFound.json',
+                              width: 100, height: 100),
+                          Text("No scripts found.", style: textStyle16WithBold),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "It seems that either you do not have a project created \nor no project has been set as active.",
+                            style: textStyle16WithoutBold,
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(
+                            height: 40,
+                          ),
+                        ],
                       );
-                    },
-                  ),
-                ),
-              ])
-            : scriptArray.isEmpty && activeProjectId > 0
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Lottie.asset('assets/images/noProjectFound.json',
-                          width: 100, height: 100),
-                      Text("No scripts found.", style: textStyle16WithBold),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "It seems you have not created any script yet.",
-                        style: textStyle16WithoutBold,
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      ElevatedButton(
-                        onPressed: () async => {_showInitPopup()},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
-                          textStyle: GoogleFonts.roboto(
-                              fontSize: 14,
-                              color: Colors.white,
-                              fontWeight: FontWeight.normal),
-                        ),
-                        child: Text("Create new script"),
-                      ),
-                      SizedBox(
-                        height: 50,
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Lottie.asset('assets/images/noProjectFound.json',
-                          width: 100, height: 100),
-                      Text("No scripts found.", style: textStyle16WithBold),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "It seems that either you do not have a project created \nor no project has been set as active.",
-                        style: textStyle16WithoutBold,
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(
-                        height: 40,
-                      ),
-                    ],
-                  );
+          });
   }
 }
 

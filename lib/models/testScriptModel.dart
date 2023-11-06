@@ -35,3 +35,8 @@ class TestScriptModel {
         .map((blockJson) => TestBlock.fromJson(blockJson)));
   }
 }
+
+class ApiTest {
+  String? testName;
+  ApiTest({this.testName}); 
+}

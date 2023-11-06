@@ -1,10 +1,13 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:harbinger/main.dart';
 import 'package:harbinger/models/Endpoint.dart';
 import 'package:harbinger/models/response_model.dart';
+import 'package:harbinger/models/testScriptModel.dart';
 import 'package:harbinger/widgets/TestPlan/api_testing.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EndpointWidget extends StatefulWidget {
   final List<Endpoint> endpoints;
@@ -352,54 +355,64 @@ class ModalWithStepperState extends State<ModalWithStepper> {
     } else if (currentPage + 1 >= widget.dataMap.length) {
       print("i am second method");
       finalmap["$currentPage"] = map;
+
       await showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: const Text("Enter Testscript Name"),
-            content: TextField(
-              // Add a controller to access the entered text
-              controller: testscriptNameController,
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text("Cancel"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text("OK"),
-                onPressed: () {
-                  String testscriptName = testscriptNameController.text;
-                  // Handle the entered testscriptName as needed
-                  print("Testscript Name: $testscriptName");
-                  // Close the dialog
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
+          return Consumer(
+            builder: (context, ref, child) {
+              return AlertDialog(
+                title: const Text("Enter Testscript Name"),
+                content: TextField(
+                  controller: testscriptNameController,
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text("Cancel"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: const Text("OK"),
+                    onPressed: () async {
+                      String testscriptName = testscriptNameController.text;
+                      // Handle the entered testscriptName as needed
+                      print("Testscript Name: $testscriptName");
+                      const url = 'http://localhost:1337/api/generateScript';
+                      final headers = {"Content-type": "application/json"};
+                      final jsonBody = jsonEncode({
+                        "finalmap": finalmap,
+                        "filename": testscriptNameController.text
+                      });
+                      print("jsonBody$jsonBody");
+                      final response = await http.post(Uri.parse(url),
+                          headers: headers, body: jsonBody);
+
+                      if (response.statusCode == 200) {
+                        ref.read(apiTestScriptProvider.notifier).state =
+                            ApiTest(testName: testscriptNameController.text);
+                        print(
+                            "############${ApiTest(testName: testscriptNameController.text).testName}");
+                        print(
+                            "++++++++++++++++++++++ getting response as script${response.body}");
+                      } else {
+                        throw Exception('Failed to make request');
+                      }
+
+                      // Close the dialog
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
           );
         },
       );
 
       //make the api request with final map
 
-      const url = 'http://localhost:1337/api/generateScript';
-      final headers = {"Content-type": "application/json"};
-      final jsonBody = jsonEncode(
-          {"finalmap": finalmap, "filename": testscriptNameController.text});
-      print("jsonBody$jsonBody");
-      final response =
-          await http.post(Uri.parse(url), headers: headers, body: jsonBody);
-
-      if (response.statusCode == 200) {
-        print(
-            "++++++++++++++++++++++ getting response as script${response.body}");
-
-      } else {
-        throw Exception('Failed to make request');
-      }
       Navigator.of(context).pop();
     }
     print("final map $finalmap");

@@ -13,6 +13,7 @@ import 'package:harbinger/widgets/TestPlan/edit_step_popup.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../assets/constants.dart';
 import '../../models/form_data.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -85,7 +86,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
   }
 
   Future<TestStep> getStatementSpecificTestStep(String addedStep) async {
-    final url = 'http://localhost:1337/ast/getSpecificJSON';
+    const url = 'http://localhost:1337/ast/getSpecificJSON';
     final headers = {"Content-type": "application/json"};
     final jsonBody = jsonEncode({"statement": addedStep});
     print(jsonBody);
@@ -108,7 +109,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
         return AlertDialog(
           title: Text('Edit step'),
           contentPadding: EdgeInsets.all(16),
-          content: Container(
+          content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.7,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
@@ -153,12 +154,12 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: Text('Cancel'),
                             style: TextButton.styleFrom(
-                              primary: Colors.white, // Set the text color
+                              foregroundColor: Colors.white,
                               backgroundColor:
                                   Colors.black, // Set the button color
                             ),
+                            child: Text('Cancel'),
                           ),
                         ],
                       ),
@@ -202,7 +203,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                           }).toList(),
                           onChanged: (newValue) {
                             setState(() {
-                              _selectedStepType = newValue as String?;
+                              _selectedStepType = newValue;
                               _selectedObject = null;
                               _selectedAction = null;
                               _selectedExtraction = null;
@@ -237,7 +238,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             }).toList(),
                             onChanged: (newValue) {
                               setState(() {
-                                _selectedObject = newValue as String?;
+                                _selectedObject = newValue;
                               });
                             },
                             decoration: InputDecoration(
@@ -276,7 +277,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             }).toList(),
                             onChanged: (newValue) {
                               setState(() {
-                                _selectedAction = newValue as String?;
+                                _selectedAction = newValue;
                               });
                             },
                             decoration: InputDecoration(
@@ -331,7 +332,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             }).toList(),
                             onChanged: (newValue) {
                               setState(() {
-                                _selectedObject = newValue as String?;
+                                _selectedObject = newValue;
                               });
                             },
                             decoration: InputDecoration(
@@ -370,7 +371,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             }).toList(),
                             onChanged: (newValue) {
                               setState(() {
-                                _selectedExtraction = newValue as String?;
+                                _selectedExtraction = newValue;
                               });
                             },
                             decoration: InputDecoration(
@@ -412,7 +413,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             }).toList(),
                             onChanged: (newValue) {
                               setState(() {
-                                _selectedVerificationType = newValue as String?;
+                                _selectedVerificationType = newValue;
                               });
                             },
                             decoration: InputDecoration(
@@ -451,7 +452,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             }).toList(),
                             onChanged: (newValue) {
                               setState(() {
-                                _selectedVerification = newValue as String?;
+                                _selectedVerification = newValue;
                               });
                             },
                             decoration: InputDecoration(
@@ -493,7 +494,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                 if (_formKey.currentState!.validate()) {
                   if (_selectedStepType == "Add action") {
                     String addedStep =
-                        '${_selectedObject}(${actionPageController.text}).${_selectedAction}(${actionArgumentController.text});';
+                        '$_selectedObject(${actionPageController.text}).$_selectedAction(${actionArgumentController.text});';
                     TestStep newStep =
                         await getStatementSpecificTestStep(addedStep);
 
@@ -509,7 +510,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                     _formKey.currentState!.reset();
                   } else if (_selectedStepType == "Add extraction step") {
                     String addedStep =
-                        'const ${extractVariableController.text} =${_selectedObject}(${extractionPageController.text}).${_selectedExtraction}(${extractArgumentController.text});';
+                        'const ${extractVariableController.text} =$_selectedObject(${extractionPageController.text}).$_selectedExtraction(${extractArgumentController.text});';
                     TestStep newStep =
                         await getStatementSpecificTestStep(addedStep);
 
@@ -525,7 +526,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                     _formKey.currentState!.reset();
                   } else {
                     String addedStep =
-                        '${_selectedVerificationType}(${verificationVariableController.text}).${_selectedVerification}(${verificationArgumentController.text});';
+                        '$_selectedVerificationType(${verificationVariableController.text}).$_selectedVerification(${verificationArgumentController.text});';
                     print(addedStep);
                     TestStep newStep =
                         await getStatementSpecificTestStep(addedStep);
@@ -700,7 +701,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer',
     };
-    String prompt = "${userPrompt} ${stepContext}";
+    String prompt = "$userPrompt $stepContext";
     final body = json.encode({
       'model': "text-davinci-003",
       'prompt': prompt,
@@ -847,7 +848,93 @@ class _TestBlockCardState extends State<TestBlockCard> {
                     child: Row(
                       children: [
                         ElevatedButton(
-                          onPressed: () => {},
+                          onPressed: () => {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                String scriptName =
+                                    ''; // Initialize an empty string to store the entered script name.
+
+                                return AlertDialog(
+                                  title: Text("Test Script Name"),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize
+                                        .min, // To make the content size dynamic.
+
+                                    children: <Widget>[
+                                      // Text(
+                                      //   "Please enter the new script name",
+                                      //   style: TextStyle(fontSize: 13),
+                                      // ),
+                                      SizedBox(
+                                          height:
+                                              10), // Space between text and text input field
+                                      TextField(
+                                        onChanged: (value) {
+                                          scriptName =
+                                              value; // Update the scriptName variable as the user types.
+                                        },
+                                        decoration: InputDecoration(
+                                          hintText: "Enter script name",
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      
+                                      onPressed: () {
+                                        // Handle the Cancel button action here (if needed).
+                                        Navigator.of(context)
+                                            .pop(); // Close the dialog.
+                                      },
+                                      child: Text("Cancel",selectionColor:
+                                      const Color.fromARGB(255, 204, 204, 204),
+                                  style: TextStyle(color: Colors.black),),
+                                    ),
+                                    SizedBox(
+                                      width: 60,
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        print(scriptName);
+
+                                        SharedPreferences prefs =
+                                            await SharedPreferences
+                                                .getInstance();
+                                        int activeProjectId =
+                                            prefs.getInt('activeProject')!;
+
+                                        //get active project id
+                                        var renameScriptUrl = Uri.parse(
+                                            "http://localhost:1337/scripts/renameScript/$activeProjectId");
+
+                                        final executeScriptResponse =
+                                            Future.wait([
+                                          http.post(
+                                            renameScriptUrl,
+                                            body: json.encode(
+                                                {"scriptName": scriptName}),
+                                            headers: {
+                                              'Content-Type': 'application/json'
+                                            },
+                                          )
+                                        ]);
+
+                                        print("response$executeScriptResponse");
+
+                                        // Handle the OK button action here.
+                                        // You can use the 'scriptName' variable to access the entered script name.
+                                        Navigator.of(context)
+                                            .pop(); // Close the dialog.
+                                      },
+                                      child: Text("OK"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            )
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black87,
                             padding: EdgeInsets.symmetric(
@@ -912,7 +999,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.of(context).size.width * .6,
                               child: Text(
                                 widget

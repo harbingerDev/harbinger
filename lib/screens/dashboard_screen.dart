@@ -2,10 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:harbinger/main.dart';
+import 'package:harbinger/screens/auth_screen.dart';
 import 'package:harbinger/screens/home_screen.dart';
 import 'package:harbinger/screens/test_lab_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
 import 'package:harbinger/screens/test_reports_screen.dart';
+import 'package:harbinger/widgets/AuthPage/login_widget.dart';
 
 import '../assets/constants.dart';
 import '../helpers/helper_functions.dart';
@@ -37,7 +39,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         builder: (_, WidgetRef ref, __) {
           final screenIndicator = ref.watch(screenProvider);
           final filePath = ref.watch(filePathProvider);
-
           return Row(
             children: <Widget>[
               NavigationRail(
@@ -87,6 +88,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     setState(() {
                       _selectedIndex = index;
                     });
+
+                    if (_selectedIndex == 5) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => MyHomePage(title:'Harbinger - your own automation copilot')));
+                    }
                     ref.read(screenProvider.notifier).state = "Nothing";
                   },
                   labelType: NavigationRailLabelType.selected,

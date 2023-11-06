@@ -15,6 +15,8 @@ final screenProvider = StateProvider<String>((ref) => "Nothing");
 final filePathProvider = StateProvider<String>((ref) => "Nothing");
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 final godJSONProvider = StateProvider<TestScriptModel?>((ref) => null);
+final apiTestScriptProvider = StateProvider<ApiTest?>((ref) => null);
+
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,8 +53,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  
   bool showLogin = false;
   bool authenticated = false;
+
   void showLoginBox() {
     setState(() {
       showLogin = true;

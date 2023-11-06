@@ -32,7 +32,13 @@ List<Map<String, dynamic>> navigationRailItems = [
     "selectedIcon": Icons.settings,
     "selectedIconColor": themeColor,
     "text": "Settings"
-  }
+  },
+   {
+    "icon": Icons.logout_outlined,
+    "selectedIcon": Icons.logout_rounded,
+    "selectedIconColor": themeColor,
+    "text": "Logout"
+  },
 ];
 
 TextStyle textStyle12WithoutBold = GoogleFonts.roboto(
