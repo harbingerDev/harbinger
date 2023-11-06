@@ -71,12 +71,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      //delete it
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => DashboardScreen()),
-                      );
-                      //delete upto this
+                      // //delete it
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //       builder: (context) => DashboardScreen()),
+                      // );
+                      // //delete upto this
 
                       final message = await AuthService().login(
                         email: _emailController.text,
