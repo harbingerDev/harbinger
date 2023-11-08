@@ -11,6 +11,14 @@ class TestBlock {
     testStepsArray = List<TestStep>.from(
         json['testStepsArray'].map((stepJson) => TestStep.fromJson(stepJson)));
   }
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['type'] = type;
+    data['testName'] = testName;
+    data['testTags'] = testTags;
+    data['testStepsArray'] = testStepsArray?.map((step) => step.toJson()).toList();
+    return data;
+  }
 }
 
 class TestStep {
@@ -23,6 +31,13 @@ class TestStep {
     tokens = List<String>.from(json['tokens']);
     humanReadableStatement = json['humanReadableStatement'];
   }
+   Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['statement'] = statement;
+    data['tokens'] = tokens;
+    data['humanReadableStatement'] = humanReadableStatement;
+    return data;
+  }
 }
 
 class TestScriptModel {
@@ -33,6 +48,12 @@ class TestScriptModel {
     preTestBlock = List<Map<String, dynamic>>.from(json['preTestBlock']);
     testBlockArray = List<TestBlock>.from(json['testBlockArray']
         .map((blockJson) => TestBlock.fromJson(blockJson)));
+  }
+    Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['preTestBlock'] = preTestBlock;
+    data['testBlockArray'] = testBlockArray?.map((block) => block.toJson()).toList();
+    return data;
   }
 }
 

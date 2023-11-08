@@ -87,7 +87,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
                 Text("Project path: ",
                     style: GoogleFonts.roboto(
                         color: Colors.black87, fontSize: 14)),
-                Text('${widget.projectPath}\\harbingerProjects',
+                Text('${widget.projectPath}/harbingerProjects',
                     style: GoogleFonts.roboto(
                         color: Colors.black87,
                         fontWeight: FontWeight.w500,
@@ -281,7 +281,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
         if (isValid) {
           projectObject["project_name"] = projectNameController.text;
           projectObject["project_path"] =
-              '${widget.projectPath}\\harbingerProjects';
+              '${widget.projectPath}/harbingerProjects';
           projectObject["default_timeout"] = defaultTimeOutController.text;
           projectObject["environments"] = environments;
           projectObject["parallel_execution"] = parallel.toString();

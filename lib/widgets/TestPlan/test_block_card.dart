@@ -13,6 +13,7 @@ import 'package:harbinger/models/testScriptModel.dart';
 import 'package:harbinger/widgets/Common/loader_widget.dart';
 import 'package:harbinger/widgets/TestPlan/edit_step_popup.dart';
 import 'package:flutter/services.dart';
+import 'package:harbinger/widgets/TestPlan/ifblockAndForloop.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,6 +83,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
   final List<String> _verifications = assertions;
 
   void _updateFormData(List<FormData> formData) {
+    //make the api call to save in fs
     setState(() {
       currentFormData = formData;
     });
@@ -861,7 +863,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                       ''; // Initialize an empty string to store the entered script name.
 
                                   return AlertDialog(
-                                    title: Text("Test Script Name"),
+                                    title: Text("TestScript Name"),
                                     content: Column(
                                       mainAxisSize: MainAxisSize
                                           .min, // To make the content size dynamic.
@@ -880,79 +882,101 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                                 value; // Update the scriptName variable as the user types.
                                           },
                                           decoration: InputDecoration(
-                                            hintText: "Enter script name",
+                                            hintText: "Enter new testscript name",
                                           ),
                                         ),
                                       ],
                                     ),
                                     actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          // Handle the Cancel button action here (if needed).
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog.
-                                        },
-                                        child: Text(
-                                          "Cancel",
-                                          selectionColor: const Color.fromARGB(
-                                              255, 204, 204, 204),
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 60,
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          var renameScriptUrl = Uri.parse(
-                                              "http://localhost:1337/scripts/renameScript");
-
-                                          final executeScriptResponse =
-                                              await http.post(
-                                            renameScriptUrl,
-                                            headers: {
-                                              'Content-Type':
-                                                  'application/json',
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () {
+                                              // Handle the Cancel button action here (if needed).
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog.
                                             },
-                                            body: json.encode({
-                                              "scriptName": scriptName,
-                                              "oldFilePath": filePath,
-                                            }),
-                                          );
+                                            child: Text(
+                                              "Cancel",
+                                              selectionColor:
+                                                  const Color.fromARGB(
+                                                      255, 204, 204, 204),
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () async {
+                                              var renameScriptUrl = Uri.parse(
+                                                  "http://localhost:1337/scripts/renameScript");
 
-                                          if (executeScriptResponse
-                                                  .statusCode ==
-                                              200) {
-                                            final responseJson = json.decode(
-                                                executeScriptResponse.body);
-                                            final regex = RegExp(
-                                                r'\\tests\\([^\\]+)\.spec\.js$');
-                                            final match =
-                                                regex.firstMatch(responseJson);
+                                              final executeScriptResponse =
+                                                  await http.post(
+                                                renameScriptUrl,
+                                                headers: {
+                                                  'Content-Type':
+                                                      'application/json',
+                                                },
+                                                body: json.encode({
+                                                  "scriptName": scriptName,
+                                                  "oldFilePath": filePath,
+                                                }),
+                                              );
 
-                                            if (match != null) {
-                                              final result = match.group(1);
-                                              ref
-                                                .read(filePathProvider.notifier)
-                                                .state = result!;
+                                              if (executeScriptResponse
+                                                      .statusCode ==
+                                                  200) {
+                                                final responseJson =
+                                                    json.decode(
+                                                        executeScriptResponse
+                                                            .body);
+                                                final regex = RegExp(
+                                                    r'\\tests\\([^\\]+)\.spec\.js$');
+                                                final match = regex
+                                                    .firstMatch(responseJson);
 
+                                                if (match != null) {
+                                                  final result = match.group(1);
+                                                  ref
+                                                      .read(filePathProvider
+                                                          .notifier)
+                                                      .state = result!;
+                                                } else {
+                                                  print('Match not found');
+                                                }
 
-                                            } else {
-                                              print('Match not found');
-                                            }
-                                            
-                                            print("Response: $responseJson");
-                                          } else {
-                                            print(
-                                                "Error: HTTP Status ${executeScriptResponse.statusCode}");
-                                          }
+                                                print(
+                                                    "Response: $responseJson");
+                                              } else {
+                                                print(
+                                                    "Error: HTTP Status ${executeScriptResponse.statusCode}");
+                                              }
 
-                                          // Handle the OK button action here.
-                                          // You can use the 'scriptName' variable to access the entered script name.
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog.
-                                        },
-                                        child: Text("OK"),
+                                              // Handle the OK button action here.
+                                              // You can use the 'scriptName' variable to access the entered script name.
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog.
+                                            },
+                                            style: IconButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5)),
+                                                backgroundColor:
+                                                    const Color.fromARGB(
+                                                        255, 3, 129, 7)),
+                                            hoverColor: const Color.fromARGB(
+                                                255, 5, 152, 10),
+                                            icon: Row(
+                                              children: [
+                                                Icon(Icons.change_circle_outlined, color: Colors.white),
+                                                Text("Change" ,style: TextStyle(color: Colors.white),),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   );
@@ -1160,6 +1184,28 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                         .testBlockArray![widget.testIndex]
                                         .testStepsArray![index]
                                         .statement!);
+                              } else if (value == "Ifblock") {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return IfBlockForLoopScreen(
+                                          screen: value,
+                                          testStepArray: widget
+                                              .testScriptModel
+                                              .testBlockArray![widget.testIndex]
+                                              .testStepsArray!);
+                                    });
+                              } else if (value == "forloop") {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return IfBlockForLoopScreen(
+                                          screen: value,
+                                          testStepArray: widget
+                                              .testScriptModel
+                                              .testBlockArray![widget.testIndex]
+                                              .testStepsArray!);
+                                    });
                               }
                             },
                             itemBuilder: (BuildContext context) {
@@ -1175,6 +1221,14 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                 PopupMenuItem<String>(
                                   value: 'createAI',
                                   child: Text('AI - step generator'),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'Ifblock',
+                                  child: Text('If Block'),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'forloop',
+                                  child: Text('For Loop'),
                                 ),
                               ];
                             },
@@ -1200,8 +1254,10 @@ class _TestBlockCardState extends State<TestBlockCard> {
                             ),
                           ),
                           InkWell(
-                            onTap: () =>
-                                {widget.deleteAt(widget.testIndex, index)},
+                            onTap: () => {
+                              widget.deleteAt(widget.testIndex, index)
+                              //api call for delete  step
+                            },
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Tooltip(

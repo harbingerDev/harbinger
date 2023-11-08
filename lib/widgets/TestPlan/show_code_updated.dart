@@ -122,10 +122,30 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
                     Row(
                       children: [
                         ElevatedButton.icon(
-                            onPressed: () => {
-                                  ref.read(screenProvider.notifier).state =
-                                      "Nothing"
-                                },
+                            onPressed: () async {
+                              ref.read(screenProvider.notifier).state =
+                                  "Nothing";
+
+                              print(
+                                  "model1${testScriptModel!.testBlockArray![0].testStepsArray}");
+                              const url =
+                                  'http://localhost:1337/ast/addTestStepInScriptFile';
+                              final headers = {
+                                "Content-type": "application/json"
+                              };
+                              final jsonBody = jsonEncode({
+                                "godJson": testScriptModel
+                                    .toJson(), // Use toJson to serialize the object
+                                "filePath": widget.filePath
+                              });
+
+                              final response = await http.post(Uri.parse(url),
+                                  headers: headers, body: jsonBody);
+
+                              if (response.statusCode == 200) {
+                                print(response.body);
+                              }
+                            },
                             // style: ElevatedButton.styleFrom(
                             //   backgroundColor: Colors.green,
                             //   padding: EdgeInsets.symmetric(
@@ -211,6 +231,8 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
   void addStepAfterIndex(int testIndex, int index, TestStep newStep) {
     TestScriptModel? updatedTestScriptModel =
         ref.read(godJSONProvider.notifier).state;
+
+
     if (index >= 0 &&
         index <
             updatedTestScriptModel!

@@ -240,7 +240,7 @@ class EndpointWidgetState extends State<EndpointWidget> {
                 itemBuilder: (context, index) {
                   return CheckboxListTile(
                     fillColor: MaterialStateProperty.all(
-                        const Color.fromARGB(255, 239, 239, 239)),
+                        Color(0xFFEFEFEF)),
                     checkColor: Colors.grey,
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -250,7 +250,7 @@ class EndpointWidgetState extends State<EndpointWidget> {
                             widget.endpoints[index].httpMethod,
                             style: const TextStyle(color: Colors.white),
                           ),
-                          backgroundColor: const Color(0xFFF3752E),
+                          backgroundColor: const Color(0xffE95622),
                         ),
                         const SizedBox(width: 3),
                         Text(widget.endpoints[index].path),
