@@ -107,6 +107,14 @@ app.post("/ast/getSpecificJSON", async (req, res) => {
   const ast = await db.getSpecificJSON(req.body);
   res.status(201).json(ast);
 });
+
+
+app.post("/ast/addTestStepInScriptFile", async (req, res) => {
+  console.log(req.body.godJson)
+  console.log(req.body.filePath)
+  
+  res.status(200).json(db.addTestStepInScriptFile(req.body));
+});
 //*********************************** */
 //**need to update after this line
 //*********************************** */

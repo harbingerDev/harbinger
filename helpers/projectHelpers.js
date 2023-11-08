@@ -88,7 +88,7 @@ async function createScript(req) {
         if (error) {
           console.error(`exec error: ${error}`);
           reject(error);
-        }
+        } 
         console.log(`stdout: ${stdout}`);
         resolve(true);
       }
@@ -281,7 +281,7 @@ function extractValuesFromAst(node) {
       values.push(node.name);
     } else if (node.type === "Literal") {
       console.log("value", node.value);
-      
+
       values.push(
         JSON.stringify(
           node.value.replace(/\[id="\\\\([0-9])([^\]]+)\]/g, (match, p1) => p1)
@@ -550,6 +550,11 @@ async function renameScript(oldFilePath, newScriptName) {
   try {
     const directoryPath = path.dirname(oldFilePath);
     const oldScriptName = path.basename(oldFilePath);
+    // Define a regular expression pattern to match spaces, numbers, and special characters
+    const regexPattern = /[0-9\s!@#$%^&*()_+|~=`{}\[\]:";'<>?,./\\-]/g;
+
+    // Replace matched characters with an empty string
+     newScriptName = newScriptName.replace(regexPattern, "");
 
     // Construct the new file path by combining the directory path and the new file name
     const newFileName = `${newScriptName}.spec.js`;
@@ -560,16 +565,50 @@ async function renameScript(oldFilePath, newScriptName) {
     console.log(`File renamed to: ${newFileName}`);
     return newFilePath;
   } catch (error) {
-    console.error('Error renaming file:', error);
+    console.error("Error renaming file:", error);
   }
 }
+async function addTestStepInScriptFile(req) {
+  const separator = os.platform() === "win32" ? "\\" : "/";
 
+  const scriptfilepath = req.filePath;
+  const godJson = req.godJson;
+  const code = generateCodeFromGodJson(godJson);
+  console.log(code);
 
+  fs.writeFileSync(scriptfilepath, code);
 
+  return code;
+}
 
+function generateCodeFromGodJson(godJson) {
+  let code = "";
 
+  // Process preTestBlock
+  godJson.preTestBlock.forEach((block) => {
+    code += `${block.statement}\n`;
+  });
 
+  // Add dotenv configuration
+  code += 'require("dotenv").config();\n';
 
+  // Process testBlockArray
+  godJson.testBlockArray.forEach((testBlock) => {
+    let tags = "";
+    testBlock.testTags.forEach((tag) => {
+      tags += tag;
+    });
+    code += `test("${testBlock.testName} ${tags}", async ({ page, context }) => {\n`;
+
+    testBlock.testStepsArray.forEach((testStep) => {
+      code += `  ${testStep.statement}\n`;
+    });
+
+    code += "});\n";
+  });
+
+  return code;
+}
 
 module.exports = {
   createProjectOnDisk,
@@ -580,6 +619,7 @@ module.exports = {
   checkGitVersion,
   getScripts,
   executeScripts,
+  addTestStepInScriptFile,
   getASTFromFile,
   getGodJSON,
   getSpecificAstJSON,

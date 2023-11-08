@@ -1,0 +1,11 @@
+import {test, expect, request} from "@playwright/test";
+const objectRepository = require("../objectRepository");
+const dataRepository = require("../dataRepository.json");
+require("dotenv").config();
+test("test        @smoke", async ({ page, context }) => {
+  await page.goto("https://www.google.com/");
+  const temp = objectRepository.default.a4bIc(page).allInnerTexts();
+  expect.soft(temp1).toEqual(temp2);
+  await objectRepository.default.a4bIc(page).click();
+  await objectRepository.default.link_kk_womens_and_childrens_hospital_kk_womens_and_childrens_hospital_httpswwwkkhcomsg(page).click();
+});

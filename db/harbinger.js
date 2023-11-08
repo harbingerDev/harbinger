@@ -62,6 +62,10 @@ async function renameScript(req){
 
  return projectHelper.renameScript( req.oldFilePath,req.scriptName)
 }
+async function addTestStepInScriptFile(req){
+  return projectHelper.addTestStepInScriptFile(req)
+
+}
 
 // everything related to runs
 async function executeScript(req) {
@@ -113,6 +117,7 @@ module.exports = {
   getActiveProject,
   getScripts,
   executeScripts,
+  addTestStepInScriptFile,
   getASTFromFile,
   getGodJSON,
   getSpecificJSON,

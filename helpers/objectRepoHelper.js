@@ -221,6 +221,7 @@ async function replaceLocatorsInScript(
   scriptPath,
   dataRepoPath
 ) {
+  console.log("replacements in replaceLocatorsInScript function", replacements);
   fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
@@ -232,6 +233,8 @@ async function replaceLocatorsInScript(
     for (const { toBeReplaced, toBeReplacedWith } of replacements) {
       updatedData = updatedData.replace(toBeReplaced, toBeReplacedWith);
     }
+    console.log("updatedData", updatedData);
+    console.log("filePath", filePath);
 
     fs.writeFile(filePath, updatedData, "utf8", (err) => {
       if (err) {
@@ -384,16 +387,19 @@ async function getControlsFromGodJSON(
         locatorJSON["key"] = locatorName;
         locatorJSON["value"] = overallControl;
         locatorJSONArray.push(locatorJSON);
+        console.log("locatorJSONArray", locatorJSONArray);
         const replacementJSON = {
           toBeReplaced: controlToBeReplaced,
           toBeReplacedWith: controlToBeReplacedWith,
         };
         replacementJSONArray.push(replacementJSON);
+        console.log("replacementJSON", replacementJSON);
       }
     });
   });
   await addControlsToPage(repoPath, "default", locatorJSONArray);
   await removeQuotes(repoPath);
+  console.log("replacementJSONArray1", replacementJSONArray);
 
   await replaceLocatorsInScript(
     scriptPath,
