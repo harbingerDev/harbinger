@@ -6,26 +6,32 @@ import 'package:harbinger/models/testScriptModel.dart';
 class IfBlockForLoopScreen extends StatefulWidget {
   final screen;
   final List<TestStep> testStepArray;
+  final Function(int, int, TestStep) addStepAfterIndex;
+  final int testIndex;
+  final int index;
+
   const IfBlockForLoopScreen(
-      {super.key, required this.screen, required this.testStepArray});
+      {super.key,
+      required this.screen,
+      required this.testStepArray,
+      required this.addStepAfterIndex,
+      required this.testIndex,
+      required this.index});
 
   @override
   State<IfBlockForLoopScreen> createState() => _IfBlockForLoopScreenState();
 }
 
 class _IfBlockForLoopScreenState extends State<IfBlockForLoopScreen> {
+  String ifloopstatement = "if (";
+  String forloopstatement = "for (";
   int page = 1;
 
   List<TestStep> selectedtestStepsArrayforloop = [];
   List<TestStep> selectedtestStepsArrayifloop = [];
   List<bool> selectedCheckboxes = [];
   TextEditingController conditionControllerforifblock = TextEditingController();
-  TextEditingController initializationController =
-      TextEditingController(text: "int i=0");
-  TextEditingController conditionController =
-      TextEditingController(text: "i>=1");
-  TextEditingController incrementController =
-      TextEditingController(text: "i++");
+  TextEditingController conditionControllerforforloop = TextEditingController();
 
   @override
   initState() {
@@ -51,13 +57,20 @@ class _IfBlockForLoopScreenState extends State<IfBlockForLoopScreen> {
                   width: MediaQuery.of(context).size.width * 0.44,
                   height: MediaQuery.of(context).size.height * 0.34,
                   child: Column(children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.start,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        SizedBox(width: 15,),
-                       widget.screen == "Ifblock"? Text("select the teststeps to include in if block:"):Text("select the teststeps to include in for block: "),
+                        SizedBox(
+                          width: 15,
+                        ),
+                        widget.screen == "Ifblock"
+                            ? Text(
+                                "select the teststeps to include in if block:")
+                            : Text(
+                                "select the teststeps to include in for block: "),
                       ],
-                    ),SizedBox(height: 7),
-                    
+                    ),
+                    SizedBox(height: 7),
                     Expanded(
                       child: ListView.builder(
                         shrinkWrap: true,
@@ -82,8 +95,8 @@ class _IfBlockForLoopScreenState extends State<IfBlockForLoopScreen> {
                                     widget.screen == "Ifblock"
                                         ? selectedtestStepsArrayifloop
                                             .remove(widget.testStepArray[index])
-                                        : selectedtestStepsArrayforloop
-                                            .remove(widget.testStepArray[index]);
+                                        : selectedtestStepsArrayforloop.remove(
+                                            widget.testStepArray[index]);
                                   }
                                 });
                               },
@@ -118,13 +131,11 @@ class _IfBlockForLoopScreenState extends State<IfBlockForLoopScreen> {
                                   Flexible(
                                     fit: FlexFit.loose,
                                     child: TextField(
-                                      controller:
-                                          conditionControllerforifblock,
+                                      controller: conditionControllerforifblock,
                                       decoration: const InputDecoration(
                                         focusColor: Colors.white,
                                         fillColor: Colors.white,
-                                        labelText:
-                                            "Enter your condition here",
+                                        labelText: "Enter your condition here",
                                       ),
                                     ),
                                   ),
@@ -140,7 +151,8 @@ class _IfBlockForLoopScreenState extends State<IfBlockForLoopScreen> {
                                     itemBuilder:
                                         (BuildContext context, int index) {
                                       return Padding(
-                                        padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            12, 2, 12, 2),
                                         child: Card(
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),
@@ -164,85 +176,63 @@ class _IfBlockForLoopScreenState extends State<IfBlockForLoopScreen> {
                           ),
                         )
                       : Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 7, 14, 5),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: [
-                                const Text(
-                                  "for(",
-                                  style: TextStyle(fontSize: 24),
-                                ),
-                                Flexible(
-                                  child: TextField(
-                                    controller: initializationController,
-                                    decoration: const InputDecoration(
-                                      focusColor: Colors.white,
-                                          fillColor: Colors.white,
-                                      labelText: 'Initialization',
-                                    ),
+                          padding: const EdgeInsets.fromLTRB(14, 7, 14, 5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                children: [
+                                  const Text(
+                                    "for(",
+                                    style: TextStyle(fontSize: 24),
                                   ),
-                                ),
-                                const Text("; ",
-                                    style: TextStyle(fontSize: 24)),
-                                Flexible(
-                                  child: TextField(
-                                    controller: conditionController,
-                                    decoration: const InputDecoration(
-                                      focusColor: Colors.white,
-                                          fillColor: Colors.white,
-                                      labelText: 'Condition',
-                                    ),
-                                  ),
-                                ),
-                                const Text("; ",
-                                    style: TextStyle(fontSize: 24)),
-                                Flexible(
-                                  child: TextField(
-                                    controller: incrementController,
-                                    decoration: const InputDecoration(
-                                      focusColor: Colors.white,
-                                          fillColor: Colors.white,
-                                      labelText: 'Increment',
-                                    ),
-                                  ),
-                                ),
-                                const Text(")",
-                                    style: TextStyle(fontSize: 24)),
-                                const Text("{",
-                                    style: TextStyle(fontSize: 24))
-                              ],
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount:
-                                      selectedtestStepsArrayforloop.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
-                                      child: Card(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                              selectedtestStepsArrayforloop[index]
-                                                      .humanReadableStatement ??
-                                                  "N/A"),
-                                        ),
+                                  Flexible(
+                                    child: TextField(
+                                      controller: conditionControllerforforloop,
+                                      decoration: const InputDecoration(
+                                        focusColor: Colors.white,
+                                        fillColor: Colors.white,
+                                        labelText: 'int lemp in temps.length',
                                       ),
-                                    );
-                                  }),
-                            ),
-                            const Row(
-                              children: [
-                                Text("}", style: TextStyle(fontSize: 24)),
-                              ],
-                            )
-                          ],
-                        ),
-                      )),
+                                    ),
+                                  ),
+                                  const Text(")",
+                                      style: TextStyle(fontSize: 24)),
+                                  const Text("{",
+                                      style: TextStyle(fontSize: 24))
+                                ],
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount:
+                                        selectedtestStepsArrayforloop.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            12, 2, 12, 2),
+                                        child: Card(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                                selectedtestStepsArrayforloop[
+                                                            index]
+                                                        .humanReadableStatement ??
+                                                    "N/A"),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                              ),
+                              const Row(
+                                children: [
+                                  Text("}", style: TextStyle(fontSize: 24)),
+                                ],
+                              )
+                            ],
+                          ),
+                        )),
           actions: <Widget>[
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               TextButton(
@@ -265,28 +255,62 @@ class _IfBlockForLoopScreenState extends State<IfBlockForLoopScreen> {
                         style: TextStyle(color: Colors.black),
                       ),
               ),
-              IconButton(
-                style: IconButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: const Color.fromARGB(255, 3, 129, 7)),
-                hoverColor: const Color.fromARGB(255, 5, 152, 10),
+              ElevatedButton.icon(
+                label: page == 1
+                    ? Text(
+                        "Next ",
+                        style: TextStyle(color: Colors.white),
+                      )
+                    : Text(
+                        "Add ",
+                        style: TextStyle(color: Colors.white),
+                      ),
                 onPressed: () {
                   page == 1
                       ? setState(() {
                           page = 2;
                         })
-                      : Navigator.of(context).pop();
+                      : widget.screen == "Ifblock"
+                          ? {
+                              ifloopstatement +=
+                                  conditionControllerforifblock.text,
+                              ifloopstatement += " ){",
+                              for (TestStep item
+                                  in selectedtestStepsArrayifloop)
+                                {ifloopstatement += item.statement!},
+                              ifloopstatement += "}",
+                              widget.addStepAfterIndex(
+                                  widget.testIndex,
+                                  widget.index,
+                                  TestStep.fromJson({
+                                    "statement": ifloopstatement,
+                                    "tokens": ["await"],
+                                    "humanReadableStatement": "if block"
+                                  })),
+                              Navigator.of(context).pop()
+                            }
+                          : {
+                              forloopstatement +=
+                                  conditionControllerforforloop.text,
+                              forloopstatement += " ){",
+                              for (TestStep item
+                                  in selectedtestStepsArrayforloop)
+                                {forloopstatement += item.statement!},
+                              forloopstatement += "}",
+                              widget.addStepAfterIndex(
+                                  widget.testIndex,
+                                  widget.index,
+                                  TestStep.fromJson({
+                                    "statement": forloopstatement,
+                                    "tokens": ["await"],
+                                    "humanReadableStatement": "for loop"
+                                  })),
+                              Navigator.of(context).pop()
+                            };
                 },
-                icon: const Row(
-                  children: [
-                    Icon(Icons.skip_next, color: Colors.white),
-                    Text(
-                      "Next ",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
+                icon: page == 1
+                    ? Icon(Icons.skip_next, color: Colors.white)
+                    : Icon(Icons.add, color: Colors.white),
               ),
             ]),
           ],

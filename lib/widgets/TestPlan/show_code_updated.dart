@@ -232,7 +232,6 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
     TestScriptModel? updatedTestScriptModel =
         ref.read(godJSONProvider.notifier).state;
 
-
     if (index >= 0 &&
         index <
             updatedTestScriptModel!

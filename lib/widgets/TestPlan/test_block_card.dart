@@ -907,7 +907,8 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                                   color: Colors.black),
                                             ),
                                           ),
-                                          IconButton(
+                                          ElevatedButton.icon(
+                                            label:Text("Change" ,style: TextStyle(color: Colors.white),),
                                             onPressed: () async {
                                               var renameScriptUrl = Uri.parse(
                                                   "http://localhost:1337/scripts/renameScript");
@@ -958,21 +959,10 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                               // You can use the 'scriptName' variable to access the entered script name.
                                               Navigator.of(context)
                                                   .pop(); // Close the dialog.
-                                            },
-                                            style: IconButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5)),
-                                                backgroundColor:
-                                                    const Color.fromARGB(
-                                                        255, 3, 129, 7)),
-                                            hoverColor: const Color.fromARGB(
-                                                255, 5, 152, 10),
+                                            },                                       
                                             icon: Row(
                                               children: [
-                                                Icon(Icons.change_circle_outlined, color: Colors.white),
-                                                Text("Change" ,style: TextStyle(color: Colors.white),),
+                                                Icon(Icons.change_circle, color: Colors.white),
                                               ],
                                             ),
                                           ),
@@ -1188,7 +1178,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                 showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return IfBlockForLoopScreen(
+                                      return IfBlockForLoopScreen(addStepAfterIndex:widget.addStepAfterIndex ,index:index ,testIndex:widget.testIndex ,
                                           screen: value,
                                           testStepArray: widget
                                               .testScriptModel
@@ -1199,7 +1189,7 @@ class _TestBlockCardState extends State<TestBlockCard> {
                                 showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return IfBlockForLoopScreen(
+                                      return  IfBlockForLoopScreen(addStepAfterIndex:widget.addStepAfterIndex ,index:index ,testIndex:widget.testIndex ,
                                           screen: value,
                                           testStepArray: widget
                                               .testScriptModel
