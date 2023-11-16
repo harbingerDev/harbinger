@@ -11,8 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EndpointWidget extends StatefulWidget {
   final List<Endpoint> endpoints;
+  final String activeprojectpath;
 
-  const EndpointWidget({super.key, required this.endpoints});
+  const EndpointWidget(
+      {super.key, required this.endpoints, required this.activeprojectpath});
 
   @override
   EndpointWidgetState createState() => EndpointWidgetState();
@@ -39,7 +41,7 @@ class EndpointWidgetState extends State<EndpointWidget> {
       };
 
       String queryString = Uri(queryParameters: queryParams).query;
-      String serverUrl = "http://127.0.0.1:8001/getapiinfo/?$queryString";
+      String serverUrl = "http://127.0.0.1:1337/getapiinfo/?$queryString";
 
       final response = await http.post(
         Uri.parse(serverUrl),
@@ -195,7 +197,8 @@ class EndpointWidgetState extends State<EndpointWidget> {
                       showDialog<String>(
                           context: context,
                           builder: (BuildContext context) {
-                            return ModalWithStepper(maphavingRequestBodyAndAll);
+                            return ModalWithStepper(maphavingRequestBodyAndAll,
+                                widget.activeprojectpath);
                           });
                     }),
                     child: const Text("Next"),
@@ -239,8 +242,7 @@ class EndpointWidgetState extends State<EndpointWidget> {
                 itemCount: widget.endpoints.length,
                 itemBuilder: (context, index) {
                   return CheckboxListTile(
-                    fillColor: MaterialStateProperty.all(
-                        Color(0xFFEFEFEF)),
+                    fillColor: MaterialStateProperty.all(Color(0xFFEFEFEF)),
                     checkColor: Colors.grey,
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -285,8 +287,9 @@ class EndpointWidgetState extends State<EndpointWidget> {
 
 class ModalWithStepper extends StatefulWidget {
   final Map<int, dynamic> dataMap;
+  final String activeprojectpath;
 
-  const ModalWithStepper(this.dataMap, {super.key});
+  const ModalWithStepper(this.dataMap, this.activeprojectpath, {super.key});
 
   @override
   ModalWithStepperState createState() => ModalWithStepperState();
@@ -379,19 +382,20 @@ class ModalWithStepperState extends State<ModalWithStepper> {
                       String testscriptName = testscriptNameController.text;
                       // Handle the entered testscriptName as needed
                       print("Testscript Name: $testscriptName");
+                      final filePath = ref.watch(filePathProvider);
+                      print("filePath$filePath");
                       const url = 'http://localhost:1337/api/generateScript';
                       final headers = {"Content-type": "application/json"};
                       final jsonBody = jsonEncode({
                         "finalmap": finalmap,
-                        "filename": testscriptNameController.text
+                        "filename": testscriptNameController.text,
+                        "filePath": widget.activeprojectpath
                       });
                       print("jsonBody$jsonBody");
                       final response = await http.post(Uri.parse(url),
                           headers: headers, body: jsonBody);
 
                       if (response.statusCode == 200) {
-                        ref.read(apiTestScriptProvider.notifier).state =
-                            ApiTest(testName: testscriptNameController.text);
                         print(
                             "############${ApiTest(testName: testscriptNameController.text).testName}");
                         print(

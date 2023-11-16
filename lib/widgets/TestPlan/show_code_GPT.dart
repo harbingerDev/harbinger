@@ -1,13 +1,9 @@
 // ignore_for_file: prefer_const_constructors
-
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
-
 import 'package:flutter_highlight/themes/arduino-light.dart';
-import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 

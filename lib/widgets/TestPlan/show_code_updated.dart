@@ -83,7 +83,9 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
   @override
   void initState() {
     super.initState();
+    print("filepath${widget.filePath}");
     readFileAsString(widget.filePath).then((content) => {
+      print("content$content"),
           setState((() {
             fileContent = content;
             isLoaded = true;
@@ -146,15 +148,6 @@ class _ShowCodeUpdatedState extends ConsumerState<ShowCodeUpdated> {
                                 print(response.body);
                               }
                             },
-                            // style: ElevatedButton.styleFrom(
-                            //   backgroundColor: Colors.green,
-                            //   padding: EdgeInsets.symmetric(
-                            //       horizontal: 10, vertical: 10),
-                            //   textStyle: GoogleFonts.roboto(
-                            //       fontSize: 14,
-                            //       color: Colors.white,
-                            //       fontWeight: FontWeight.normal),
-                            // ),
                             label: Text("Save"),
                             icon: Icon(Icons.save)),
                         SizedBox(

@@ -32,7 +32,6 @@ class _AddStepPopupState extends State<AddStepPopup> {
               SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () {
-                  print(formValues);
                   Navigator.pop(context);
                 },
                 label: Text('Save'),

@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
 class AuthService {
   Future<String?> login({
     required String email,

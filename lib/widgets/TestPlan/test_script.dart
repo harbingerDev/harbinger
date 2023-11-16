@@ -319,7 +319,7 @@ class _TestScriptState extends State<TestScript> {
                                 showSpinner = true;
                               });
                               String serverUrl =
-                                  "http://127.0.0.1:8001/uploadapiinfo/";
+                                  "http://127.0.0.1:1337/uploadapiinfo/";
                               final selectedFile = result.files.first;
                               // Create an HTTP request to your backend
                               final request = http.MultipartRequest(
@@ -391,10 +391,14 @@ class _TestScriptState extends State<TestScript> {
   }
 
   _showchooseendpointsPopup(List<Endpoint> endpoints) {
+    String activeprojectpath = activeProject[0]["project_path"] +
+        "/" +
+        activeProject[0]["project_name"]+"/tests";
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) {
-          return EndpointWidget(endpoints: endpoints);
+          return EndpointWidget(
+              endpoints: endpoints, activeprojectpath: activeprojectpath);
         });
   }
 
