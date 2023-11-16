@@ -363,12 +363,30 @@ function getTestBlocks(astBody) {
 function getTestStepsBlocks(astBody) {
   let testStepsArray = [];
   astBody.forEach((block, index) => {
+
     let requiredObject = {};
     requiredObject["statement"] = astring.generate(block);
     requiredObject["tokens"] = extractValuesFromAst(block);
-    requiredObject["humanReadableStatement"] = humanReadable.getHumanReadable(
-      requiredObject["tokens"]
+    console.log("tokens",requiredObject["tokens"])
+    // edited need to check!!!
+     if (requiredObject["tokens"].length!=0) 
+    {
+      requiredObject["humanReadableStatement"] = humanReadable.getHumanReadable(
+       requiredObject["tokens"]
     );
+    }else{
+      requiredObject["tokens"]=[""]
+      console.log("statement",requiredObject["statement"])
+      if (requiredObject["statement"].trim().startsWith("if")){
+        
+        requiredObject["humanReadableStatement"] ="if block"
+      }
+      else if (requiredObject["statement"].startsWith("for")){
+        requiredObject["humanReadableStatement"] ="for block"
+      }
+      else 
+      requiredObject["humanReadableStatement"] =""
+    }
     testStepsArray.push(requiredObject);
   });
   return testStepsArray;

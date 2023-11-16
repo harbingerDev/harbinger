@@ -1,6 +1,7 @@
 const path = require("path");
 const knex = require("./knex");
 const projectHelper = require("../helpers/projectHelpers");
+const apiHelper = require("../helpers/apiHelper");
 
 // everything related to projects
 async function createProject(project) {
@@ -93,7 +94,7 @@ async function getASTFromFile(req) {
   return ast;
 }
 async function getSpecificJSON(req) {
-  const ast = await projectHelper.getSpecificAstJSON(req);
+  const ast = await promjectHelper.getSpecificAstJSON(req);
   return ast;
 }
 
@@ -101,6 +102,24 @@ async function getGodJSON(req) {
   const ast = await projectHelper.getGodJSON(req);
   return ast;
 }
+async function getApiInfo(req){
+  const apiInfo = req.api_info;
+  const httpMethod = req.http_method;
+  
+  const  getapiInfo=await apiHelper.getApiInfo(apiInfo,httpMethod);
+  return getapiInfo;
+}
+
+async function getAllDataAndParse(req){
+  const  parsedResult=await apiHelper.getAllDataAndParse(req);
+  return parsedResult;
+}
+async function convertToPlaywright(req){
+  const  convertedscript=await apiHelper.convertToPlaywright(req);
+  return convertedscript;
+}
+
+
 
 module.exports = {
   createProject,
@@ -121,4 +140,7 @@ module.exports = {
   getASTFromFile,
   getGodJSON,
   getSpecificJSON,
+  getApiInfo,
+  getAllDataAndParse,
+  convertToPlaywright
 };

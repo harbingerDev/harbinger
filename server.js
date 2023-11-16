@@ -10,6 +10,9 @@ const db = require("./db/harbinger");
 const cors = require("cors");
 const os = require("os");
 const { exec } = require("child_process");
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 app.use(
   cors({
     origin: "*",
@@ -110,8 +113,6 @@ app.post("/ast/getSpecificJSON", async (req, res) => {
 
 
 app.post("/ast/addTestStepInScriptFile", async (req, res) => {
-  console.log(req.body.godJson)
-  console.log(req.body.filePath)
   
   res.status(200).json(db.addTestStepInScriptFile(req.body));
 });
@@ -618,134 +619,44 @@ app.post("/git/status", (req, res) => {
 
 // generate api script
 app.post("/api/generateScript", async (req, res) => {
-  // const tests = req.body;
-  const { finalmap, filename }  = req.body;
-
-  console.log("finalmap"+finalmap);
-  console.log("filename"+filename);
-
-
- const  playwrightScript =  convertToPlaywright(finalmap);
- console.log(playwrightScript);
-
- const documentsPath = path.join(os.homedir(), "Documents");
- const scriptsPath = path.join(documentsPath,"harbingerProjects")
- const filepath = path.join(scriptsPath, filename);
+  const { finalmap, filename,filePath }  = req.body;
+ const  playwrightScript =await  db.convertToPlaywright(finalmap);
+ const finalfilepath = path.join(filePath, filename);
  
  try {
    // Ensure the directory exists
-   if (!fs.existsSync(documentsPath)) {
-     fs.mkdirSync(documentsPath, { recursive: true }); // Create the directory and its parents if they don't exist.
+   if (!fs.existsSync(filePath)) {
+     fs.mkdirSync(filePath, { recursive: true }); // Create the directory and its parents if they don't exist.
    }
- 
    // Write the file
-   fs.writeFileSync(filepath+".txt", playwrightScript);
-   console.log('File created and content written to:', filepath);
+   fs.writeFileSync(finalfilepath+".spec.js", playwrightScript);
+   console.log('File created and content written to:', finalfilepath);
  } catch (err) {
    console.error('Error:', err);
  }
- 
-
-
-  // await 
-
   res.type("application/javascript");
   res.send(playwrightScript);
 });
 
-// function convertToPlaywright(tests) {
-//   let script = `const { test, expect } = require('@playwright/test');\n\n`;
+app.post("/getapiinfo/", async (req, res) => {
+  const apiInfo = await db.getApiInfo(req.query);
+  res.status(200).json(apiInfo);
+});
 
-//   for (let key in tests) {
-//     const testConfig = tests[key];
-//     if (testConfig.method && testConfig.url) {
-//       script += generatePlaywrightTest(testConfig, key);
-//     }
-//   }
 
-//   return script;
-// }
-
-// function generatePlaywrightTest(testConfig, key) {
-//   const method = testConfig.method.toLowerCase();
-//   const url = testConfig.url;
-//   const requestBody = JSON.stringify(testConfig.requestBody || {});
-//   const headers = JSON.stringify(testConfig.headers || {});
-//   const statusCode = testConfig.expectedStatusCode;
-
-//   let testCode = `test('${method.toUpperCase()} ${url}', async ({ request }) => {\n`;
-//   testCode += `  const response = await request.${method}('${url}', {\n`;
-
-//   if (testConfig.headers) {
-//     testCode += `    headers: ${headers},\n`;
-//   }
-//   if (Object.keys(testConfig.requestBody || {}).length > 0) {
-//     testCode += `    data: ${requestBody},\n`;
-//   }
-
-//   testCode += `  });\n\n`;
-
-//   if (testConfig.isStatusValdiation && statusCode) {
-//     testCode += `  expect(response.status()).toBe(${statusCode});\n`;
-//   }
-
-//   if (testConfig.isKeyValueValidation && testConfig.expectedKeyValue) {
-//     for (let [key, value] of Object.entries(testConfig.expectedKeyValue)) {
-//       testCode += `  expect(await response.json()).toHaveProperty('${key}', '${value}');\n`;
-//     }
-//   }
-
-//   testCode += `});\n\n`;
-//   return testCode;
-// }
-function convertToPlaywright(tests) {
-  let script = `const { test, expect } = require('@playwright/test');\n\n`;
-
-  script += `test('Combined Test', async ({ request }) => {\n`;
-
-  for (let key in tests) {
-    const testConfig = tests[key];
-    if (testConfig.method && testConfig.url) {
-      script += generateTestSteps(testConfig);
-    }
+app.post("/uploadapiinfo/", upload.single('file'),async (req, res) => {
+  const file = req.file;
+  if (file.originalname.endsWith(".json")) {
+      const contents = file.buffer;
+      // Write the contents directly to "test.json"
+      fs.writeFileSync("test.json", contents);
+      // Now you can use the contents for processing
+      const extractedData = await db.getAllDataAndParse(contents);
+      res.status(200).json(extractedData);
+  } else {
+      res.status(400).json({ error: "File must have a .json extension" });
   }
-
-  script += `});\n\n`;
-
-  return script;
-}
-
-function generateTestSteps(testConfig) {
-  const method = testConfig.method.toLowerCase();
-  const url = testConfig.url;
-  const requestBody = JSON.stringify(testConfig.requestBody || {});
-  const headers = JSON.stringify(testConfig.headers || {});
-  const statusCode = testConfig.expectedStatusCode;
-
-  let testSteps = `  // ${method.toUpperCase()} ${url}\n`;
-  testSteps += `  const response = await request.${method}('${url}', {\n`;
-
-  if (testConfig.headers) {
-    testSteps += `    headers: ${headers},\n`;
-  }
-  if (Object.keys(testConfig.requestBody || {}).length > 0) {
-    testSteps += `    data: ${requestBody},\n`;
-  }
-
-  testSteps += `  });\n\n`;
-
-  if (testConfig.isStatusValidation && statusCode) {
-    testSteps += `  expect(response.status()).toBe(${statusCode});\n`;
-  }
-
-  if (testConfig.isKeyValueValidation && testConfig.expectedKeyValue) {
-    for (let [key, value] of Object.entries(testConfig.expectedKeyValue)) {
-      testSteps += `  expect(await response.json()).toHaveProperty('${key}', '${value}');\n`;
-    }
-  }
-
-  return testSteps;
-}
+});
 
 
 app.listen(1337, () => console.log("server running on port 1337"));
