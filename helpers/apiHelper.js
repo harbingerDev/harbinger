@@ -62,17 +62,21 @@ function getSchemas() {
     }
 }
 
-function getSecuritySchemas(schemaName) {
+function getSecuritySchema(schemaName) {
+    schemaName=Object.keys(schemaName)[0]
+    
     const jsonFilePath = "test.json";
     const data = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
     const securitySchemas = data.components.securitySchemes || {};
-    return securitySchemas[schemaName]?.type;
+    console.log("ss",securitySchemas)
+    console.log("schemaName",schemaName,"inside","type",securitySchemas[schemaName]?.type,securitySchemas[schemaName]?.name)
+    const tokenname=securitySchemas[schemaName]?.name
+   
+    
+    return {[tokenname]:"Bearer token"};
 }
 
-function getSecuritySchema(schemaName) {
-    const schemasDict = getSecuritySchemas(schemaName);
-    // Additional logic needed based on your requirements
-}
+
 
 function getSchema(schemaName) {
     const schemasDict = getSchemas();
@@ -99,30 +103,26 @@ function getAllDataAndParse(data) {
 
 
 
-function getApiInfo(apiInfo, method) {
+async function getApiInfo(apiInfo, method)  {
     console.log("apiInfo",apiInfo,"method",method)
     const pathvariable = [];
     const queryparam = [];
     const reqbody = [];
     const responseschema = [];
-    const securityparameters = {};
+    let securityparameters = {};
     const jsonFilePath = "test.json";
     const data = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
 
     try {
         const paths = data.paths[apiInfo] || {};
-        console.log("paths",paths)
 
         // Request Body
         const schemaPath = paths[method]?.requestBody?.content?.["application/json"]?.schema?.$ref;
-        console.log("schemaPath",schemaPath)
         if (schemaPath) {
             const match = schemaPath.match(/\/([^/]+)$/);
-            console.log("match",match)
             if (match) {
                 const extractedText = match[1];
                 reqbody.push(...getSchema(extractedText));
-                console.log("reqbody",reqbody)
             } else {
                 console.log("No match found");
             }
@@ -155,10 +155,21 @@ function getApiInfo(apiInfo, method) {
 
         // Security Parameters
         const securityParameter = paths[method]?.security || [];
+        console.log("Security Parameters",securityParameter,securityParameter.type);
         if (securityParameter.length > 0) {
-            securityparameters.type = getSecuritySchema(securityParameter[0]);
-            console.log("type", securityparameters.type);
+            console.log("1")
+            securityparameters= getSecuritySchema(securityParameter[0]);
+            console.log("secur", securityparameters);
+            console.log("2")
+
         }
+
+        console.log("reqbody",reqbody)
+        console.log("pathvariable",pathvariable)
+        console.log("queryparam",queryparam)
+        console.log("securityparameters",securityparameters)
+        console.log("responseschema",responseschema)
+        
 
         return {
             reqbody,
@@ -256,8 +267,11 @@ function generateTestSteps(testConfig) {
 }
 
 // Function to generate a unique identifier for variable names
+let uniqueIdentifierCounter = 0;
+
 function getUniqueIdentifier() {
-    return Math.floor(Math.random() * 1000);
+    uniqueIdentifierCounter += 1;
+    return uniqueIdentifierCounter;
 }
 
   
