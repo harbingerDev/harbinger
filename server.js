@@ -35,9 +35,6 @@ app.get("/projects/getActiveProject", async (req, res) => {
   res.status(200).json(id);
 });
 
-
-
-
 app.post("/projects/createProject", async (req, res) => {
   const results = await db.createProject(req.body);
   res.status(201).json({ id: results[0] });

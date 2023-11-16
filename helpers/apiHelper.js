@@ -201,38 +201,7 @@ function convertToPlaywright(tests) {
   
     return script;
   }
-  
-//   function generateTestSteps(testConfig) {
-//     const method = testConfig.method.toLowerCase();
-//     const url = testConfig.url;
-//     const requestBody = JSON.stringify(testConfig.requestBody || {});
-//     const headers = JSON.stringify(testConfig.headers || {});
-//     const statusCode = testConfig.expectedStatusCode;
-  
-//     let testSteps = `  // ${method.toUpperCase()} ${url}\n`;
-//     testSteps += `  const response = await request.${method}('${url}', {\n`;
-  
-//     if (testConfig.headers) {
-//       testSteps += `    headers: ${headers},\n`;
-//     }
-//     if (Object.keys(testConfig.requestBody || {}).length > 0) {
-//       testSteps += `    data: ${requestBody},\n`;
-//     }
-  
-//     testSteps += `  });\n\n`;
-  
-//     if (testConfig.isStatusValidation && statusCode) {
-//       testSteps += `  expect(response.status()).toBe(${statusCode});\n`;
-//     }
-  
-//     if (testConfig.isKeyValueValidation && testConfig.expectedKeyValue) {
-//       for (let [key, value] of Object.entries(testConfig.expectedKeyValue)) {
-//         testSteps += `  expect(await response.json()).toHaveProperty('${key}', '${value}');\n`;
-//       }
-//     }
-  
-//     return testSteps;
-//   }
+
 function generateTestSteps(testConfig) {
     const method = testConfig.method.toLowerCase();
     const url = testConfig.url;
