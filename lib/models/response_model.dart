@@ -10,13 +10,12 @@ class ResponseModel {
   Map<String, dynamic>? securityparameters;
   List<RequestParameter>? responseschema;
 
-  ResponseModel({
-    this.reqbody,
-    this.pathvariable,
-    this.queryparam,
-    this.securityparameters,
-    this.responseschema
-  });
+  ResponseModel(
+      {this.reqbody,
+      this.pathvariable,
+      this.queryparam,
+      this.securityparameters,
+      this.responseschema});
 
   factory ResponseModel.fromJson(Map<String, dynamic> json) =>
       _$ResponseModelFromJson(json);
@@ -26,10 +25,10 @@ class ResponseModel {
 
 @JsonSerializable()
 class RequestParameter {
-  String name;
-  String type;
-  String placeholder;
-  bool required;
+  String? name;
+  String? type;
+  String? placeholder;
+  bool? required;
 
   RequestParameter({
     required this.name,

@@ -265,7 +265,7 @@ class _TestScriptState extends State<TestScript> {
               title: Text("Upload file"),
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.38,
-                height: MediaQuery.of(context).size.height * 0.32,
+                height: MediaQuery.of(context).size.height * 0.35,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[

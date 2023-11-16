@@ -22,6 +22,8 @@ class EndpointWidget extends StatefulWidget {
 
 class EndpointWidgetState extends State<EndpointWidget> {
   List<int> selectedEndpoints = [];
+  TextEditingController urlController =
+      TextEditingController(text: "http://localhost:8080");
 
   List<Endpoint> selectedEndpointsList = [];
 
@@ -182,6 +184,12 @@ class EndpointWidgetState extends State<EndpointWidget> {
                   ),
                 ),
                 actions: <Widget>[
+                  TextField(
+                    controller: urlController,
+                    decoration: InputDecoration(
+                        labelText: 'Enter the baseurl of the projects here '),
+                    style: TextStyle(color: Colors.black38),
+                  ),
                   ElevatedButton(
                     onPressed: (() async {
                       print("doing something");
@@ -194,11 +202,12 @@ class EndpointWidgetState extends State<EndpointWidget> {
 
                       Navigator.of(context).pop();
 
+                      // ignore: use_build_context_synchronously
                       showDialog<String>(
                           context: context,
                           builder: (BuildContext context) {
                             return ModalWithStepper(maphavingRequestBodyAndAll,
-                                widget.activeprojectpath);
+                                widget.activeprojectpath, urlController.text);
                           });
                     }),
                     child: const Text("Next"),
@@ -288,8 +297,10 @@ class EndpointWidgetState extends State<EndpointWidget> {
 class ModalWithStepper extends StatefulWidget {
   final Map<int, dynamic> dataMap;
   final String activeprojectpath;
+  final String url;
 
-  const ModalWithStepper(this.dataMap, this.activeprojectpath, {super.key});
+  const ModalWithStepper(this.dataMap, this.activeprojectpath, this.url,
+      {super.key});
 
   @override
   ModalWithStepperState createState() => ModalWithStepperState();
@@ -325,7 +336,7 @@ class ModalWithStepperState extends State<ModalWithStepper> {
                   reqBody: widget.dataMap[index]["reqBody"],
                   responseSchema: widget.dataMap[index]["responseSchema"],
                   headers: widget.dataMap[index]["headers"],
-                  baseUrl: "http://localhost:8080"),
+                  baseUrl: widget.url),
             );
           }),
           controlsBuilder: (context, details) {
