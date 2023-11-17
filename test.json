@@ -412,7 +412,7 @@
         "parameters": [
           {
             "name": "oldUserId",
-            "in": "path",
+            "in": "query",
             "description": "",
             "required": true,
             "schema": {
@@ -423,7 +423,7 @@
           },
           {
             "name": "newUserId",
-            "in": "path",
+            "in": "query",
             "description": "",
             "required": true,
             "schema": {

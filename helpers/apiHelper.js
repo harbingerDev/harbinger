@@ -128,17 +128,48 @@ async function getApiInfo(apiInfo, method)  {
             }
         }
 
-        // Response Schema
-        const responseSchemaPath = paths[method]?.responses?.["200"]?.content?.["application/json"]?.schema?.$ref;
-        if (responseSchemaPath) {
-            const match = responseSchemaPath.match(/\/([^/]+)$/);
-            if (match) {
-                const extractedText = match[1];
-                responseschema.push(...getSchema(extractedText));
-            } else {
-                console.log("No match found");
-            }
-        }
+         // Response Schema
+         const responseSchemaPath = paths[method]?.responses?.["200"]?.content?.["application/json"]?.schema?.$ref;
+         const responseSchemaPath2=paths[method]?.responses?.["200"]?.content?.["application/json"]?.schema?.items?.$ref;
+         const responseSchemaPath3 = paths[method]?.responses?.["201"]?.content?.["application/json"]?.schema?.$ref;
+         const responseSchemaPath4=paths[method]?.responses?.["201"]?.content?.["application/json"]?.schema?.items?.$ref;
+         if (responseSchemaPath) {
+             const match = responseSchemaPath.match(/\/([^/]+)$/);
+             if (match) {
+                 const extractedText = match[1];
+                 responseschema.push(...getSchema(extractedText));
+             } else {
+                 console.log("No match found");
+             }
+         }
+         else if  (responseSchemaPath2) {
+             const match = responseSchemaPath2.match(/\/([^/]+)$/);
+             if (match) {
+                 const extractedText = match[1];
+                 responseschema.push(...getSchema(extractedText));
+             } else {
+                 console.log("No match found");
+             }
+         }
+         else if  (responseSchemaPath3) {
+             const match = responseSchemaPath3.match(/\/([^/]+)$/);
+             if (match) {
+                 const extractedText = match[1];
+                 responseschema.push(...getSchema(extractedText));
+             } else {
+                 console.log("No match found");
+             }
+         }
+         else if  (responseSchemaPath4) {
+             const match = responseSchemaPath4.match(/\/([^/]+)$/);
+             if (match) {
+                 const extractedText = match[1];
+                 responseschema.push(...getSchema(extractedText));
+             } else {
+                 console.log("No match found");
+             }
+         }
+  
 
         // Path Variables or Query Parameters
         const pathVariableParameters = paths[method]?.parameters || [];
@@ -231,6 +262,12 @@ function generateTestSteps(testConfig) {
         testSteps += `  expect(await response${getUniqueIdentifier()}.json()).toHaveProperty('${key}', '${value}');\n`;
       }
     }
+    if (testConfig.isExtractkeyValidation && testConfig.expectedkeyAndVariableName) {
+        console.log('Extract key validation',Object.entries(testConfig.expectedkeyAndVariableName));
+        for (let [key, variableName] of Object.entries(testConfig.expectedkeyAndVariableName)) {
+          testSteps += `  const ${variableName} = await response${getcurrentIdentifier()}.json()['${key}'];\n`;
+        }
+      }
   
     return testSteps;
 }
@@ -242,7 +279,7 @@ function getUniqueIdentifier() {
     uniqueIdentifierCounter += 1;
     return uniqueIdentifierCounter;
 }
-
+function getcurrentIdentifier() {return uniqueIdentifierCounter}
   
 
 module.exports = {
