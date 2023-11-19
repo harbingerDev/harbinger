@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, deprecated_member_use, prefer_collection_literals, prefer_const_literals_to_create_immutables
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:harbinger/main.dart';
 import 'package:harbinger/models/Endpoint.dart';
@@ -8,6 +10,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:harbinger/assets/constants.dart';
+import 'package:harbinger/widgets/TestPlan/createopenapi_popup.dart';
 import 'package:harbinger/widgets/TestPlan/spec_card.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -265,7 +268,7 @@ class _TestScriptState extends State<TestScript> {
               title: Text("Upload file"),
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.38,
-                height: MediaQuery.of(context).size.height * 0.35,
+                height: MediaQuery.of(context).size.height * 0.40,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
@@ -279,10 +282,42 @@ class _TestScriptState extends State<TestScript> {
                     ),
                     const SizedBox(height: 20),
                     const Text(
-                      "Upload the project openapi.json file",
+                      "Upload your project's openapi.json file",
                       style: TextStyle(fontSize: 20),
                     ),
-                    const SizedBox(height: 17),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Text.rich(
+                      TextSpan(
+                        text:
+                            "Haven't created 'openapi.json' for your project? ",
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                        children: [
+                          TextSpan(
+                            text: 'Click here to generate quickly!',
+                            style: GoogleFonts.roboto(
+                                color: Color(0xffE95622), fontSize: 12),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                print("Tapped");
+                                Navigator.of(context).pop();
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CreateOpenApiJsonFile(
+                                      onBackButtonPressed: () =>
+                                          _showUploadPopup(context),
+                                    );
+                                  },
+                                );
+                              },
+                          )
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -390,15 +425,19 @@ class _TestScriptState extends State<TestScript> {
     );
   }
 
+
   _showchooseendpointsPopup(List<Endpoint> endpoints) {
     String activeprojectpath = activeProject[0]["project_path"] +
         "/" +
-        activeProject[0]["project_name"]+"/tests";
+        activeProject[0]["project_name"] +
+        "/tests";
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) {
           return EndpointWidget(
-              endpoints: endpoints, activeprojectpath: activeprojectpath);
+              endpoints: endpoints,
+              activeprojectpath: activeprojectpath,
+              callback: getActiveProject);
         });
   }
 
@@ -507,6 +546,7 @@ class _TestScriptState extends State<TestScript> {
     setState(() {
       loaded = false;
     });
+
     Map<String, String> recordPayload = {
       "project_path": activeProject[0]["project_path"],
       "project_name": activeProject[0]["project_name"],

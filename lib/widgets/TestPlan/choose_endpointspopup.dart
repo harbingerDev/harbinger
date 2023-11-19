@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -12,9 +14,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class EndpointWidget extends StatefulWidget {
   final List<Endpoint> endpoints;
   final String activeprojectpath;
+  final VoidCallback? callback;
 
   const EndpointWidget(
-      {super.key, required this.endpoints, required this.activeprojectpath});
+      {super.key,
+      required this.endpoints,
+      required this.activeprojectpath,
+      this.callback});
 
   @override
   EndpointWidgetState createState() => EndpointWidgetState();
@@ -174,7 +180,28 @@ class EndpointWidgetState extends State<EndpointWidget> {
                               .map(
                                 (entry) => ListTile(
                                   key: ValueKey(entry.key),
-                                  title: Text(entry.value.path),
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Chip(
+                                        label: Text(
+                                          entry.value.httpMethod,
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                        ),
+                                        backgroundColor:
+                                            const Color(0xffE95622),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(entry.value.path),
+                                    ],
+                                  ),
+                                  // Row(
+                                  //   children: [
+                                  //       Text(entry.value.httpMethod),
+                                  //     Text(entry.value.path),
+                                  //   ],
+                                  // ),
                                 ),
                               )
                               .toList(),
@@ -190,27 +217,46 @@ class EndpointWidgetState extends State<EndpointWidget> {
                         labelText: 'Enter the baseurl of the projects here '),
                     style: TextStyle(color: Colors.black38),
                   ),
-                  ElevatedButton(
-                    onPressed: (() async {
-                      print("doing something");
+                  SizedBox(
+                    height: 7,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        child: Text('Close',
+                            style: TextStyle(color: Colors.black)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      ElevatedButton(
+                        onPressed: (() async {
+                          print("doing something");
 
-                      print("doing something++");
+                          print("doing something++");
 
-                      Map<int, dynamic> maphavingRequestBodyAndAll =
-                          await getMapOfAllEndpointsSchemasReqBodyQueryParam(
-                              selectedEndpointsList);
+                          Map<int, dynamic> maphavingRequestBodyAndAll =
+                              await getMapOfAllEndpointsSchemasReqBodyQueryParam(
+                                  selectedEndpointsList);
 
-                      Navigator.of(context).pop();
+                          Navigator.of(context).pop();
 
-                      // ignore: use_build_context_synchronously
-                      showDialog<String>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return ModalWithStepper(maphavingRequestBodyAndAll,
-                                widget.activeprojectpath, urlController.text);
-                          });
-                    }),
-                    child: const Text("Next"),
+                          // ignore: use_build_context_synchronously
+                          showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return ModalWithStepper(
+                                  maphavingRequestBodyAndAll,
+                                  widget.activeprojectpath,
+                                  urlController.text,
+                                  callback: widget.callback,
+                                );
+                              });
+                        }),
+                        child: const Text("Next"),
+                      ),
+                    ],
                   ),
                 ],
               );
@@ -298,9 +344,10 @@ class ModalWithStepper extends StatefulWidget {
   final Map<int, dynamic> dataMap;
   final String activeprojectpath;
   final String url;
+  final VoidCallback? callback;
 
   const ModalWithStepper(this.dataMap, this.activeprojectpath, this.url,
-      {super.key});
+      {super.key, this.callback});
 
   @override
   ModalWithStepperState createState() => ModalWithStepperState();
@@ -310,7 +357,7 @@ class ModalWithStepperState extends State<ModalWithStepper> {
   Map<String, dynamic> finalmap = {};
   int currentPage = 0;
   TextEditingController testscriptNameController = TextEditingController();
-
+  
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -319,11 +366,12 @@ class ModalWithStepperState extends State<ModalWithStepper> {
         width: MediaQuery.of(context).size.width * .8,
         height: MediaQuery.of(context).size.height * .8,
         child: Stepper(
+          physics: NeverScrollableScrollPhysics(),
           type: StepperType.horizontal,
           currentStep: currentPage,
           steps: List.generate(widget.dataMap.length, (index) {
             return Step(
-              title: Text('Page ${index + 1}'),
+              title: Text('Api ${index + 1}'),
               isActive: currentPage == index,
               content: ApiTesting(
                   page: widget.dataMap.length - 1 == currentPage
@@ -344,16 +392,6 @@ class ModalWithStepperState extends State<ModalWithStepper> {
           },
         ),
       ),
-      // actions: [
-      //   if (currentPage == widget.dataMap.length - 1)
-      //     ElevatedButton(
-      //       onPressed: () {
-      //         print(widget.dataMap.length-1);
-      //         print(currentPage);
-      //       },
-      //       child: const Text("Generate"),
-      //     ),
-      // ],
     );
   }
 
@@ -392,8 +430,13 @@ class ModalWithStepperState extends State<ModalWithStepper> {
                     onPressed: () async {
                       String testscriptName = testscriptNameController.text;
                       // Handle the entered testscriptName as needed
+                      // ref.read(apiTestScriptProvider.notifier).state =
+                      //     ApiTest(testName: testscriptNameController.text);
+                      //
                       print("Testscript Name: $testscriptName");
+
                       final filePath = ref.watch(filePathProvider);
+
                       print("filePath$filePath");
                       const url = 'http://localhost:1337/api/generateScript';
                       final headers = {"Content-type": "application/json"};
@@ -408,8 +451,6 @@ class ModalWithStepperState extends State<ModalWithStepper> {
 
                       if (response.statusCode == 200) {
                         print(
-                            "############${ApiTest(testName: testscriptNameController.text).testName}");
-                        print(
                             "++++++++++++++++++++++ getting response as script${response.body}");
                       } else {
                         throw Exception('Failed to make request');
@@ -417,6 +458,7 @@ class ModalWithStepperState extends State<ModalWithStepper> {
 
                       // Close the dialog
                       Navigator.of(context).pop();
+                      widget.callback?.call();
                     },
                   ),
                 ],

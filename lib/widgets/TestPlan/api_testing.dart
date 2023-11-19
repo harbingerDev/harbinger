@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_is_empty
 
 import 'dart:convert';
 import 'package:harbinger/models/response_model.dart';
@@ -56,6 +56,21 @@ class ApiTestingState extends State<ApiTesting> {
   TextEditingController valueController = TextEditingController();
   TextEditingController keyOfVariableController = TextEditingController();
   TextEditingController variableController = TextEditingController();
+  String keyofvalue = "";
+
+  getValue(value) {
+    if (value == "integer") {
+      keyofvalue = "1";
+    } else if (value == "string")
+      keyofvalue = "str";
+    else if (value == "boolean")
+      keyofvalue = "true";
+    else {
+      keyofvalue = value;
+    }
+
+    return keyofvalue;
+  }
 
   @override
   void initState() {
@@ -64,8 +79,26 @@ class ApiTestingState extends State<ApiTesting> {
     responseBodyController.text = widget.responseSchema!;
     selectedHttpMethod = widget.httpMethod!;
     selectedBaseUrl = widget.baseUrl!;
-    baseurlController.text=widget.baseUrl!;
-    headersController.text= widget.headers!;
+    baseurlController.text = widget.baseUrl!;
+    headersController.text = widget.headers!;
+    if (widget.queryParam!.length != 0) {
+      print("check1");
+      urlController.text += "?";
+      for (int i = 0; i < widget.queryParam!.length; i++) {
+        print("check2");
+        if (i > 0) urlController.text += "&";
+        print("check2.0${widget.queryParam![i].name!}");
+        urlController.text += widget.queryParam![i].name!;
+        print("check2.1${widget.queryParam![i].type!}");
+        urlController.text += "=";
+        urlController.text += getValue(widget.queryParam![i].type!);
+        print("check3");
+
+        widget.queryParam![i].placeholder =
+            getValue(widget.queryParam![i].type!);
+        print("checkinggggg${getValue(widget.queryParam![i].type!)}");
+      }
+    }
 
     super.initState();
   }
@@ -183,8 +216,10 @@ class ApiTestingState extends State<ApiTesting> {
                                                   controller:
                                                       keyOfVariableController,
                                                   decoration: InputDecoration(
-                                                       labelText: 'Enter the Key to be extracted'),
-                                                      style: TextStyle(color: Colors.black26),
+                                                      labelText:
+                                                          'Enter the Key to be extracted'),
+                                                  style: TextStyle(
+                                                      color: Colors.black26),
                                                 ),
                                                 SizedBox(
                                                   height: 5,
@@ -195,7 +230,8 @@ class ApiTestingState extends State<ApiTesting> {
                                                   decoration: InputDecoration(
                                                       labelText:
                                                           'Enter the Variable Name in which you want to store'),
-                                                          style: TextStyle(color: Colors.black26),
+                                                  style: TextStyle(
+                                                      color: Colors.black26),
                                                 ),
                                               ]),
                                         )
@@ -265,18 +301,18 @@ class ApiTestingState extends State<ApiTesting> {
                                           value: baseurlController.text,
                                           onChanged: (newValue) {
                                             setState(() {
-                                              baseurlController.text = newValue!;
+                                              baseurlController.text =
+                                                  newValue!;
                                             });
                                           },
-                                          items:  [
+                                          items: [
                                             DropdownMenuItem<String>(
                                               value: 'BASEURL',
                                               child: Text('BASEURL'),
                                             ),
                                             DropdownMenuItem<String>(
                                               value: selectedBaseUrl,
-                                              child:
-                                                  Text(selectedBaseUrl),
+                                              child: Text(selectedBaseUrl),
                                             ),
                                             DropdownMenuItem<String>(
                                               value: 'https://example1.com',
@@ -349,31 +385,178 @@ class ApiTestingState extends State<ApiTesting> {
                                     const SizedBox(
                                       width: 10,
                                     ),
-                                    Expanded(
-                                      child: Container(
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: const Color.fromARGB(
-                                                255, 224, 223, 223),
-                                            width: 1.0,
-                                          ),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(10.0)),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: TextField(
-                                            controller: requestparamController,
-                                            maxLines: 4,
-                                            decoration: const InputDecoration(
-                                              labelText: 'Request param',
-                                              // labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                                    widget.queryParam?.length == 0
+                                        ? Expanded(
+                                            child: Container(
+                                              height: 100,
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: const Color.fromARGB(
+                                                      255, 224, 223, 223),
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                        Radius.circular(10.0)),
+                                              ),
+                                              child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: TextField(
+                                                    controller:
+                                                        requestparamController,
+                                                    maxLines: 4,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      labelText:
+                                                          'Request param',
+                                                      // labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                  )),
+                                            ),
+                                          )
+                                        : Expanded(
+                                            child: Container(
+                                              height: 150,
+                                              child: Column(children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Text("Request param"),
+                                                  ],
+                                                ),
+                                                Expanded(
+                                                  child: ListView.builder(
+                                                    itemCount: widget.queryParam
+                                                            ?.length ??
+                                                        0,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return Card(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child:
+                                                                    TextField(
+                                                                  decoration: InputDecoration(
+                                                                      labelText:
+                                                                          'Key'),
+                                                                  controller:
+                                                                      TextEditingController(
+                                                                    text: widget
+                                                                        .queryParam?[
+                                                                            index]
+                                                                        .name,
+                                                                  ),
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    urlController
+                                                                            .text =
+                                                                        widget
+                                                                            .endpointPath!;
+                                                                    // Update the name when the text changes
+                                                                    widget
+                                                                        .queryParam?[
+                                                                            index]
+                                                                        .name = value;
+                                                                    if (widget
+                                                                            .queryParam!
+                                                                            .length !=
+                                                                        0) {
+                                                                      urlController
+                                                                              .text +=
+                                                                          "?";
+                                                                      for (int i =
+                                                                              0;
+                                                                          i < widget.queryParam!.length;
+                                                                          i++) {
+                                                                        if (i >
+                                                                            0) {
+                                                                          urlController.text +=
+                                                                              "&";
+                                                                        }
+                                                                        urlController.text += widget
+                                                                            .queryParam![i]
+                                                                            .name!;
+                                                                        urlController.text +=
+                                                                            "=";
+                                                                        urlController.text += widget
+                                                                            .queryParam![i]
+                                                                            .placeholder!;
+                                                                      }
+                                                                    }
+                                                                  },
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 10),
+                                                              Expanded(
+                                                                child:
+                                                                    TextField(
+                                                                  decoration: InputDecoration(
+                                                                      labelText:
+                                                                          'Value'),
+                                                                  controller:
+                                                                      TextEditingController(
+                                                                    text: widget
+                                                                        .queryParam?[
+                                                                            index]
+                                                                        .placeholder,
+                                                                  ),
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    urlController
+                                                                            .text =
+                                                                        widget
+                                                                            .endpointPath!;
+                                                                    widget
+                                                                        .queryParam![
+                                                                            index]
+                                                                        .placeholder = value;
+                                                                    if (widget.queryParam !=
+                                                                            null ||
+                                                                        widget.queryParam!.length !=
+                                                                            0) {
+                                                                      urlController
+                                                                              .text +=
+                                                                          "?";
+                                                                      for (int i =
+                                                                              0;
+                                                                          i < widget.queryParam!.length;
+                                                                          i++) {
+                                                                        if (i >
+                                                                            0) {
+                                                                          urlController.text +=
+                                                                              "&";
+                                                                        }
+                                                                        urlController.text += widget
+                                                                            .queryParam![i]
+                                                                            .name!;
+                                                                        urlController.text +=
+                                                                            "=";
+                                                                        urlController.text += widget
+                                                                            .queryParam![i]
+                                                                            .placeholder!;
+                                                                      }
+                                                                    }
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ]),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -455,8 +638,17 @@ class ApiTestingState extends State<ApiTesting> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      TextButton(
+                        child: Text(
+                          'Close',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
                       ElevatedButton(
                           onPressed: () {
                             // if (widget.page != "next") {
@@ -465,7 +657,6 @@ class ApiTestingState extends State<ApiTesting> {
                             createMapAndAdd();
 
                             //  if(widget.page != "next")performApiRequest();
-                            
                           },
                           child: widget.page == "next"
                               ? Text("Next")
@@ -484,8 +675,7 @@ class ApiTestingState extends State<ApiTesting> {
   createMapAndAdd() {
     String httpMethod = selectedHttpMethod;
     String url = baseurlController.text + urlController.text;
-    String requestBody =
-        requestBodyController.text;
+    String requestBody = requestBodyController.text;
     String path = urlController.text;
     String headers = headersController.text;
     String queryParams = requestparamController.text;
@@ -495,18 +685,18 @@ class ApiTestingState extends State<ApiTesting> {
     String expectedkeyOfVariable = keyOfVariableController.text;
     String expectedvariable = variableController.text;
 
-    bool isStatusValdiation = false;
+    bool isStatusValidation = false;
     bool isKeyValueValidation = false;
     bool isExtractkeyValidation = false;
 
     if (expectedStatusCode != "" || expectedStatusCode.trim() != "") {
-      isStatusValdiation = true;
+      isStatusValidation = true;
     }
     if (expectedkey != "" || expectedkey.trim() != "") {
       isKeyValueValidation = true;
     }
     if (expectedkeyOfVariable != "" || expectedkeyOfVariable.trim() != "") {
-      isKeyValueValidation = true;
+      isExtractkeyValidation = true;
     }
 
     Map<String, dynamic> map = {
@@ -516,7 +706,7 @@ class ApiTestingState extends State<ApiTesting> {
       "requestBody": requestBody,
       "headers": headers,
       "queryParams": queryParams,
-      "isStatusValdiation": isStatusValdiation,
+      "isStatusValidation": isStatusValidation,
       "isKeyValueValidation": isKeyValueValidation,
       "isExtractkeyValidation": isExtractkeyValidation,
       "expectedStatusCode": expectedStatusCode,
