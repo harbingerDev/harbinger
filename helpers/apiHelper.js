@@ -252,20 +252,22 @@ function generateTestSteps(testConfig) {
     }
   
     testSteps += `  });\n\n`;
-  
+  console.log(statusCode,"<-code:trueorfalse->",testConfig.isStatusValidation)
     if (testConfig.isStatusValidation && statusCode) {
-      testSteps += `  expect(response${getUniqueIdentifier()}.status()).toBe(${statusCode});\n`;
+      testSteps += `  expect(response${getcurrentIdentifier()}.status()).toBe(${statusCode});\n`;
     }
   
     if (testConfig.isKeyValueValidation && testConfig.expectedKeyValue) {
       for (let [key, value] of Object.entries(testConfig.expectedKeyValue)) {
-        testSteps += `  expect(await response${getUniqueIdentifier()}.json()).toHaveProperty('${key}', '${value}');\n`;
+        testSteps += `  expect(await response${getcurrentIdentifier()}.json()).toHaveProperty('${key}', '${value}');\n`;
       }
     }
     if (testConfig.isExtractkeyValidation && testConfig.expectedkeyAndVariableName) {
         console.log('Extract key validation',Object.entries(testConfig.expectedkeyAndVariableName));
         for (let [key, variableName] of Object.entries(testConfig.expectedkeyAndVariableName)) {
-          testSteps += `  const ${variableName} = await response${getcurrentIdentifier()}.json()['${key}'];\n`;
+          testSteps += `  const ${variableName+"demo"} = await response${getcurrentIdentifier()}.json();\n`;
+          testSteps += `  const ${variableName} =${variableName+"demo"}['${key}'];\n`;
+
         }
       }
   

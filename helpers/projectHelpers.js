@@ -284,7 +284,7 @@ function extractValuesFromAst(node) {
 
       values.push(
         JSON.stringify(
-          node.value.replace(/\[id="\\\\([0-9])([^\]]+)\]/g, (match, p1) => p1)
+          node.value.toString().replace(/\[id="\\\\([0-9])([^\]]+)\]/g, (match, p1) => p1)
         )
       );
     } else if (node.type === "CallExpression") {

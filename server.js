@@ -13,6 +13,8 @@ const { exec } = require("child_process");
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+
 app.use(
   cors({
     origin: "*",
@@ -24,6 +26,10 @@ app.use(function (err, req, res, next) {
   console.error(err.stack);
   res.status(500).send("Something broke!");
 });
+
+
+
+
 
 //Everything related to projects
 app.get("/projects/getProjects", async (req, res) => {
@@ -652,6 +658,29 @@ app.post("/uploadapiinfo/", upload.single('file'),async (req, res) => {
       res.status(200).json(extractedData);
   } else {
       res.status(400).json({ error: "File must have a .json extension" });
+  }
+});
+
+
+
+
+
+app.get('/generateSwagger',async (req, res) => {
+  const codeFilePath = req.query.filePath;
+
+  if (!codeFilePath) {
+    return res.status(400).json({ error: 'File path is required.' });
+  }
+  try {
+    const swaggerSpec = await db.generateSwaggerDocs(codeFilePath);
+    // Send the OpenAPI specification as a downloadable file
+    res.setHeader('Content-Disposition', 'attachment; filename=openapi.json');
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(swaggerSpec, null, 2));
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error.' });
   }
 });
 

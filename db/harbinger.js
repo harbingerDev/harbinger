@@ -2,6 +2,7 @@ const path = require("path");
 const knex = require("./knex");
 const projectHelper = require("../helpers/projectHelpers");
 const apiHelper = require("../helpers/apiHelper");
+const openApiJsonHelper = require("../helpers/openApiJsonHelper");
 
 // everything related to projects
 async function createProject(project) {
@@ -119,6 +120,11 @@ async function convertToPlaywright(req){
   return convertedscript;
 }
 
+async function generateSwaggerDocs(codeFilePath){
+  const  generatedSwaggerDocs=await openApiJsonHelper.generateSwaggerDocs(codeFilePath);
+  return generatedSwaggerDocs;
+}
+
 
 
 module.exports = {
@@ -142,5 +148,6 @@ module.exports = {
   getSpecificJSON,
   getApiInfo,
   getAllDataAndParse,
-  convertToPlaywright
+  convertToPlaywright,
+  generateSwaggerDocs
 };
