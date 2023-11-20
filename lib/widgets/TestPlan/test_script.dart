@@ -305,7 +305,15 @@ class _TestScriptState extends State<TestScript> {
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
+                                    String activeprojectpath = activeProject[0]
+                                            ["project_path"] +
+                                        "/" +
+                                        activeProject[0]["project_name"] +
+                                        "/tests";
+
                                     return CreateOpenApiJsonFile(
+                                      activeprojectpath: activeprojectpath,
+                                      callback: getActiveProject,
                                       onBackButtonPressed: () =>
                                           _showUploadPopup(context),
                                     );
@@ -424,7 +432,6 @@ class _TestScriptState extends State<TestScript> {
       },
     );
   }
-
 
   _showchooseendpointsPopup(List<Endpoint> endpoints) {
     String activeprojectpath = activeProject[0]["project_path"] +

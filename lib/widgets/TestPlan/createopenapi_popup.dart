@@ -5,12 +5,21 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:harbinger/models/Endpoint.dart';
 import 'package:harbinger/models/analysisResult.dart';
+import 'package:harbinger/widgets/TestPlan/choose_endpointspopup.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class CreateOpenApiJsonFile extends StatefulWidget {
   final VoidCallback onBackButtonPressed;
-  const CreateOpenApiJsonFile({Key? key, required this.onBackButtonPressed})
+  final String activeprojectpath;
+  final VoidCallback? callback;
+  const CreateOpenApiJsonFile(
+      {Key? key,
+      required this.onBackButtonPressed,
+      required this.activeprojectpath,
+      this.callback})
       : super(key: key);
 
   @override
@@ -21,7 +30,8 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
   TextEditingController urlController = TextEditingController();
   String analysisResult = "";
   bool isAnalyzing = false;
-
+  bool iscreate = true;
+  String uploadpath = "";
   @override
   Widget build(BuildContext context) {
     return StatefulBuilder(
@@ -44,7 +54,7 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
           contentPadding: const EdgeInsets.all(16),
           content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.44,
-            height: MediaQuery.of(context).size.height * 0.34,
+            height: MediaQuery.of(context).size.height * 0.39,
             child: Column(
               children: [
                 // Text(
@@ -70,63 +80,110 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                         style:
                             TextStyle(fontSize: 16, color: Color(0xffE95622)))
                     : SizedBox.shrink(),
-                SizedBox(height: 36),
+                SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () async {
-                    if (isGitHubRepo(urlController.text)) {
-                      setState(() {
-                        isAnalyzing = true;
-                        analysisResult =
-                            "Cloning project from github repository...";
-                      });
-                      final path =
-                          await cloneprojectfromgithub(urlController.text);
-                      analysisResult = "Cloned project in $path";
-                    }
+                  onPressed: iscreate
+                      ? () async {
+                          setState(() {
+                            isAnalyzing = true;
+                            analysisResult = "Analyzing...";
+                          });
+                          await Future.delayed(Duration(seconds: 3));
+                          if (isGitHubRepo(urlController.text)) {
+                            setState(() {
+                              isAnalyzing = true;
+                              analysisResult =
+                                  "Cloning project from github repository...";
+                            });
+                            await Future.delayed(Duration(seconds: 2));
+                            final path = await cloneprojectfromgithub(
+                                urlController.text);
+                            print(path);
+                            setState(() {
+                              analysisResult = "Cloned project in $path ...";
+                            });
+                          }
+                          await Future.delayed(Duration(seconds: 3));
 
-                    setState(() {
-                      isAnalyzing = true;
-                      analysisResult = "Analyzing...";
-                    });
+                          setState(() {
+                            isAnalyzing = true;
+                            analysisResult = "Analyzing project language...";
+                          });
 
-                    // Perform analysis based on the entered URL or path
-                    String input = urlController.text;
-                    // Assuming there's a function for language analysis
-                    AnalysisResult result = await analyzeLanguage(input);
-                    print(result.maxLanguage);
-                    String languagesprint = "";
-                    result.languages.forEach((key, value) {
-                      languagesprint += "$key = $value files  ";
-                    });
-                    if (result.maxLanguage == "Unknown" &&
-                        result.result == "Unknown") {
-                      analysisResult = "Failed to analyse the language";
-                    }
-                    setState(() {
-                      analysisResult =
-                          " languages : \n ${languagesprint} \n max language ${result.maxLanguage}  ";
-                    });
-                    print("waiting for 3 sec");
-                    await Future.delayed(Duration(seconds: 3));
+                          // Perform analysis based on the entered URL or path
+                          String input = urlController.text;
+                          // Assuming there's a function for language analysis
+                          AnalysisResult result = await analyzeLanguage(input);
+                          print(result.maxLanguage);
+                          String languagesprint = "";
+                          result.languages.forEach((key, value) {
+                            languagesprint += "$key = $value files  ";
+                          });
+                          if (result.maxLanguage == "NA") {
+                            setState(() {
+                              analysisResult = "Failed to analyse the language";
+                            });
+                          }
+                          setState(() {
+                            analysisResult =
+                                " languages used : \n ${languagesprint} \n max language ${result.maxLanguage}  ";
+                          });
+                          print("waiting for 3 sec");
 
-                    // Hit the createopenapi.jsonfile API
-                    if (result.maxLanguage != "Unknown") {
-                      analysisResult =
-                          "Creating openapi.json file for ${result.maxLanguage}";
-                      await createOpenApiJsonFile(input, result.maxLanguage);
-                    } else {
-                      analysisResult = "Failed to analyse the language";
-                    }
+                          await Future.delayed(Duration(seconds: 5));
+                          print("after 3 sec");
 
-                    setState(() {
-                      analysisResult = "OpenApi.json file created!";
-                      isAnalyzing = false;
-                    });
+                          // Hit the createopenapi.jsonfile API
+                          if (result.maxLanguage != "Unknown") {
+                            setState(() {
+                              analysisResult =
+                                  "Creating openapi.json file for ${result.maxLanguage} ....";
+                            });
+                            String textresult = await createOpenApiJsonFile(
+                                input, result.maxLanguage);
+                            print("textresult$textresult");
+                            setState(() {
+                              analysisResult = textresult;
+                              iscreate = false;
+                            });
+                          } else {
+                            setState(() {
+                              analysisResult = "Failed to analyse the language";
+                            });
+                          }
 
-                    // You might want to close the dialog or handle completion differently
-                    // Navigator.of(context).pop();
-                  },
-                  child: Text("Create "),
+                          // You might want to close the dialog or handle completion differently
+                          // Navigator.of(context).pop();
+                        }
+                      : () async {
+                          Map<String, String> queryParams = {
+                            'path': uploadpath,
+                          };
+                          String queryString =
+                              Uri(queryParameters: queryParams).query;
+
+                          final Uri apiUri = Uri.parse(
+                              "http://localhost:1337/uploadFileWithPath?$queryString");
+
+                          // You can perform the logic for language analysis here
+                          final response = await http.get(
+                            apiUri,
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                          );
+                          if (response.statusCode == 200) {
+                            final List<dynamic> responseData =
+                                json.decode(response.body);
+                            final List<Endpoint> endpoints = responseData
+                                .map((e) => Endpoint.fromJson(e))
+                                .toList();
+
+                            Navigator.of(context).pop();
+                            _showchooseendpointsPopup(endpoints);
+                          }
+                        },
+                  child: iscreate ? Text("Create ") : Text("Upload"),
                 ),
               ],
             ),
@@ -160,7 +217,7 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
       print("github response$responseData");
-      return responseData.filepath;
+      return responseData;
     }
 
     // Simulating a delay for demonstration purposes
@@ -202,7 +259,7 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
         maxLanguage: "Unknown"); // For example
   }
 
-  Future<void> createOpenApiJsonFile(String path, String language) async {
+  Future<String> createOpenApiJsonFile(String path, String language) async {
     print(language);
     if (language == "JavaScript") {
       try {
@@ -223,29 +280,36 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
         );
 
         if (response.statusCode == 200) {
-          // Extracting file name from Content-Disposition header
-          // String fileName = response.headers['content-disposition']!
-          //     .split('filename=')[1]
-          //     .replaceAll('"', '');
-
-          // Save the file
-          File file = File("openapi.json");
-          file.writeAsBytesSync(response.bodyBytes);
-
-          // You can now use the 'file' variable to access the downloaded file.
-          print('File downloaded successfully: ${file.path}');
+          try {
+            final responseData = json.decode(response.body);
+            print("responseData$responseData");
+            setState(() {
+              uploadpath = responseData;
+            });
+            return "openapi.json created successfully. \n File saved to $responseData path.";
+          } catch (e) {
+            print('Error writing file: $e');
+          }
         } else {
           print('Failed to download file. Status code: ${response.statusCode}');
+          return "not created";
         }
       } catch (e) {
         print('Error downloading file: $e');
       }
-    }
+      return "not created";
+    } else
+      return "not supported for other language as of now ";
+  }
 
-    // Simulating a delay for demonstration purposes
-    await Future.delayed(Duration(seconds: 3));
-
-    // Replace this with actual logic to handle the response
-    print("OpenApi.json file created for $language at $path");
+  _showchooseendpointsPopup(List<Endpoint> endpoints) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return EndpointWidget(
+              endpoints: endpoints,
+              activeprojectpath: widget.activeprojectpath,
+              callback: widget.callback);
+        });
   }
 }
