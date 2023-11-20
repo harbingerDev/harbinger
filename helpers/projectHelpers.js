@@ -261,6 +261,7 @@ async function checkGitVersion() {
 // *** AST specific
 
 function extractValuesFromAst(node) {
+  console.log("node********", node);
   const values = [];
 
   function traverse(node, parentNode = null) {
@@ -310,12 +311,18 @@ function extractValuesFromAst(node) {
         })
         .join(", ");
       values.push(`{ ${properties} }`);
+    } else if (node.type === "TemplateLiteral") {
+      node.quasis.forEach((quasi) => {
+        values.push(quasi.value.raw);
+        traverse(quasi.expression, node);
+      });
     }
   }
 
   traverse(node);
   return values;
 }
+
 
 function getPreTestBlock(astBody) {
   let preTestBlockArray = [];

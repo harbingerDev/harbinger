@@ -242,7 +242,8 @@ function generateTestSteps(testConfig) {
   
     let testSteps = `  // ${method.toUpperCase()} ${url}\n`;
     testSteps += `  const response${getUniqueIdentifier()} = await request.${method}('${url}', {\n`;
-  
+    testSteps=testSteps.replace("'","`")
+    testSteps=testSteps.replace("'","`")
     if (testConfig.headers) {
       testSteps += `    headers: ${headers},\n`;
     }

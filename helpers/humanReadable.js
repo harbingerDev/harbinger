@@ -2,6 +2,7 @@ const utils = require("./utls");
 const locActions = require("../playwrightActionLocators.json");
 
 function getHumanReadable(tokenAray) {
+  console.log("****",tokenAray)
   let base = "";
   if (tokenAray.includes("objectRepository") && tokenAray[0] === "const") {
     base = utils.findValueByKeyInArray(
@@ -60,6 +61,15 @@ function getHumanReadable(tokenAray) {
       } else {
         return `Soft assert ${tokenAray[2]} ${splitCamelCase(tokenAray[3])}`;
       }
+    }else if(tokenAray[3]==='request' && tokenAray[0]==='const'){
+      return `${tokenAray[4].toUpperCase()} request to ${tokenAray[5].split(", {")[0]}`
+
+    }else if(tokenAray[4]==='json' && tokenAray[0]==='const' && tokenAray[3].includes('response')){
+      return `Save response to ${tokenAray[1]}`
+
+    }else if(tokenAray[4]==='json' && tokenAray[0]==='const' && tokenAray[3].includes('response')){
+      return `Save response to ${tokenAray[1]}`
+
     } else {
       if (tokenAray.length === 4) {
         return `Assert ${tokenAray[1]} ${splitCamelCase(tokenAray[2])} ${
@@ -78,3 +88,4 @@ function splitCamelCase(str) {
 module.exports = {
   getHumanReadable,
 };
+
