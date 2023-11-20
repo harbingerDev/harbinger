@@ -1,6 +1,44 @@
 const swaggerJSDoc = require('swagger-jsdoc');
 const fs = require("fs");
+const path = require('path');
+const os = require("os");
+const { exec } = require('child_process');
 
+
+function searchExpressionInPath(projectFolderPath) {
+  let resultFilePath = null;
+
+  function searchInDirectory(directoryPath) {
+    const files = fs.readdirSync(directoryPath);
+
+    files.forEach((file) => {
+      const filePath = path.join(directoryPath, file);
+      const stats = fs.statSync(filePath);
+
+      if (stats.isDirectory()) {
+        searchInDirectory(filePath);
+      } else if (stats.isFile()) {
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+        // Use regex to search for the expression require("express")
+        const expressionRegex = /\brequire\s*\(\s*["']express["']\s*\)\s*;/;
+        if (expressionRegex.test(fileContent)) {
+          resultFilePath = filePath;
+        }
+      }
+    });
+  }
+
+  searchInDirectory(projectFolderPath);
+
+  if (resultFilePath) {
+    console.log(`Expression found in file: ${resultFilePath}`);
+    return resultFilePath;
+  } else {
+    console.log('Expression not found in any file.');
+    return null;
+  }
+}
 
 function generateSwaggerAnnotations(code) {
   const annotations = [];
@@ -33,10 +71,14 @@ function generateSwaggerAnnotations(code) {
   return annotations.join('\n');
 }
 
-function generateSwaggerDocs(codeFilePath) {
+ function generateSwaggerDocs(codeFilePath) {
+  if(!fs.statSync(codeFilePath).isFile()){
+    codeFilePath=searchExpressionInPath(codeFilePath);
+  }
+ 
   try {
     const code = fs.readFileSync(codeFilePath, 'utf-8');
-    const swaggerAnnotations = generateSwaggerAnnotations(code);
+    const swaggerAnnotations =  generateSwaggerAnnotations(code);
     const annotationsFilePath = 'swagger_annotations.js';
     fs.writeFileSync(annotationsFilePath, swaggerAnnotations);
 
@@ -67,7 +109,142 @@ function generateSwaggerDocs(codeFilePath) {
   }
 }
 
-module.exports = { generateSwaggerDocs };
+function cloneGitHubRepository(githubRepoUrl, destinationPath) {
+  return new Promise((resolve, reject) => {
+    const command = `git clone ${githubRepoUrl} ${destinationPath}`;
+
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error cloning repository: ${stderr}`);
+        reject(new Error('Error cloning repository'));
+      } else {
+        console.log('Repository cloned successfully.');
+        resolve(destinationPath);
+      }
+    });
+  });
+}
+
+function clonegithubintolocalpath(githubRepoUrl) {
+
+  const documentsPath = path.join(os.homedir(), "Documents");
+
+// Regular expression to validate GitHub repository URL
+const repoUrlPattern = /^https:\/\/github\.com\/[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+\.git$/;
+
+if (repoUrlPattern.test(githubRepoUrl)) {
+  console.log('Valid GitHub repository URL');
+
+  // Extract repository name using regex
+  const repoNamePattern = /\/([a-zA-Z0-9._-]+)\.git$/;
+  const match = githubRepoUrl.match(repoNamePattern);
+  let repoName ="demo"
+  if (match) {
+     repoName = match[1];
+    console.log('Repository Name:', repoName);
+  } else {
+    console.log('Unable to extract repository name');
+  }
+
+//clone the repository in documentsPath
+console.log(githubRepoUrl,documentsPath)
+const githubprojectclonedlocalpath = path.join(documentsPath, repoName);
+
+
+cloneGitHubRepository(githubRepoUrl, githubprojectclonedlocalpath)
+  .then((clonedPath) => {
+    console.log('Cloned repository path:', clonedPath);
+  })
+  .catch((error) => {
+    console.error(error.message);
+  });
+
+
+
+
+  
+  return githubprojectclonedlocalpath
+
+} else {
+  console.log('Invalid GitHub repository URL');
+  throw new Error('Invalid GitHub repository URL');
+}
+}
+
+function analyzeLanguage(filePath) {
+  try {
+    const stats = fs.statSync(filePath);
+
+    if (stats.isDirectory()) {
+      // If it's a directory, analyze all files in the directory and its subdirectories
+      const files = getFiles(filePath);
+      const languages = {};
+
+      files.forEach((file) => {
+        const fileExtension = path.extname(file).toLowerCase();
+        const language = detectLanguageByExtension(fileExtension);
+        languages[language] = (languages[language] || 0) + 1;
+      });
+
+      const maxLanguage = Object.keys(languages).reduce((a, b) => (languages[a] > languages[b] ? a : b));
+
+      return {
+        result: 'Analysis successful',
+        languages,
+        maxLanguage,
+      };
+    } else if (stats.isFile()) {
+      // If it's a file, analyze the language of that file
+      const fileExtension = path.extname(filePath).toLowerCase();
+      const language = detectLanguageByExtension(fileExtension);
+
+      return {
+        result: 'Analysis successful',
+        languages: { [language]: 1 },
+        maxLanguage: language,
+      };
+    } else {
+      return { result: 'Cannot analyze', languages: {}, maxLanguage: 'N/A' };
+    }
+  } catch (error) {
+    return { result: 'Error analyzing', error: error.message, languages: {}, maxLanguage: 'N/A' };
+  }
+}
+
+function getFiles(dir) {
+  const files = [];
+  const dirents = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const dirent of dirents) {
+    const fullPath = path.join(dir, dirent.name);
+
+    if (dirent.isDirectory()) {
+      files.push(...getFiles(fullPath));
+    } else {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
+
+function detectLanguageByExtension(fileExtension) {
+  switch (fileExtension) {
+    case '.js':
+      return 'JavaScript';
+    case '.py':
+      return 'Python';
+    case '.java':
+      return 'Java';
+    // Add more cases for other file extensions and their corresponding languages
+    default:
+      return 'Unknown';
+  }
+}
+
+
+
+module.exports = { generateSwaggerDocs ,clonegithubintolocalpath,analyzeLanguage };
 
 
 

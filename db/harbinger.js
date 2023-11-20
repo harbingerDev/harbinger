@@ -125,6 +125,15 @@ async function generateSwaggerDocs(codeFilePath){
   return generatedSwaggerDocs;
 }
 
+async function clonegithubrepointolocal(githubRepoUrl){
+  const  filepath=await openApiJsonHelper.clonegithubintolocalpath(githubRepoUrl);
+  return filepath;
+}
+async function analyzeLanguage(path){
+  const  analyzedLanguage=await openApiJsonHelper.analyzeLanguage(path);
+  return analyzedLanguage;
+}
+
 
 
 module.exports = {
@@ -149,5 +158,7 @@ module.exports = {
   getApiInfo,
   getAllDataAndParse,
   convertToPlaywright,
-  generateSwaggerDocs
+  generateSwaggerDocs,
+  clonegithubrepointolocal,
+  analyzeLanguage
 };

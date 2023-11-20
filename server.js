@@ -665,7 +665,7 @@ app.post("/uploadapiinfo/", upload.single('file'),async (req, res) => {
 
 
 
-app.get('/generateSwagger',async (req, res) => {
+app.get('/generateSwaggerinNodejs',async (req, res) => {
   const codeFilePath = req.query.filePath;
 
   if (!codeFilePath) {
@@ -682,6 +682,15 @@ app.get('/generateSwagger',async (req, res) => {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error.' });
   }
+});
+
+app.get("/clonegithubrepointolocal", async (req, res) => {
+  const filepath = await db.clonegithubrepointolocal(req.query.githubRepoUrl);
+  res.status(200).json(filepath);
+});
+app.get("/analyzeLanguage", async (req, res) => {
+  const analyzedLanguage = await db.analyzeLanguage(req.query.path);
+  res.status(200).json(analyzedLanguage);
 });
 
 
