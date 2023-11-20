@@ -526,7 +526,37 @@
 
 /**
  * @swagger
- * /generateSwagger:
+ * /generateSwaggerinNodejs:
+ *   get:
+ *     summary: [Summary Here]
+ *     description: [Description Here]
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example: [Example JSON]
+ */
+
+
+/**
+ * @swagger
+ * /clonegithubrepointolocal:
+ *   get:
+ *     summary: [Summary Here]
+ *     description: [Description Here]
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example: [Example JSON]
+ */
+
+
+/**
+ * @swagger
+ * /analyzeLanguage:
  *   get:
  *     summary: [Summary Here]
  *     description: [Description Here]

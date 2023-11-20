@@ -96,13 +96,18 @@ function generateSwaggerAnnotations(code) {
     };
 
     const swaggerSpec = swaggerJSDoc(options);
+    const documentsPath = path.join(os.homedir(), "Documents");
+    
+    
 
-    // const outputFile = 'openapi.json';
-    // fs.writeFileSync(outputFile, JSON.stringify(swaggerSpec, null, 2));
+    const outputFile = 'openapi.json';
+  const filesavedpath= path.join(documentsPath,outputFile);
+
+    fs.writeFileSync(filesavedpath, JSON.stringify(swaggerSpec, null, 2));
 
     // console.log(`Swagger documentation has been generated and saved to ${outputFile}`);
 
-    return swaggerSpec;
+    return filesavedpath;
   } catch (error) {
     console.error(error);
     return { error: 'Internal server error.' };
