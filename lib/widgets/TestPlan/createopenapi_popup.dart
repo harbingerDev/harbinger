@@ -1,6 +1,12 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:harbinger/models/analysisResult.dart';
+import 'package:http/http.dart' as http;
 
 class CreateOpenApiJsonFile extends StatefulWidget {
   final VoidCallback onBackButtonPressed;
@@ -29,7 +35,9 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                     widget.onBackButtonPressed();
                   },
                   icon: const Icon(Icons.arrow_back)),
-                  SizedBox(width: 30,),
+              SizedBox(
+                width: 30,
+              ),
               const Text('Create OpenApi.json file'),
             ],
           ),
@@ -71,7 +79,9 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                         analysisResult =
                             "Cloning project from github repository...";
                       });
-                      await cloneprojectfromgithub(urlController.text);
+                      final path =
+                          await cloneprojectfromgithub(urlController.text);
+                      analysisResult = "Cloned project in $path";
                     }
 
                     setState(() {
@@ -82,14 +92,31 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                     // Perform analysis based on the entered URL or path
                     String input = urlController.text;
                     // Assuming there's a function for language analysis
-                    String language = await analyzeLanguage(input);
-
-                    setState(() {
-                      analysisResult = "Creating json file for $language";
+                    AnalysisResult result = await analyzeLanguage(input);
+                    print(result.maxLanguage);
+                    String languagesprint = "";
+                    result.languages.forEach((key, value) {
+                      languagesprint += "$key = $value files  ";
                     });
+                    if (result.maxLanguage == "Unknown" &&
+                        result.result == "Unknown") {
+                      analysisResult = "Failed to analyse the language";
+                    }
+                    setState(() {
+                      analysisResult =
+                          " languages : \n ${languagesprint} \n max language ${result.maxLanguage}  ";
+                    });
+                    print("waiting for 3 sec");
+                    await Future.delayed(Duration(seconds: 3));
 
                     // Hit the createopenapi.jsonfile API
-                    await createOpenApiJsonFile(input, language);
+                    if (result.maxLanguage != "Unknown") {
+                      analysisResult =
+                          "Creating openapi.json file for ${result.maxLanguage}";
+                      await createOpenApiJsonFile(input, result.maxLanguage);
+                    } else {
+                      analysisResult = "Failed to analyse the language";
+                    }
 
                     setState(() {
                       analysisResult = "OpenApi.json file created!";
@@ -116,33 +143,104 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
   }
 
   Future<String> cloneprojectfromgithub(String input) async {
+    Map<String, String> queryParams = {
+      'githubRepoUrl': input,
+    };
+    String queryString = Uri(queryParameters: queryParams).query;
+
+    final Uri apiUri = Uri.parse(
+        "http://localhost:1337/clonegithubrepointolocal?$queryString");
+    final response = await http.get(
+      apiUri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
     // You can perform the logic for language analysis here
-    // Make API call to localhost1337/analyselanguage or perform your own analysis
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print("github response$responseData");
+      return responseData.filepath;
+    }
 
     // Simulating a delay for demonstration purposes
-    await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 2));
 
     // Replace this with your actual logic to determine the language
-    return "path"; // For example
+    return "error in path"; // For example
   }
 
-  Future<String> analyzeLanguage(String input) async {
-    // You can perform the logic for language analysis here
-    // Make API call to localhost1337/analyselanguage or perform your own analysis
+  Future<AnalysisResult> analyzeLanguage(String input) async {
+    Map<String, String> queryParams = {
+      'path': input,
+    };
+    String queryString = Uri(queryParameters: queryParams).query;
 
+    final Uri apiUri =
+        Uri.parse("http://localhost:1337/analyzeLanguage?$queryString");
+
+    // You can perform the logic for language analysis here
+    final response = await http.get(
+      apiUri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      AnalysisResult analysisResult = AnalysisResult.fromJson(responseData);
+      print("analyzeLanguage response$analysisResult");
+      return analysisResult;
+    }
     // Simulating a delay for demonstration purposes
-    await Future.delayed(Duration(seconds: 7));
+    await Future.delayed(Duration(seconds: 2));
 
     // Replace this with your actual logic to determine the language
-    return "springboot"; // For example
+    return AnalysisResult(
+        languages: Map.of({"unkown": 0}),
+        result: "Unknown",
+        maxLanguage: "Unknown"); // For example
   }
 
   Future<void> createOpenApiJsonFile(String path, String language) async {
-    // Make API call to localhost1337/createopenapi.jsonfile
-    // Provide the path and language in the request
-    // You might need to use a package like http or dio for API calls
-    // Example using http package:
-    // final response = await http.post('localhost1337/createopenapi.jsonfile', body: {'path': path, 'language': language});
+    print(language);
+    if (language == "JavaScript") {
+      try {
+        Map<String, String> queryParams = {
+          'filePath': path,
+        };
+        String queryString = Uri(queryParameters: queryParams).query;
+
+        final Uri apiUri = Uri.parse(
+            "http://localhost:1337/generateSwaggerinNodejs?$queryString");
+
+        final http.Client client = http.Client();
+        final http.Response response = await client.get(
+          apiUri,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          // Extracting file name from Content-Disposition header
+          // String fileName = response.headers['content-disposition']!
+          //     .split('filename=')[1]
+          //     .replaceAll('"', '');
+
+          // Save the file
+          File file = File("openapi.json");
+          file.writeAsBytesSync(response.bodyBytes);
+
+          // You can now use the 'file' variable to access the downloaded file.
+          print('File downloaded successfully: ${file.path}');
+        } else {
+          print('Failed to download file. Status code: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error downloading file: $e');
+      }
+    }
 
     // Simulating a delay for demonstration purposes
     await Future.delayed(Duration(seconds: 3));

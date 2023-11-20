@@ -608,7 +608,7 @@ class ApiTestingState extends State<ApiTesting> {
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: TextField(
-                                            enabled: false,
+                                            readOnly: true,
                                             controller: responseBodyController,
                                             maxLines:
                                                 10, // Make it multiline (expanded)
