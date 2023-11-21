@@ -4,6 +4,14 @@ const path = require('path');
 const os = require("os");
 const { exec } = require('child_process');
 
+function generateSwaggerDocs(codeFilePath,projectName,projectLanguage) {
+  if(projectLanguage=="JavaScript"){
+ return generateOpenApiForJavaScript(codeFilePath,projectName)
+}
+else if(projectLanguage=="Java"){
+    return generateOpenApiForJava(codeFilePath,projectName)
+}
+}
 
 function searchExpressionInPath(projectFolderPath) {
   let resultFilePath = null;
@@ -70,12 +78,10 @@ function generateSwaggerAnnotations(code) {
 
   return annotations.join('\n');
 }
-
- function generateSwaggerDocs(codeFilePath) {
+function generateOpenApiForJavaScript(codeFilePath,projectName){
   if(!fs.statSync(codeFilePath).isFile()){
     codeFilePath=searchExpressionInPath(codeFilePath);
   }
- 
   try {
     const code = fs.readFileSync(codeFilePath, 'utf-8');
     const swaggerAnnotations =  generateSwaggerAnnotations(code);
@@ -100,7 +106,7 @@ function generateSwaggerAnnotations(code) {
     
     
 
-    const outputFile = 'openapi.json';
+    const outputFile = projectName+'_openapi.json';
   const filesavedpath= path.join(documentsPath,outputFile);
 
     fs.writeFileSync(filesavedpath, JSON.stringify(swaggerSpec, null, 2));
@@ -113,6 +119,8 @@ function generateSwaggerAnnotations(code) {
     return { error: 'Internal server error.' };
   }
 }
+
+
 
 function cloneGitHubRepository(githubRepoUrl, destinationPath) {
   return new Promise((resolve, reject) => {
@@ -164,10 +172,6 @@ cloneGitHubRepository(githubRepoUrl, githubprojectclonedlocalpath)
     console.error(error.message);
   });
 
-
-
-
-  
   return githubprojectclonedlocalpath
 
 } else {
@@ -176,11 +180,13 @@ cloneGitHubRepository(githubRepoUrl, githubprojectclonedlocalpath)
 }
 }
 
+
+
 function analyzeLanguage(filePath) {
   try {
     const stats = fs.statSync(filePath);
 
-    if (stats.isDirectory()) {
+    if (stats.isDirectory() &&( path.basename(filePath) !== "node_modules" || path.basename(filePath) !== 'target')) {
       // If it's a directory, analyze all files in the directory and its subdirectories
       const files = getFiles(filePath);
       const languages = {};
@@ -241,10 +247,9 @@ function detectLanguageByExtension(fileExtension) {
       return 'Python';
     case '.java':
       return 'Java';
-    // Add more cases for other file extensions and their corresponding languages
-    default:
-      return 'Unknown';
-  }
+      default:
+        return 'Unknown';
+      }
 }
 
 
@@ -347,39 +352,6 @@ module.exports = { generateSwaggerDocs ,clonegithubintolocalpath,analyzeLanguage
 //     return { modelName, properties };
 //   });
 // }
-
-// // Read Java files
-// const controllerFiles = [
-//   'path/to/Controller1.java',
-//   'path/to/Controller2.java',
-//   // Add all your controller files
-// ];
-
-// const modelFiles = [
-//   'path/to/Model1.java',
-//   'path/to/Model2.java',
-//   // Add all your model files
-// ];
-
-// const controllerJavaCode = controllerFiles.map(file => fs.readFileSync(file, 'utf-8')).join('\n');
-// const modelJavaCode = modelFiles.map(file => fs.readFileSync(file, 'utf-8')).join('\n');
-
-// // Extract controller and model information
-// const controllers = extractControllers(controllerJavaCode);
-// const models = extractModels(modelJavaCode);
-
-// // Generate OpenAPI JSON
-// const openApiJson = {
-//   openapi: '3.0.0',
-//   info: {
-//     title: 'Your API Title',
-//     version: '1.0.0',
-//   },
-//   paths: {},
-//   components: {
-//     schemas: {},
-//   },
-// };
 
 // controllers.forEach(controller => {
 //   controller.methods.forEach(method => {
@@ -707,7 +679,7 @@ module.exports = { generateSwaggerDocs ,clonegithubintolocalpath,analyzeLanguage
 //   return {};
 // }
 
-// function extractPaths(controllerContent) {
+// function  (controllerContent) {
 //   // Implement logic to extract paths and methods from Java controller class
 //   // (e.g., using regular expressions or a more sophisticated parser)
 //   return [];
@@ -751,187 +723,133 @@ module.exports = { generateSwaggerDocs ,clonegithubintolocalpath,analyzeLanguage
 //   return matches ? matches.map(match => match.replace(/class (\w+)[^{]*{/, '$1')) : [];
 // }
 
+
+// Recursive function to scan a directory for Java files and detect controllers and models
+
+
+// // Function to detect controller classes
+function detectControllers(javaCode) {
+  const regex = /@RestController|@Controller/g;
+  const matches = javaCode.match(regex);
+
+  return matches ? true : false;
+}
+
+// // Function to detect model classes
+function detectModels(javaCode) {
+  const regex = /@Entity|@Table/g;
+  const matches = javaCode.match(regex);
+
+  return matches ? true : false;
+}
+
+function scanDirectory(directory) {
+  const files = fs.readdirSync(directory);
+
+  let controllers = [];
+  let models = [];
+
+  files.forEach(file => {
+    const filePath = path.join(directory, file);
+
+    if (fs.statSync(filePath).isDirectory()) {
+      const subdirectoryResults = scanDirectory(filePath);
+      controllers = controllers.concat(subdirectoryResults.controllers);
+      models = models.concat(subdirectoryResults.models);
+    } else if (file.endsWith('.java')) {
+      const javaCode = readJavaFiles(filePath);
+
+      if (detectControllers(javaCode)) {
+        controllers.push(file.replace('.java', ''));
+      }
+
+      if (detectModels(javaCode)) {
+        models.push(file.replace('.java', ''));
+      }
+    }
+  });
+
+  return { controllers, models };
+}
+
+
+// Function to scan a directory for Java files and detect controllers and models
+function scanProjectForControllersAndModels(projectPath) {
+  return scanDirectory(projectPath);
+}
+
 // // Function to generate OpenAPI JSON
-// function generateOpenApi(controllers, models) {
-//   const openApiJson = {
-//     openapi: '3.0.0',
-//     info: {
-//       title: 'Your API Title',
-//       version: '1.0.0',
-//     },
-//     paths: {},
-//     components: {
-//       schemas: {},
-//     },
-//   };
+function generateOpenApiForJava(projectPath,projectName) {
+  // if(!fs.statSync(codeFilePath).isFile()){
+  // }
 
-//   // Populate paths from controllers
-//   controllers.forEach(controller => {
-//     openApiJson.paths[controller] = {
-//       get: {
-//         summary: 'Controller endpoint summary',
-//         // Add more method properties as needed
-//       },
-//       // Add more HTTP methods as needed
-//     };
-//   });
+ const { controllers, models } = scanProjectForControllersAndModels(projectPath);
 
-//   // Populate schemas from models
-//   models.forEach(model => {
-//     openApiJson.components.schemas[model] = {
-//       type: 'object',
-//       // Add more schema properties as needed
-//     };
-//   });
+console.log('Detected Controllers:', controllers);
+console.log('Detected Models:', models);
 
-//   return openApiJson;
-// }
+//main game starts now !...
 
-// // Main function
-// function generateOpenApiForSpringBootProject(controllerDirectory, modelDirectory) {
-//   const controllerCode = readJavaFiles(controllerDirectory);
-//   const modelCode = readJavaFiles(modelDirectory);
+//all the paths of controllers need to take one by one read file
+const controllerCode = readJavaFiles(controllerDirectory);
 
-//   const controllers = parseControllers(controllerCode);
-//   const models = parseModels(modelCode);
+const controllerss = parseControllers(controllerCode);
+// createSchemaForController()
 
-//   const openApiJson = generateOpenApi(controllers, models);
-
-//   fs.writeFileSync('openapi.json', JSON.stringify(openApiJson, null, 2));
-//   console.log('OpenAPI documentation has been generated and saved to openapi.json');
-// }
+// add all the method in an array get the method and path and reqbody ,pathvariable ,reqparam
+// and make the json schema format
 
 
+//all the paths of model need to take one by one read file
+// add all the properties and name of the class 
+// and make the json schema format
+const modelCode = readJavaFiles(modelDirectory);
+
+const modelss = parseModels(modelCode);
+// createSchemaForModels()
+
+  const openApiJson = {
+    openapi: '3.0.0',
+    info: {
+      title: 'Your API Title',
+      version: '1.0.0',
+    },
+    paths: {},
+    components: {
+      schemas: {},
+    },
+  };
+
+  // Populate paths from controllers
+  controllers.forEach(controller => {
+    openApiJson.paths[controller] = {
+      get: {
+        summary: 'Controller endpoint summary',
+        // Add more method properties as needed
+      },
+      // Add more HTTP methods as needed
+    };
+  });
+
+  // Populate schemas from models
+  models.forEach(model => {
+    openApiJson.components.schemas[model] = {
+      type: 'object',
+      // Add more schema properties as needed
+    };
+  });
+
+  const openApiJsoncontent = generateOpenApi(controllers, models);
+  constfinalpath= path.join(directory, projectName+'_openapi.json');
+  fs.writeFileSync(constfinalpath, JSON.stringify(openApiJsoncontent, null, 2));
+  console.log('OpenAPI documentation has been generated and saved to openapi.json');
+
+  return openApiJson;
+}
 
 
 
-
-
-
-// ///////////////////////////////////////////////////////////////////////////////
-// const fs = require('fs');
-// const path = require('path');
-
-// // Function to read Java files
-// function readJavaFiles(directory) {
-//   const files = fs.readdirSync(directory);
-//   const javaFiles = files.filter(file => file.endsWith('.java'));
-
-//   return javaFiles.map(file => fs.readFileSync(path.join(directory, file), 'utf-8')).join('\n');
-// }
-
-// // Function to detect controller classes
-// function detectControllers(javaCode) {
-//   const regex = /@RestController|@Controller/g;
-//   const matches = javaCode.match(regex);
-
-//   return matches ? true : false;
-// }
-
-// // Function to detect model classes
-// function detectModels(javaCode) {
-//   const regex = /@Entity|@Table/g;
-//   const matches = javaCode.match(regex);
-
-//   return matches ? true : false;
-// }
-
-// // Function to scan a directory for Java files and detect controllers and models
-// function scanProjectForControllersAndModels(projectPath) {
-//   const files = fs.readdirSync(projectPath);
-//   const javaFiles = files.filter(file => file.endsWith('.java'));
-
-//   const controllers = [];
-//   const models = [];
-
-//   javaFiles.forEach(file => {
-//     const javaCode = fs.readFileSync(path.join(projectPath, file), 'utf-8');
-
-//     if (detectControllers(javaCode)) {
-//       controllers.push(file.replace('.java', ''));
-//     }
-
-//     if (detectModels(javaCode)) {
-//       models.push(file.replace('.java', ''));
-//     }
-//   });
-
-//   return { controllers, models };
-// }
-
-// // Example usage
-// const projectPath = 'path/to/your/spring/boot/project';
-
-// // const { controllers, models } = scanProjectForControllersAndModels(projectPath);
-
-// console.log('Detected Controllers:', controllers);
-// console.log('Detected Models:', models);
-
-
-// ////////////////////////////////////////////////////////////////////////////////
-// const fs = require('fs');
-// const path = require('path');
-
-// // Function to read Java files
-// function readJavaFiles(filePath) {
-//   return fs.readFileSync(filePath, 'utf-8');
-// }
-
-// // Function to detect controller classes
-// function detectControllers(javaCode) {
-//   const regex = /@RestController|@Controller/g;
-//   const matches = javaCode.match(regex);
-
-//   return matches ? true : false;
-// }
-
-// // Function to detect model classes
-// function detectModels(javaCode) {
-//   const regex = /@Entity|@Table/g;
-//   const matches = javaCode.match(regex);
-
-//   return matches ? true : false;
-// }
-
-// // Recursive function to scan a directory for Java files and detect controllers and models
-// function scanDirectory(directory) {
-//   const files = fs.readdirSync(directory);
-
-//   let controllers = [];
-//   let models = [];
-
-//   files.forEach(file => {
-//     const filePath = path.join(directory, file);
-
-//     if (fs.statSync(filePath).isDirectory()) {
-//       const subdirectoryResults = scanDirectory(filePath);
-//       controllers = controllers.concat(subdirectoryResults.controllers);
-//       models = models.concat(subdirectoryResults.models);
-//     } else if (file.endsWith('.java')) {
-//       const javaCode = readJavaFiles(filePath);
-
-//       if (detectControllers(javaCode)) {
-//         controllers.push(file.replace('.java', ''));
-//       }
-
-//       if (detectModels(javaCode)) {
-//         models.push(file.replace('.java', ''));
-//       }
-//     }
-//   });
-
-//   return { controllers, models };
-// }
-
-// // Function to scan a directory for Java files and detect controllers and models
-// function scanProjectForControllersAndModels(projectPath) {
-//   return scanDirectory(projectPath);
-// }
-
-// // // Example usage
-// // const projectPath = 'path/to/your/spring/boot/project';
-
-// // const { controllers, models } = scanProjectForControllersAndModels(projectPath);
-
-// console.log('Detected Controllers:', controllers);
-// console.log('Detected Models:', models);
+// Function to read Java files
+function readJavaFiles(filePath) {
+  return fs.readFileSync(filePath, 'utf-8');
+}

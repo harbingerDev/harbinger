@@ -120,8 +120,8 @@ async function convertToPlaywright(req){
   return convertedscript;
 }
 
-async function generateSwaggerDocs(codeFilePath){
-  const  generatedSwaggerDocs=await openApiJsonHelper.generateSwaggerDocs(codeFilePath);
+async function generateSwaggerDocs(codeFilePath,projectName,projectLanguage){
+  const  generatedSwaggerDocs=await openApiJsonHelper.generateSwaggerDocs(codeFilePath,projectName,projectLanguage);
   return generatedSwaggerDocs;
 }
 

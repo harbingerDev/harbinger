@@ -567,3 +567,18 @@
  *           application/json:
  *             example: [Example JSON]
  */
+
+
+/**
+ * @swagger
+ * /uploadFileWithPath/:
+ *   post:
+ *     summary: [Summary Here]
+ *     description: [Description Here]
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example: [Example JSON]
+ */

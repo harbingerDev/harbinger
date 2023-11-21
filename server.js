@@ -665,14 +665,17 @@ app.post("/uploadapiinfo/", upload.single('file'),async (req, res) => {
 
 
 
-app.get('/generateSwaggerinNodejs',async (req, res) => {
+app.get('/generateSwagger',async (req, res) => {
   const codeFilePath = req.query.filePath;
+  const projectName = req.query.projectName;
+  const projectLanguage = req.query.projectLanguage;
+
 
   if (!codeFilePath) {
     return res.status(400).json({ error: 'File path is required.' });
   }
   try {
-    const swaggerSpec = await db.generateSwaggerDocs(codeFilePath);
+    const swaggerSpec = await db.generateSwaggerDocs(codeFilePath,projectName,projectLanguage);
     // Send the OpenAPI specification as a downloadable file
     res.setHeader('Content-Disposition', 'attachment; filename=openapi.json');
     res.setHeader('Content-Type', 'application/json');
@@ -688,9 +691,29 @@ app.get("/clonegithubrepointolocal", async (req, res) => {
   const filepath = await db.clonegithubrepointolocal(req.query.githubRepoUrl);
   res.status(200).json(filepath);
 });
+
 app.get("/analyzeLanguage", async (req, res) => {
   const analyzedLanguage = await db.analyzeLanguage(req.query.path);
   res.status(200).json(analyzedLanguage);
+});
+
+app.post("/uploadFileWithPath/", async (req, res) => {
+
+  const apijsonfilepath = req.query.path;
+ 
+  try {
+    const data = fs.readFileSync(apijsonfilepath, "utf8");
+    fs.writeFileSync("test.json", data);
+
+    // Use the contents for processing (assuming db.getAllDataAndParse returns a Promise)
+    const extractedData = await db.getAllDataAndParse(data);
+
+    res.status(200).json(extractedData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to upload file with path." });
+  }
+
 });
 
 
