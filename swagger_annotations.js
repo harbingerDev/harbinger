@@ -526,7 +526,7 @@
 
 /**
  * @swagger
- * /generateSwaggerinNodejs:
+ * /generateSwagger:
  *   get:
  *     summary: [Summary Here]
  *     description: [Description Here]
