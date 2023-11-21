@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, curly_braces_in_flow_control_structures
 
 import 'dart:convert';
 import 'dart:io';
@@ -32,6 +32,7 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
   bool isAnalyzing = false;
   bool iscreate = true;
   String uploadpath = "";
+  String projectName = "";
   @override
   Widget build(BuildContext context) {
     return StatefulBuilder(
@@ -84,6 +85,7 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                 ElevatedButton(
                   onPressed: iscreate
                       ? () async {
+                          String input = urlController.text;
                           setState(() {
                             isAnalyzing = true;
                             analysisResult = "Analyzing...";
@@ -111,7 +113,21 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                           });
 
                           // Perform analysis based on the entered URL or path
-                          String input = urlController.text;
+
+                          RegExp regex = RegExp(r'\\([^\\]+)$');
+
+                          Match match = regex.firstMatch(input)!;
+
+                          if (match != null) {
+                            String extractedString = match.group(1)!;
+                            setState((() {
+                              projectName = extractedString;
+                            }));
+
+                            print(extractedString); // Output: harbinger_backend
+                          } else {
+                            print('Pattern not found in the path');
+                          }
                           // Assuming there's a function for language analysis
                           AnalysisResult result = await analyzeLanguage(input);
                           print(result.maxLanguage);
@@ -151,9 +167,6 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                               analysisResult = "Failed to analyse the language";
                             });
                           }
-
-                          // You might want to close the dialog or handle completion differently
-                          // Navigator.of(context).pop();
                         }
                       : () async {
                           Map<String, String> queryParams = {
@@ -166,7 +179,7 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                               "http://localhost:1337/uploadFileWithPath?$queryString");
 
                           // You can perform the logic for language analysis here
-                          final response = await http.get(
+                          final response = await http.post(
                             apiUri,
                             headers: {
                               'Content-Type': 'application/json',
@@ -254,22 +267,24 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
 
     // Replace this with your actual logic to determine the language
     return AnalysisResult(
-        languages: Map.of({"unkown": 0}),
+        languages: Map.of({"Unknown": 0}),
         result: "Unknown",
         maxLanguage: "Unknown"); // For example
   }
 
   Future<String> createOpenApiJsonFile(String path, String language) async {
     print(language);
-    if (language == "JavaScript") {
+    if (language == "JavaScript" || language == "Java") {
       try {
         Map<String, String> queryParams = {
           'filePath': path,
+          "projectName": projectName,
+          "projectLanguage": language
         };
         String queryString = Uri(queryParameters: queryParams).query;
 
-        final Uri apiUri = Uri.parse(
-            "http://localhost:1337/generateSwaggerinNodejs?$queryString");
+        final Uri apiUri =
+            Uri.parse("http://localhost:1337/generateSwagger?$queryString");
 
         final http.Client client = http.Client();
         final http.Response response = await client.get(
@@ -299,7 +314,7 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
       }
       return "not created";
     } else
-      return "not supported for other language as of now ";
+      return "Not supported for  $language as of now ";
   }
 
   _showchooseendpointsPopup(List<Endpoint> endpoints) {
