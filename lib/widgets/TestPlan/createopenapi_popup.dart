@@ -33,6 +33,8 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
   bool iscreate = true;
   String uploadpath = "";
   String projectName = "";
+  String path = "";
+  bool disableButton = false;
   @override
   Widget build(BuildContext context) {
     return StatefulBuilder(
@@ -49,10 +51,10 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
               SizedBox(
                 width: 30,
               ),
-              const Text('Create OpenApi.json file'),
+              const Text('Harbinger Analyser'),
             ],
           ),
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.all(10),
           content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.44,
             height: MediaQuery.of(context).size.height * 0.39,
@@ -79,125 +81,156 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
                 isAnalyzing
                     ? Text(analysisResult,
                         style:
-                            TextStyle(fontSize: 16, color: Color(0xffE95622)))
+                            // TextStyle(fontSize: 16, color: Color(0xffE95622)))
+                            TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 54, 54, 54)))
                     : SizedBox.shrink(),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: iscreate
-                      ? () async {
-                          String input = urlController.text;
-                          setState(() {
-                            isAnalyzing = true;
-                            analysisResult = "Analyzing...";
-                          });
-                          await Future.delayed(Duration(seconds: 3));
-                          if (isGitHubRepo(urlController.text)) {
-                            setState(() {
-                              isAnalyzing = true;
-                              analysisResult =
-                                  "Cloning project from github repository...";
-                            });
-                            await Future.delayed(Duration(seconds: 2));
-                            final path = await cloneprojectfromgithub(
-                                urlController.text);
-                            print(path);
-                            setState(() {
-                              analysisResult = "Cloned project in $path ...";
-                            });
-                          }
-                          await Future.delayed(Duration(seconds: 3));
+                SizedBox(height: 36),
+                !disableButton
+                    ? ElevatedButton(
+                        onPressed: iscreate
+                            ? () async {
+                                String input = urlController.text;
+                                setState(() {
+                                  disableButton = true;
+                                  isAnalyzing = true;
+                                  analysisResult =
+                                      "Harbinger Analyser is Analysing ...";
+                                });
+                                await Future.delayed(Duration(seconds: 3));
+                                if (isGitHubRepo(urlController.text)) {
+                                  setState(() {
+                                    isAnalyzing = true;
+                                    analysisResult =
+                                        "Cloning project from github repository...";
+                                  });
+                                  await Future.delayed(Duration(seconds: 2));
+                                  path = await cloneprojectfromgithub(
+                                      urlController.text);
+                                  print(path);
+                                  setState(() {
+                                    analysisResult =
+                                        "Cloned project in $path ...";
+                                  });
+                                }
+                                await Future.delayed(Duration(seconds: 3));
 
-                          setState(() {
-                            isAnalyzing = true;
-                            analysisResult = "Analyzing project language...";
-                          });
+                                setState(() {
+                                  isAnalyzing = true;
+                                  analysisResult =
+                                      "Analysing project language...";
+                                });
 
-                          // Perform analysis based on the entered URL or path
+                                // Perform analysis based on the entered URL or path
+                                if (!isGitHubRepo(input)) {
+                                  RegExp regex = RegExp(r'\\([^\\]+)$');
 
-                          RegExp regex = RegExp(r'\\([^\\]+)$');
+                                  Match match = regex.firstMatch(input)!;
 
-                          Match match = regex.firstMatch(input)!;
+                                  if (match != null) {
+                                    String extractedString = match.group(1)!;
+                                    setState((() {
+                                      projectName = extractedString;
+                                    }));
 
-                          if (match != null) {
-                            String extractedString = match.group(1)!;
-                            setState((() {
-                              projectName = extractedString;
-                            }));
+                                    print(
+                                        extractedString); // Output: harbinger_backend
+                                  } else {
+                                    print('Pattern not found in the path');
+                                  }
+                                } else if (isGitHubRepo(input)) {
+                                  RegExp regex = RegExp(
+                                      r'https://github\.com/([^/]+/[^/]+)\.git');
+                                  Match match = regex.firstMatch(input)!;
 
-                            print(extractedString); // Output: harbinger_backend
-                          } else {
-                            print('Pattern not found in the path');
-                          }
-                          // Assuming there's a function for language analysis
-                          AnalysisResult result = await analyzeLanguage(input);
-                          print(result.maxLanguage);
-                          String languagesprint = "";
-                          result.languages.forEach((key, value) {
-                            languagesprint += "$key = $value files  ";
-                          });
-                          if (result.maxLanguage == "NA") {
-                            setState(() {
-                              analysisResult = "Failed to analyse the language";
-                            });
-                          }
-                          setState(() {
-                            analysisResult =
-                                " languages used : \n ${languagesprint} \n max language ${result.maxLanguage}  ";
-                          });
-                          print("waiting for 3 sec");
+                                  if (match != null && match.groupCount >= 1) {
+                                    projectName = match.group(1)!;
+                                  } else {
+                                    projectName = "demo";
+                                  }
+                                }
+                                // Assuming there's a function for language analysis
+                                if (isGitHubRepo(input)) {
+                                  input = path;
+                                }
+                                AnalysisResult result =
+                                    await analyzeLanguage(input);
+                                print(result.maxLanguage);
+                                String languagesprint = "";
+                                // result.languages.forEach((key, value) {
+                                //   languagesprint += "$key = $value files  ";
+                                // });
+                                if (result.maxLanguage == "NA") {
+                                  setState(() {
+                                    disableButton = true;
 
-                          await Future.delayed(Duration(seconds: 5));
-                          print("after 3 sec");
+                                    analysisResult =
+                                        "Sorry, Harbinger Analyser Failed to analyse the language";
+                                  });
+                                }
+                                setState(() {
+                                  analysisResult =
+                                      "Harbinger Analyser analysed your project is with ${result.maxLanguage} language  ";
+                                });
+                                print("waiting for 3 sec");
 
-                          // Hit the createopenapi.jsonfile API
-                          if (result.maxLanguage != "Unknown") {
-                            setState(() {
-                              analysisResult =
-                                  "Creating openapi.json file for ${result.maxLanguage} ....";
-                            });
-                            String textresult = await createOpenApiJsonFile(
-                                input, result.maxLanguage);
-                            print("textresult$textresult");
-                            setState(() {
-                              analysisResult = textresult;
-                              iscreate = false;
-                            });
-                          } else {
-                            setState(() {
-                              analysisResult = "Failed to analyse the language";
-                            });
-                          }
-                        }
-                      : () async {
-                          Map<String, String> queryParams = {
-                            'path': uploadpath,
-                          };
-                          String queryString =
-                              Uri(queryParameters: queryParams).query;
+                                await Future.delayed(Duration(seconds: 4));
+                                print("after 3 sec");
 
-                          final Uri apiUri = Uri.parse(
-                              "http://localhost:1337/uploadFileWithPath?$queryString");
+                                // Hit the createopenapi.jsonfile API
+                                if (result.maxLanguage != "Unknown") {
+                                  setState(() {
+                                    analysisResult =
+                                        "Anaysing your ${result.maxLanguage} project to get endpoints ....";
+                                  });
+                                  String textresult =
+                                      await createOpenApiJsonFile(
+                                          input, result.maxLanguage);
+                                  print("textresult$textresult");
+                                  setState(() {
+                                    analysisResult = textresult;
+                                  });
+                                } else {
+                                  setState(() {
+                                    disableButton = true;
+                                    analysisResult =
+                                        "Sorry, Harbinger Analyser Failed to analyse the language";
+                                  });
+                                }
+                              }
+                            : () async {
+                                Map<String, String> queryParams = {
+                                  'path': uploadpath,
+                                };
+                                String queryString =
+                                    Uri(queryParameters: queryParams).query;
 
-                          // You can perform the logic for language analysis here
-                          final response = await http.post(
-                            apiUri,
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                          );
-                          if (response.statusCode == 200) {
-                            final List<dynamic> responseData =
-                                json.decode(response.body);
-                            final List<Endpoint> endpoints = responseData
-                                .map((e) => Endpoint.fromJson(e))
-                                .toList();
+                                final Uri apiUri = Uri.parse(
+                                    "http://localhost:1337/uploadFileWithPath?$queryString");
 
-                            Navigator.of(context).pop();
-                            _showchooseendpointsPopup(endpoints);
-                          }
-                        },
-                  child: iscreate ? Text("Create ") : Text("Upload"),
-                ),
+                                // You can perform the logic for language analysis here
+                                final response = await http.post(
+                                  apiUri,
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                );
+                                if (response.statusCode == 200) {
+                                  final List<dynamic> responseData =
+                                      json.decode(response.body);
+                                  final List<Endpoint> endpoints = responseData
+                                      .map((e) => Endpoint.fromJson(e))
+                                      .toList();
+
+                                  Navigator.of(context).pop();
+                                  _showchooseendpointsPopup(endpoints);
+                                }
+                              },
+                        child: iscreate
+                            ? Text("Create ")
+                            : Text("Choose Endpoints"))
+                    : Container(),
               ],
             ),
           ),
@@ -300,21 +333,37 @@ class _CreateOpenApiJsonFileState extends State<CreateOpenApiJsonFile> {
             print("responseData$responseData");
             setState(() {
               uploadpath = responseData;
+              disableButton = false;
+              iscreate = false;
             });
-            return "openapi.json created successfully. \n File saved to $responseData path.";
+            return "Harbinger Analyser Analysed successfully.";
           } catch (e) {
+            setState(() {
+              disableButton = true;
+            });
+
             print('Error writing file: $e');
           }
         } else {
+          setState(() {
+            disableButton = true;
+          });
           print('Failed to download file. Status code: ${response.statusCode}');
-          return "not created";
+          return "Sorry, Harbinger Analyser failed to Analyse your project";
         }
       } catch (e) {
+        setState(() {
+          disableButton = true;
+        });
         print('Error downloading file: $e');
       }
-      return "not created";
-    } else
-      return "Not supported for  $language as of now ";
+      return "Failed to analyse file.";
+    } else {
+      setState(() {
+        disableButton = true;
+      });
+      return "Sorry, Harbinger Analyser doesnot supports $language as of now ";
+    }
   }
 
   _showchooseendpointsPopup(List<Endpoint> endpoints) {

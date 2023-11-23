@@ -1,12 +1,16 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, depend_on_referenced_packages
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:harbinger/firebase_options.dart';
 import 'package:harbinger/models/projects.dart';
 import 'package:harbinger/models/testScriptModel.dart';
 import 'package:harbinger/screens/auth_screen.dart';
+import 'package:harbinger/screens/dashboard_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yaru/yaru.dart';
 import 'widgets/Common/footer_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +20,6 @@ final filePathProvider = StateProvider<String>((ref) => "Nothing");
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 final godJSONProvider = StateProvider<TestScriptModel?>((ref) => null);
 final apiTestScriptProvider = StateProvider<ApiTest?>((ref) => null);
-
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +40,51 @@ class MyApp extends StatelessWidget {
         darkTheme: yaru.darkTheme,
         debugShowCheckedModeBanner: false,
         title: 'Harbinger - your own automation copilot',
-        home:
-            const MyHomePage(title: 'Harbinger - your own automation copilot'),
+        home: FutureBuilder(
+          future: isLoggedin(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.data == false) {
+                return const MyHomePage(
+                    title: 'Harbinger - your own automation copilot');
+              } else {
+                return const DashboardScreen();
+              }
+            } else {
+              return const CircularProgressIndicator();
+            }
+          },
+        ),
       );
     });
+  }
+
+
+  static Future<bool> isLoggedin() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final token = sharedPreferences.getString("token");
+
+    if (token != null) {
+      final tokenData = jsonDecode(
+          ascii.decode(base64.decode(base64.normalize(token.split(".")[1]))));
+      final int expirySeconds = tokenData['exp'];
+      final String role = tokenData['role'];
+      final int userid = tokenData['userid'];
+      //seting the role
+      sharedPreferences.setString("role", role);
+      sharedPreferences.setInt("userid", userid);
+
+      // Get the current time in seconds since the epoch
+      final int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      // Check if the token is expired
+      if (currentTime < expirySeconds) {
+        return true; // Token is valid
+      } else {
+        sharedPreferences.clear(); //expired token removed.
+      }
+    }
+    return false; // Token is invalid or not found
   }
 }
 
@@ -53,7 +97,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  
   bool showLogin = false;
   bool authenticated = false;
 

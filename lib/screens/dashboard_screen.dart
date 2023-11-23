@@ -8,6 +8,7 @@ import 'package:harbinger/screens/test_lab_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
 import 'package:harbinger/screens/test_reports_screen.dart';
 import 'package:harbinger/widgets/AuthPage/login_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../assets/constants.dart';
 import '../helpers/helper_functions.dart';
@@ -90,8 +91,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     });
 
                     if (_selectedIndex == 5) {
+                      cleartoken();
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => MyHomePage(title:'Harbinger - your own automation copilot')));
+                          builder: (context) => MyHomePage(
+                              title:
+                                  'Harbinger - your own automation copilot')));
                     }
                     ref.read(screenProvider.notifier).state = "Nothing";
                   },
@@ -118,5 +122,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
       ),
     );
+  }
+
+  static void cleartoken() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.clear();
   }
 }

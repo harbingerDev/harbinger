@@ -290,12 +290,11 @@ class _TestScriptState extends State<TestScript> {
                     ),
                     Text.rich(
                       TextSpan(
-                        text:
-                            "Haven't created 'openapi.json' for your project? ",
+                        text: "Dont have 'openapi.json' for your project? ",
                         style: TextStyle(fontSize: 12, color: Colors.black),
                         children: [
                           TextSpan(
-                            text: 'Click here to generate quickly!',
+                            text: 'Use Harbinger Analyser!',
                             style: GoogleFonts.roboto(
                                 color: Color(0xffE95622), fontSize: 12),
                             recognizer: TapGestureRecognizer()
