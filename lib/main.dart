@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, depend_on_referenced_packages
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, depend_on_referenced_packages, non_constant_identifier_names
 
 import 'dart:convert';
 
@@ -16,6 +16,7 @@ import 'widgets/Common/footer_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final screenProvider = StateProvider<String>((ref) => "Nothing");
+final roleBasedNavigatorProvider = StateProvider<String>((ref) => "Nothing");
 final filePathProvider = StateProvider<String>((ref) => "Nothing");
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 final godJSONProvider = StateProvider<TestScriptModel?>((ref) => null);
@@ -35,46 +36,43 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return YaruTheme(builder: (context, yaru, child) {
-      return MaterialApp(
-        theme: yaru.theme,
-        darkTheme: yaru.darkTheme,
-        debugShowCheckedModeBanner: false,
-        title: 'Harbinger - your own automation copilot',
-        home: FutureBuilder(
-          future: isLoggedin(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.data == false) {
-                return const MyHomePage(
-                    title: 'Harbinger - your own automation copilot');
+      return Consumer(builder: (context, ref, child) {
+        return MaterialApp(
+          theme: yaru.theme,
+          darkTheme: yaru.darkTheme,
+          debugShowCheckedModeBanner: false,
+          title: 'Harbinger - your own automation copilot',
+          home: FutureBuilder(
+            future: isLoggedin(ref),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                print(snapshot.data);
+                if (snapshot.data == true) {
+                  return DashboardScreen();
+                } else {
+                  return const MyHomePage(
+                      title: 'Harbinger - your own automation copilot');
+                }
               } else {
-                return const DashboardScreen();
+                return const CircularProgressIndicator();
               }
-            } else {
-              return const CircularProgressIndicator();
-            }
-          },
-        ),
-      );
+            },
+          ),
+        );
+      });
     });
   }
 
-
-  static Future<bool> isLoggedin() async {
+  static Future<bool> isLoggedin(ref) async {
     final sharedPreferences = await SharedPreferences.getInstance();
     final token = sharedPreferences.getString("token");
+    final role = sharedPreferences.getString("role");
+    ref.read(roleBasedNavigatorProvider.notifier).state = role;
 
     if (token != null) {
       final tokenData = jsonDecode(
           ascii.decode(base64.decode(base64.normalize(token.split(".")[1]))));
       final int expirySeconds = tokenData['exp'];
-      final String role = tokenData['role'];
-      final int userid = tokenData['userid'];
-      //seting the role
-      sharedPreferences.setString("role", role);
-      sharedPreferences.setInt("userid", userid);
-
-      // Get the current time in seconds since the epoch
       final int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
       // Check if the token is expired

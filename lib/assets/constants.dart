@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 const themeColor = Colors.black87;
-List<Map<String, dynamic>> navigationRailItems = [
+List<Map<String, dynamic>> projectAdminNavigationRailItems = [
   {
     "icon": Icons.home,
     "selectedIcon": Icons.home_filled,
     "selectedIconColor": themeColor,
-    "text": "Home"
+    "text": "PA"
   },
   {
     "icon": Icons.account_tree_outlined,
@@ -33,7 +33,123 @@ List<Map<String, dynamic>> navigationRailItems = [
     "selectedIconColor": themeColor,
     "text": "Settings"
   },
-   {
+  {
+    "icon": Icons.logout_outlined,
+    "selectedIcon": Icons.logout_rounded,
+    "selectedIconColor": themeColor,
+    "text": "Logout"
+  },
+];
+
+List<Map<String, dynamic>> superAdminNavigationRailItems = [
+  {
+    "icon": Icons.home,
+    "selectedIcon": Icons.home_filled,
+    "selectedIconColor": themeColor,
+    "text": "SA"
+  },
+  {
+    "icon": Icons.admin_panel_settings_sharp,
+    "selectedIcon": Icons.admin_panel_settings_outlined,
+    "selectedIconColor": themeColor,
+    "text": "Adminstrate"
+  },
+  {
+    "icon": Icons.supervised_user_circle_sharp,
+    "selectedIcon": Icons.supervised_user_circle_outlined,
+    "selectedIconColor": themeColor,
+    "text": "Users"
+  },
+  {
+    "icon": Icons.bar_chart_outlined,
+    "selectedIcon": Icons.bar_chart,
+    "selectedIconColor": themeColor,
+    "text": "Reports"
+  },
+  {
+    "icon": Icons.settings_outlined,
+    "selectedIcon": Icons.settings,
+    "selectedIconColor": themeColor,
+    "text": "Settings"
+  },
+  {
+    "icon": Icons.logout_outlined,
+    "selectedIcon": Icons.logout_rounded,
+    "selectedIconColor": themeColor,
+    "text": "Logout"
+  },
+];
+
+List<Map<String, dynamic>> orgAdminNavigationRailItems = [
+  {
+    "icon": Icons.home,
+    "selectedIcon": Icons.home_filled,
+    "selectedIconColor": themeColor,
+    "text": "OA"
+  },
+  {
+    "icon": Icons.account_tree_outlined,
+    "selectedIcon": Icons.account_tree,
+    "selectedIconColor": themeColor,
+    "text": "Test plan"
+  },
+  {
+    "icon": Icons.science_outlined,
+    "selectedIcon": Icons.science,
+    "selectedIconColor": themeColor,
+    "text": "Test lab"
+  },
+  {
+    "icon": Icons.bar_chart_outlined,
+    "selectedIcon": Icons.bar_chart,
+    "selectedIconColor": themeColor,
+    "text": "Reports"
+  },
+  {
+    "icon": Icons.settings_outlined,
+    "selectedIcon": Icons.settings,
+    "selectedIconColor": themeColor,
+    "text": "Settings"
+  },
+  {
+    "icon": Icons.logout_outlined,
+    "selectedIcon": Icons.logout_rounded,
+    "selectedIconColor": themeColor,
+    "text": "Logout"
+  },
+];
+List<Map<String, dynamic>> projectMemberNavigationRailItems = [
+  {
+    "icon": Icons.home,
+    "selectedIcon": Icons.home_filled,
+    "selectedIconColor": themeColor,
+    "text": "PM"
+  },
+  {
+    "icon": Icons.account_tree_outlined,
+    "selectedIcon": Icons.account_tree,
+    "selectedIconColor": themeColor,
+    "text": "Test plan"
+  },
+  {
+    "icon": Icons.science_outlined,
+    "selectedIcon": Icons.science,
+    "selectedIconColor": themeColor,
+    "text": "Test lab"
+  },
+  {
+    "icon": Icons.bar_chart_outlined,
+    "selectedIcon": Icons.bar_chart,
+    "selectedIconColor": themeColor,
+    "text": "Reports"
+  },
+  {
+    "icon": Icons.settings_outlined,
+    "selectedIcon": Icons.settings,
+    "selectedIconColor": themeColor,
+    "text": "Settings"
+  },
+  {
     "icon": Icons.logout_outlined,
     "selectedIcon": Icons.logout_rounded,
     "selectedIconColor": themeColor,
