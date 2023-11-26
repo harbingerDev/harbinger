@@ -78,7 +78,7 @@ class DashboardScreen extends ConsumerWidget {
               ref.read(selectedIndexProvider.notifier).state = index;
               print(index);
               print(selectedIndex);
-              if (selectedIndex == 5) {
+              if (index == 5) {
                 cleartoken();
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => MyHomePage(
@@ -167,7 +167,7 @@ class _NavigateToSpecificScreenInDashboardState
       } else if (selectedIndex == 4) {
         return TestLabScreen();
       } else {
-        return Container(); 
+        return Container();
       }
     } else if (role == AppConfig.ORGADMIN) {
       if (selectedIndex == 0) {
@@ -181,8 +181,7 @@ class _NavigateToSpecificScreenInDashboardState
       } else if (selectedIndex == 4) {
         return TestLabScreen();
       } else {
-       
-        return Container(); 
+        return Container();
       }
     } else if (role == AppConfig.PROJECTMEMBER) {
       if (selectedIndex == 0) {
@@ -196,7 +195,7 @@ class _NavigateToSpecificScreenInDashboardState
       } else if (selectedIndex == 4) {
         return TestLabScreen();
       } else {
-        return Container(); 
+        return Container();
       }
     }
     return Placeholder();

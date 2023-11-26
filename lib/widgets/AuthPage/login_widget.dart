@@ -9,6 +9,7 @@ import 'package:harbinger/main.dart';
 import 'package:harbinger/screens/dashboard_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../helpers/auth_service.dart';
+import '../../assets/config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -112,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           /////******************************with fastapi*********************************************
 
                           final Map<String, dynamic>? loginResult =
-                              await AuthService("http://127.0.0.1:8000").login(
+                              await AuthService(AppConfig.BASE_URL2).login(
                             email_id: _emailController.text,
                             password: _passwordController.text,
                           );
