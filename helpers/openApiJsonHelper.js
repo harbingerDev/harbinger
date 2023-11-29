@@ -316,7 +316,7 @@ function scanProjectForControllersAndModels(projectPath) {
 }
 
 // Function to generate OpenAPI JSON
-function generateOpenApiForJava(projectPath,projectName) {
+async function generateOpenApiForJava(projectPath,projectName) {
   // if(!fs.statSync(codeFilePath).isFile()){
   // }
 
@@ -328,35 +328,191 @@ const controllerspatharr=controllers
 const modelspatharr=models
 //main game starts now !...
 const controllerschema=createFinalSchemaForController(controllerspatharr);
+console.log("printing controller schemas",controllerschema)
 const modelschema=createFinalSchemaForModel(modelspatharr);
+console.log("printing model schemas",modelschema)
 
   // i will give the schema of both and you create it 
   const openApiJsoncontent = generateOpenApi(controllerschema, modelschema);
-  constfinalpath= path.join(directory, projectName+'_harbingeranalyser.json');
-  fs.writeFileSync(constfinalpath, JSON.stringify(openApiJsoncontent, null, 2));
-  console.log('OpenAPI documentation has been generated and saved to openapi.json');
+  const documentsPath = path.join(os.homedir(), "Documents");
+  const finalpath= path.join(documentsPath, "jsonfile");
+  console.log(finalpath,documentsPath)
 
-  return constfinalpath;
+  if (!fs.existsSync(finalpath)) {
+    fs.mkdirSync(finalpath, { recursive: true });
+    console.log(`Directory created: ${finalpath}`);
+  } else {
+    console.log(`Directory already exists: ${finalpath}`);
+  }
+  
+  const filePath = path.join(finalpath, `_harbingeranalyser.json`);
+  fs.writeFileSync(filePath, JSON.stringify(openApiJsoncontent, null, 2));
+  console.log('OpenAPI documentation has been generated and saved to openapi.json');
+  
+  return filePath;
 }
 
 function createFinalSchemaForController(controllerspatharr){
-  let finalSchemaForController="";
+  let paths={}
 
   controllerspatharr.forEach(eachcontrollerpath=>{
     const controllerCode = readJavaFiles(eachcontrollerpath);
-    const parsedControllers= parseControllers(controllerCode);
-    finalSchemaForController.push(createSchemaForEachControllerClass(parsedControllers))
+    paths=Object.assign({},paths,parseControllers(controllerCode)) ;
+
   })
-  return finalSchemaForController
+  return paths
 }
 
-function  parseControllers(controllerCode){
+function parseControllers(controllerCode){
+  const paths={}
+  let globalPath=""
 
+    // Use regex to extract the global path
+    const pathRegex = /@\s*RequestMapping\s*\(\s*"([^"]+)"\s*\)\s*public\s*class\s*(\w+)/;
+    const pathMatch = controllerCode.match(pathRegex);
+    globalPath = pathMatch ? pathMatch[1] : "";
+
+    // Use regex to remove all code above the class
+    const classRegex = /(class.*?{[\s\S]*})/;
+    const classMatch = controllerCode.match(classRegex);
+    const classCode = classMatch ? classMatch[1] : null;
+
+  const methodArr = [];
+  const regex = /@[a-zA-Z]+Mapping[\s\S]*?return .*?;/g;
+  let match;
+  while ((match = regex.exec(classCode)) !== null) {
+    methodArr.push(match[0]);
+  }
+
+  methodArr.forEach(
+    (apiCode)=>{
+    const {key, value}=generateSchemaForMethod(apiCode,globalPath);  
+    paths[key]=value;
+    }
+  )
+
+  return paths;
+}
+
+function generateSchemaForMethod(apiCode,globalpath){
+  //method
+  console.log("codestart",apiCode,"end")
+  let method="null"
+  let path="" 
+  let requestBodytype="";
+  let requestBodyvariablename="";
+  let response="";
+  const methodRegex1 = /@(\w+)Mapping/g;
+  const methodRegex2 = /RequestMethod\.(\w+)/;
+  const match1 = methodRegex1.exec(apiCode);
+  const match2 = methodRegex2.exec(apiCode);
+  if (match1 && match1[1]!=null &&  match1[1]!="Request") {
+    method= match1[1].toUpperCase();
+  }
+  else if (match2 && match2[1]!=null) {
+    method= match2[1].toUpperCase();
+  }
+  else{
+    console.log("******api method printed check the method as its null->>>>>>",apiCode)
+  }
+
+ const pathregex1 = /Mapping\(value\s*=\s*["']([^"']+)["']\)/;
+  const pathregex2=/Mapping\(["']([^"']+)["']\)/;
+  const matchpathregex1 = apiCode.match(pathregex1);
+  const matchpathregex2 = apiCode.match(pathregex2);
+
+  if (matchpathregex1 && matchpathregex1[1]) {
+    path= matchpathregex1[1];
+  }
+  else if (matchpathregex2 && matchpathregex2[1]){
+    path= matchpathregex2[1];
+  }
+
+
+  const requestBodyRegex =/@RequestBody\s+(\w+(?:\s*<\s*\w+\s*>)?)\s+(\w+)/;
+
+  // Search for @RequestBody annotation in the code
+  const requestBodyMatch = apiCode.match(requestBodyRegex);
+
+  if (requestBodyMatch) {
+    // Extracted type and variable from @RequestBody annotation
+     requestBodytype = requestBodyMatch[1];
+     requestBodyvariablename = requestBodyMatch[2];
+  } 
+
+  
+const regex1 = /ResponseEntity<List<(\w+)>/;
+const regex2 = /ResponseEntity<(\w+)>/;
+
+const responsematch1 = apiCode.match(regex1);
+const responsematch2 = apiCode.match(regex2);
+
+
+if (responsematch1&& responsematch1[1]) {
+   response = responsematch1[1];
+} else if (responsematch2 && responsematch2[1]) {
+  response = responsematch2[1];
+} 
+
+if(requestBodytype=="int"||requestBodytype=="String"||requestBodytype=="integer")requestBodytype=""
+if(response=="int"||response=="String"||response=="integer")response=""
+
+ const api= new Api(method,globalpath+path,requestBodytype,requestBodyvariablename,response)
+return { key:[api.path],
+ value:{
+    [api.method.toLowerCase()]: {
+      tags: [api.requestBodyType.toLowerCase()],
+      summary: api.summary || '',
+      operationId: api.operationId || '',
+      ...(api.requestBodyType
+        ? {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: `#/components/schemas/${api.requestBodyType}`
+                  }
+                }
+              },
+              required: true
+            }
+          }
+        : {}),
+      responses: {
+        ...(api.response
+          ? {
+        200: {
+          description: 'Successful Response',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: `#/components/schemas/${api.response}`
+              }
+            }
+          }
+        }
+      }:{}),
+        422: {
+          description: 'Validation Error',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/HTTPValidationError'
+              }
+            }
+          }
+        }
+      }
+    }
+  }}
+  
 
 }
+
+
 function createSchemaForEachControllerClass(parsedControllers){
 
-   // // Populate paths from controllers
+  // Populate paths from controllers
   // controllers.forEach(controller => {
   //   openApiJson.paths[controller] = {
   //     get: {
@@ -370,30 +526,78 @@ function createSchemaForEachControllerClass(parsedControllers){
 }
 
 function createFinalSchemaForModel(modelspatharr){
-  let finalSchemaForModel="";
+  let schemas={};
 
   modelspatharr.forEach(eachModelpath=>{
     const modelCode = readJavaFiles(eachModelpath);
-    const parsedModels= parseModels(modelCode);
-    finalSchemaForModel.push(createSchemaForEachModelClass(parsedModels))
+    const scheme={}
+   const { key,value} = createSchemaForEachModelClass(modelCode)
+   scheme[key]=value;
+    schemas=Object.assign({},schemas,scheme)
   })
-  return finalSchemaForModel
+
+  return schemas
 }
 
-function parseModels(modelCode){
 
-}
+function createSchemaForEachModelClass(javaCode){
 
-function createSchemaForEachModelClass(parsedModels){
+    // Extract class name
+    const classNameMatch = javaCode.match(/class (\w+)/);
+    if (!classNameMatch) {
+      throw new Error('Class name not found in Java code');
+    }
+    const className = classNameMatch[1];
   
-  // // Populate schemas from models
-  // models.forEach(model => {
-  //   openApiJson.components.schemas[model] = {
-  //     type: 'object',
-  //     // Add more schema properties as needed
-  //   };
-  // });
+    // Extract fields
+    const fieldsMatch = javaCode.match(/private (\w+) (\w+);/g);
+    if (!fieldsMatch) {
+      throw new Error('No fields found in Java code');
+    }
+  
+    const properties = {};
+    fieldsMatch.forEach((field) => {
+      const fieldMatch = field.match(/private (\w+) (\w+);/);
+      if (fieldMatch) {
+        const fieldType = mapFieldType(fieldMatch[1]);
+        const fieldName = fieldMatch[2];
+  
+        properties[fieldName] = {
+          type: fieldType,
+          title: fieldName,
+        };
+      }
+    });
+  
+    // Generate JSON schema
 
+   return {key:  [className],value:{
+        properties,
+        type: 'object',
+        required: [],
+        title: className,
+      }}
+
+    // console.log("without stringify",jsonSchema)
+
+    // console.log("stringifying",JSON.stringify(jsonSchema, null, 2))
+    // return JSON.stringify(jsonSchema, null, 2);
+  }
+
+
+function mapFieldType(javaType) {
+  // You can extend this mapping based on your specific needs
+  switch (javaType) {
+    case 'String':
+      return 'string';
+    case 'int':
+    case 'Long':
+    case 'Integer':
+      return 'integer';
+    // Add more mappings as needed
+    default:
+      return 'unknown';
+  }
 }
 
 function generateOpenApi(controllers, models){
@@ -409,6 +613,13 @@ function generateOpenApi(controllers, models){
       schemas: {},
     },
   };
+
+
+
+  openApiJson.paths=controllers
+  openApiJson.components.schemas=models
+  console.log(openApiJson)
+
 
   return openApiJson;
 
@@ -604,3 +815,12 @@ module.exports = { generateSwaggerDocs ,clonegithubintolocalpath,analyzeLanguage
 //           },
 
 
+class Api {
+  constructor(method, path, requestBodyType,requestBodyName,response) {
+    this.method = method;
+    this.path = path;
+    this.requestBodyType = requestBodyType;
+    this.requestBodyName = requestBodyName;
+    this.response=response
+  }
+}
