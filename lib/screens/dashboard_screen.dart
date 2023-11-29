@@ -7,11 +7,13 @@ import 'package:harbinger/screens/home_screen.dart';
 import 'package:harbinger/screens/test_lab_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
 import 'package:harbinger/screens/test_reports_screen.dart';
+import 'package:harbinger/widgets/organisation/org_admin_dashboard.dart';
+import 'package:harbinger/widgets/Admin/superadmin_dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../assets/constants.dart';
 import '../helpers/helper_functions.dart';
 import '../widgets/TestPlan/show_code_updated.dart';
-
+import '../widgets/Admin/superadmin_adminstrate_screen.dart';
 class DashboardScreen extends ConsumerWidget {
   final selectedIndexProvider = StateProvider<int>((ref) => 0);
 
@@ -157,9 +159,9 @@ class _NavigateToSpecificScreenInDashboardState
       }
     } else if (role == AppConfig.SUPERADMIN) {
       if (selectedIndex == 0) {
-        return HomeScreen();
+        return SuperadminDashboardOverviewScreen();
       } else if (selectedIndex == 1 && screenIndicator == "Nothing") {
-        return TestPlanScreen();
+        return SuperAdminAdminstrate();
       } else if (selectedIndex == 1 && screenIndicator == "Code") {
         return ShowCodeUpdated(filePath: widget.filePath);
       } else if (selectedIndex == 3) {
@@ -171,9 +173,9 @@ class _NavigateToSpecificScreenInDashboardState
       }
     } else if (role == AppConfig.ORGADMIN) {
       if (selectedIndex == 0) {
-        return HomeScreen();
+        return OrgAdminDashboardScreen();
       } else if (selectedIndex == 1 && screenIndicator == "Nothing") {
-        return TestPlanScreen();
+        return HomeScreen();
       } else if (selectedIndex == 1 && screenIndicator == "Code") {
         return ShowCodeUpdated(filePath: widget.filePath);
       } else if (selectedIndex == 3) {

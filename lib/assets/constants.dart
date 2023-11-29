@@ -82,28 +82,28 @@ List<Map<String, dynamic>> superAdminNavigationRailItems = [
 
 List<Map<String, dynamic>> orgAdminNavigationRailItems = [
   {
-    "icon": Icons.home,
-    "selectedIcon": Icons.home_filled,
+    "icon": Icons.dashboard_customize_outlined,
+    "selectedIcon": Icons.dashboard_customize_sharp,
     "selectedIconColor": themeColor,
     "text": "OA"
   },
   {
-    "icon": Icons.account_tree_outlined,
-    "selectedIcon": Icons.account_tree,
+    "icon": Icons.checklist_sharp,
+    "selectedIcon": Icons.checklist_rtl_sharp,
     "selectedIconColor": themeColor,
-    "text": "Test plan"
+    "text": "Projects"
   },
   {
-    "icon": Icons.science_outlined,
-    "selectedIcon": Icons.science,
+    "icon": Icons.people_outline_outlined,
+    "selectedIcon": Icons.people_alt,
     "selectedIconColor": themeColor,
-    "text": "Test lab"
+    "text": "Employees"
   },
   {
-    "icon": Icons.bar_chart_outlined,
-    "selectedIcon": Icons.bar_chart,
+    "icon": Icons.add_moderator_outlined,
+    "selectedIcon": Icons.admin_panel_settings,
     "selectedIconColor": themeColor,
-    "text": "Reports"
+    "text": "Profile"
   },
   {
     "icon": Icons.settings_outlined,
