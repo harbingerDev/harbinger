@@ -53,6 +53,7 @@ class _SuperAdminAdminstrateState extends State<SuperAdminAdminstrate> {
   }
 
   Future<void> _getData() async {
+    print("calling getData");
     organisationDataList = [];
 
     var organisationsUrl = Uri.parse("${baseurl}/organisation/");
@@ -155,6 +156,7 @@ class _SuperAdminAdminstrateState extends State<SuperAdminAdminstrate> {
                     InkWell(
                       onTap: () {
                         setState(() {
+                          _getData();
                           displayScreen = "org_home_screen";
                         });
                         print(displayScreen);
@@ -178,48 +180,48 @@ class _SuperAdminAdminstrateState extends State<SuperAdminAdminstrate> {
                         ),
                       ),
                     ),
-        
+
                     SizedBox(
                       width: 10,
                     ),
                     // Search Organisation
 
-
-
-                  displayScreen == "org_home_screen"?  Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          filterOrganisations(value);
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search Organisation',
-                          prefixIcon: Icon(Icons.search),
-                        ),
-                      ),
-                    ):
-
-                     Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: const Text(
-            'Organisation Details',
-            style: TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+                    displayScreen == "org_home_screen"
+                        ? Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (value) {
+                                filterOrganisations(value);
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Search Organisation',
+                                prefixIcon: Icon(Icons.search),
+                              ),
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: const Text(
+                              'Organisation Details',
+                              style: TextStyle(
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
 
                     SizedBox(
                       width: 10,
                     ),
-               displayScreen == "org_home_screen"?     ElevatedButton.icon(
-                      onPressed: () {
-                        _showCreateOrganisationDialog(context);
-                      },
-                      label: Text('Create Organization'),
-                      icon: Icon(Icons.add),
-                    ):Container(),
+                    displayScreen == "org_home_screen"
+                        ? ElevatedButton.icon(
+                            onPressed: () {
+                              _showCreateOrganisationDialog(context, _getData);
+                            },
+                            label: Text('Create Organisation'),
+                            icon: Icon(Icons.add),
+                          )
+                        : Container(),
                   ],
                 ),
               ),
@@ -268,18 +270,19 @@ class _SuperAdminAdminstrateState extends State<SuperAdminAdminstrate> {
                           ],
                         )
                   : Expanded(
-                    child: SuperAdminOrganisationDetails(
-                        organisation: currentOrganisation),
-                  ),
+                      child: SuperAdminOrganisationDetails(
+                          organisation: currentOrganisation),
+                    ),
             ],
           );
   }
 
-  void _showCreateOrganisationDialog(BuildContext context) {
+  void _showCreateOrganisationDialog(
+      BuildContext context, VoidCallback? callback) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CreateOrganisationPopup();
+        return CreateOrganisationPopup(callback: callback);
       },
     );
   }

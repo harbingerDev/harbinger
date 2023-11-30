@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:harbinger/models/organisation.dart';
 import 'package:harbinger/models/organisation_remodel.dart';
+import 'package:intl/intl.dart';
 
 class SuperAdminOrganisationDetails extends StatefulWidget {
   final Organisation organisation;
@@ -23,11 +24,14 @@ class SuperAdminOrganisationDetails extends StatefulWidget {
 class _SuperAdminOrganisationDetailsState
     extends State<SuperAdminOrganisationDetails> {
   late Future<Organisationremodel> _organisationFuture;
+  late DateTime _selectedDate;
+  bool _isDateChanged = false;
 
   @override
   void initState() {
     super.initState();
     _organisationFuture = _fetchOrganisationData();
+    _selectedDate = widget.organisation.orgEndDate ?? DateTime.now();
   }
 
   Future<Organisationremodel> _fetchOrganisationData() async {
@@ -51,10 +55,72 @@ class _SuperAdminOrganisationDetailsState
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       print(
-          'Received data from API+++++++++++++++++++++++++++++++++++++++++++: $jsonData'); // Add this line to print the received data
+          'Received data from API+++++++++++++++++++++++++++++++++++++++++++: $jsonData');
       return Organisationremodel.fromJson(jsonData);
     } else {
       throw Exception('Failed to load organisation data');
+    }
+  }
+
+  // Function to show date picker in a popup
+  Future<void> _selectDate(BuildContext context, id) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _isDateChanged = true; // Set the flag to true when the date is changed
+      });
+    }
+  }
+
+  // Function to save the selected date
+  Future<void> _saveEndDate() async {
+    if (_isDateChanged) {
+      try {
+        print("selected$_selectedDate");
+
+        // Format the date in ISO 8601 with UTC time
+        String formattedDate = _selectedDate
+            .toIso8601String()
+            .replaceAll(RegExp(r'\.\d+'), '.000000');
+        print("formated$formattedDate");
+        // Your API endpoint for updating the end date
+        final String apiUrl =
+            '${AppConfig.BASE_URL2}/organisation/enddate/${widget.organisation.orgId}?enddate=${formattedDate.toString()}';
+        // 2023-11-29T13:06:33.455Z";
+
+        // Your API call logic using the http package
+        final response = await http.patch(
+          Uri.parse(apiUrl),
+          headers: {
+            // Add any headers needed for your API
+            // For example, 'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+          },
+          body: {},
+        );
+        if (response.statusCode == 200) {
+          print('End date updated successfully');
+        } else {
+          // Handle API call errors
+          print('Error updating end date: ${response.statusCode}');
+          print(response.body);
+        }
+      } catch (error) {
+        // Handle other errors
+        print('Error: $error');
+        throw error; // Rethrow the error to be caught by the caller
+      }
+
+      // Reset the flag after saving
+      setState(() {
+        _isDateChanged = false;
+      });
     }
   }
 
@@ -94,7 +160,7 @@ class _SuperAdminOrganisationDetailsState
                                       child: Chip(
                                         elevation: 1,
                                         label: Text(
-                                          org.status == "active"
+                                          widget.organisation.status == "active"
                                               ? "Active"
                                               : "Inactive",
                                           overflow: TextOverflow.ellipsis,
@@ -103,7 +169,9 @@ class _SuperAdminOrganisationDetailsState
                                             fontSize: 15,
                                           ),
                                         ),
-                                        backgroundColor: org.status == "active"
+                                        backgroundColor: widget
+                                                    .organisation.status ==
+                                                "active"
                                             ? Colors.green.withOpacity(.2)
                                             : Colors.black87.withOpacity(.2),
                                       ),
@@ -186,12 +254,20 @@ class _SuperAdminOrganisationDetailsState
                                         fontWeight: FontWeight.w500),
                                   ),
                                   Text(
-                                    "${org.orgEndDate}",
+                                    "${_selectedDate.toLocal()}".split(' ')[0],
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500),
                                   ),
-                                  Icon(Icons.edit),
+                                  IconButton(
+                                    icon:!_isDateChanged
+                                        ? Icon(Icons.edit)
+                                        : Icon(Icons.save),
+                                    onPressed: !_isDateChanged
+                                        ? () => _selectDate(
+                                            context, widget.organisation.orgId)
+                                        : _saveEndDate,
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 8.0),
