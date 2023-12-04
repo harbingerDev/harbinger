@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_is_empty
 
 import 'dart:convert';
+import 'package:harbinger/models/requestBody.dart';
 import 'package:harbinger/models/response_model.dart';
 import 'package:harbinger/widgets/TestPlan/choose_endpointspopup.dart';
 import 'package:http/http.dart' as http;
@@ -10,7 +11,7 @@ import 'package:accordion/accordion.dart';
 class ApiTesting extends StatefulWidget {
   final String? page;
   final void Function(Map<String, dynamic>) onSave;
-  final String? reqBody;
+  final List<RequestParameter>? reqBody;
   final List<RequestParameter>? queryParam;
   final String? endpointPath;
   final String? httpMethod;
@@ -36,6 +37,8 @@ class ApiTesting extends StatefulWidget {
 }
 
 class ApiTestingState extends State<ApiTesting> {
+  List<RequestBodyParameter> reqbodyList = [];
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   TextEditingController urlController = TextEditingController();
@@ -58,6 +61,9 @@ class ApiTestingState extends State<ApiTesting> {
   TextEditingController variableController = TextEditingController();
   String keyofvalue = "";
 
+  bool isFakerChecked = false;
+  bool isDirectTestChecked = false;
+
   getValue(value) {
     if (value == "integer") {
       keyofvalue = "1";
@@ -72,33 +78,51 @@ class ApiTestingState extends State<ApiTesting> {
     return keyofvalue;
   }
 
+  initialiseReqBodyList() {
+    List<RequestParameter>? requestBody = widget.reqBody;
+    int index = 0;
+
+    if (requestBody != null) {
+      for (RequestParameter parameter in requestBody) {
+        RequestBodyParameter tempParameter =
+            RequestBodyParameter(); // Instantiate the object
+
+        tempParameter.isFakerEnabled = false;
+
+        tempParameter.fakertype = "";
+        tempParameter.paramkey = parameter.name;
+        tempParameter.paramtype = parameter.type;
+        tempParameter.paramvalue = getValue(tempParameter.paramtype!);
+        reqbodyList.add(tempParameter); // Add the object to the list
+        index++;
+      }
+    }
+    print("reqbodyList in init method$reqbodyList");
+  }
+
   @override
   void initState() {
+    initialiseReqBodyList();
     urlController.text = widget.endpointPath!;
-    requestBodyController.text = widget.reqBody!;
     responseBodyController.text = widget.responseSchema!;
     selectedHttpMethod = widget.httpMethod!;
     selectedBaseUrl = widget.baseUrl!;
     baseurlController.text = widget.baseUrl!;
     headersController.text = widget.headers!;
     if (widget.queryParam!.length != 0) {
-      print("check1");
       urlController.text += "?";
       for (int i = 0; i < widget.queryParam!.length; i++) {
-        print("check2");
         if (i > 0) urlController.text += "&";
-        print("check2.0${widget.queryParam![i].name!}");
         urlController.text += widget.queryParam![i].name!;
-        print("check2.1${widget.queryParam![i].type!}");
         urlController.text += "=";
         urlController.text += getValue(widget.queryParam![i].type!);
-        print("check3");
 
         widget.queryParam![i].placeholder =
             getValue(widget.queryParam![i].type!);
         print("checkinggggg${getValue(widget.queryParam![i].type!)}");
       }
     }
+    // reqbodymap.add
 
     super.initState();
   }
@@ -560,35 +584,215 @@ class ApiTestingState extends State<ApiTesting> {
                                   ],
                                 ),
                               ),
+
                               Padding(
-                                padding: const EdgeInsets.all(15.0),
+                                padding:
+                                    const EdgeInsets.fromLTRB(15, 0, 15, 15),
                                 child: Row(
                                   children: [
-                                    Expanded(
-                                      child: Container(
-                                        height: 200,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: const Color.fromARGB(
-                                                255, 223, 222, 222),
-                                            width: 1.0,
-                                          ),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(10.0)),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: TextField(
-                                            controller: requestBodyController,
-                                            maxLines:
-                                                8, // Make it multiline (expanded)
-                                            decoration: const InputDecoration(
-                                              labelText: 'Request Body',
+                                    widget.reqBody?.length != 0
+                                        ? Expanded(
+                                            child: SizedBox(
+                                              height: 200,
+                                              child: Column(children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Text(
+                                                          "Request Body              Want to enable Faker? Enable the checkbox!"),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Expanded(
+                                                  child: ListView.builder(
+                                                    itemCount:
+                                                        reqbodyList.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      String selectedValue =
+                                                          reqbodyList[index]
+                                                                      .fakertype ==
+                                                                  ""
+                                                              ? 'Name'
+                                                              : reqbodyList[
+                                                                      index]
+                                                                  .fakertype!;
+                                                      List<String>
+                                                          dropdownItems = [
+                                                        'Name',
+                                                        'Address',
+                                                        'Email',
+                                                        'UserName',
+                                                        'Password',
+                                                        'Number',
+                                                        'FutureDate',
+                                                        'CompanyName'
+                                                      ];
+
+                                                      return Card(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child:
+                                                                    TextField(
+                                                                  readOnly:
+                                                                      true,
+                                                                  decoration: InputDecoration(
+                                                                      labelText:
+                                                                          'Key'),
+                                                                  controller:
+                                                                      TextEditingController(
+                                                                    text: reqbodyList[
+                                                                            index]
+                                                                        .paramkey,
+                                                                  ),
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    //key cant be changed
+                                                                  },
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 10),
+                                                              reqbodyList[index]
+                                                                      .isFakerEnabled!
+                                                                  ? Expanded(
+                                                                      child:
+                                                                          DropdownButton(
+                                                                        value:
+                                                                            selectedValue,
+                                                                        items: dropdownItems.map((String
+                                                                            value) {
+                                                                          return DropdownMenuItem(
+                                                                            value:
+                                                                                value,
+                                                                            child:
+                                                                                Text(value),
+                                                                          );
+                                                                        }).toList(),
+                                                                        onChanged:
+                                                                            (newValue) {
+                                                                          print(
+                                                                              'Selected Value 111: $newValue');
+                                                                          print(
+                                                                              'Index 111: $index');
+                                                                          print(
+                                                                              'reqbodyList 111: $reqbodyList');
+                                                                          selectedValue =
+                                                                              newValue!;
+                                                                          setState(
+                                                                              () {
+                                                                            selectedValue =
+                                                                                newValue!;
+                                                                            reqbodyList[index].fakertype =
+                                                                                selectedValue;
+                                                                          });
+                                                                        },
+                                                                      ),
+                                                                    )
+                                                                  : Expanded(
+                                                                      child:
+                                                                          TextField(
+                                                                        decoration:
+                                                                            InputDecoration(labelText: 'Value'),
+                                                                        controller:
+                                                                            TextEditingController(
+                                                                          text:
+                                                                              reqbodyList[index].paramvalue!,
+                                                                        ),
+                                                                        onChanged:
+                                                                            (value) {
+                                                                          // setState(
+                                                                          //     () {
+                                                                          reqbodyList[index].paramvalue =
+                                                                              value;
+                                                                          // });
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                              Checkbox(
+                                                                semanticLabel:
+                                                                    "Enable Faker",
+                                                                fillColor:
+                                                                    MaterialStateProperty
+                                                                        .all(
+                                                                  const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      235,
+                                                                      234,
+                                                                      234),
+                                                                ),
+                                                                value: reqbodyList[
+                                                                        index]
+                                                                    .isFakerEnabled!,
+                                                                onChanged:
+                                                                    (bool?
+                                                                        value) {
+                                                                  setState(() {
+                                                                    reqbodyList[index]
+                                                                            .isFakerEnabled =
+                                                                        value!;
+                                                                  });
+                                                                },
+                                                                activeColor:
+                                                                    const Color
+                                                                        .fromARGB(
+                                                                        255,
+                                                                        236,
+                                                                        234,
+                                                                        234), // Color when checkbox is checked
+                                                                checkColor: Colors
+                                                                    .green, // Color of the checkmark
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ]),
+                                            ),
+                                          )
+                                        : Expanded(
+                                            child: Container(
+                                              height: 200,
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: const Color.fromARGB(
+                                                      255, 223, 222, 222),
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                        Radius.circular(10.0)),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: TextField(
+                                                  controller:
+                                                      requestBodyController,
+                                                  maxLines:
+                                                      8, // Make it multiline (expanded)
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText: 'Request Body',
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    ),
                                     const SizedBox(
                                       width: 10,
                                     ),
@@ -649,18 +853,57 @@ class ApiTestingState extends State<ApiTesting> {
                           Navigator.of(context).pop();
                         },
                       ),
-                      ElevatedButton(
-                          onPressed: () {
-                            // if (widget.page != "next") {
+                      Row(
+                        children: [
+                          !isDirectTestChecked
+                              ? Text("Wanna test directly?")
+                              : Text("Wanna create scripts? Uncheck it!"),
+                          Checkbox(
+                            fillColor: MaterialStateProperty.all(
+                              const Color.fromARGB(255, 235, 234, 234),
+                            ),
+                            value: isDirectTestChecked,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isDirectTestChecked = value!;
+                              });
+                            },
+                            activeColor: const Color.fromARGB(255, 236, 234,
+                                234), // Color when checkbox is checked
+                            checkColor: Colors.green, // Color of the checkmark
+                          ),
+                        ],
+                      ),
+                      isDirectTestChecked
+                          ? ElevatedButton(
+                              onPressed: () async {
+                                Map<String, dynamic> convertedMap =
+                                    convertListToMap(reqbodyList);
 
-                            // }
-                            createMapAndAdd();
+                                String jsonString = json.encode(convertedMap);
 
-                            //  if(widget.page != "next")performApiRequest();
-                          },
-                          child: widget.page == "next"
-                              ? Text("Next")
-                              : Text("Generate")),
+                                String responseBody = await performApiRequest(
+                                  selectedHttpMethod,
+                                  baseurlController.text + urlController.text,
+                                  jsonString,
+                                );
+                                setState(() {
+                                  responseBodyController.text = responseBody;
+                                });
+                              },
+                              child: Text("Test"))
+                          : ElevatedButton(
+                              onPressed: () {
+                                // if (widget.page != "next") {
+
+                                // }
+                                createMapAndAdd();
+
+                                //  if(widget.page != "next")performApiRequest();
+                              },
+                              child: widget.page == "next"
+                                  ? Text("Next")
+                                  : Text("Generate")),
                     ],
                   ),
                 ],
@@ -703,7 +946,7 @@ class ApiTestingState extends State<ApiTesting> {
       "method": httpMethod,
       "url": url,
       "path": path,
-      "requestBody": requestBody,
+      "requestBody": RequestBodyParameter.listToJson(reqbodyList),
       "headers": headers,
       "queryParams": queryParams,
       "isStatusValidation": isStatusValidation,
@@ -711,7 +954,7 @@ class ApiTestingState extends State<ApiTesting> {
       "isExtractkeyValidation": isExtractkeyValidation,
       "expectedStatusCode": expectedStatusCode,
       "expectedKeyValue": {expectedkey: expectedvalue},
-      "expectedkeyAndVariableName": {expectedkeyOfVariable: expectedvariable}
+      "expectedkeyAndVariableName": {expectedkeyOfVariable: expectedvariable},
     };
     widget.onSave(map);
 
@@ -738,6 +981,14 @@ class ApiTestingState extends State<ApiTesting> {
       ),
     );
   }
+
+  Map<String, dynamic> convertListToMap(List<RequestBodyParameter> list) {
+    Map<String, dynamic> result = {};
+    for (var entry in list) {
+      result[entry.paramkey!] = entry.paramvalue;
+    }
+    return result;
+  }
 }
 
 Map<String, dynamic> parseJsonString(String jsonString) {
@@ -748,4 +999,38 @@ Map<String, dynamic> parseJsonString(String jsonString) {
     print('Error parsing JSON: $e');
     return <String, dynamic>{};
   }
+}
+
+Future<String> performApiRequest(
+    String httpMethod, String url, String requestBody) async {
+  print(
+      "Making API request with method: $httpMethod, URL: $url, and request body: $requestBody");
+
+  Map<String, String> queryParams = {'method': httpMethod, 'url': url};
+  Map<String, dynamic> parsedreqbody = parseJsonString(requestBody);
+  print("parsedreqbody$parsedreqbody");
+
+  String reqBodyJson = jsonEncode(parsedreqbody);
+  // Encode the query parameters into a query string
+  String queryString = Uri(queryParameters: queryParams).query;
+
+  String serverUrl = "http://127.0.0.1:8001/makerequest/?$queryString";
+
+  // Make the API call with the query parameters in the URL
+  final response = await http.post(
+    Uri.parse(serverUrl),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: reqBodyJson,
+  );
+
+  if (response.statusCode == 200) {
+    // Successful response
+    final responseData = json.decode(response.body);
+    print(responseData['response_body']);
+    print(responseData['status']);
+    return responseData['response_body'];
+  }
+  return "";
 }

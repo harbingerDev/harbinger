@@ -62,24 +62,25 @@ class EndpointWidgetState extends State<EndpointWidget> {
         final responseData = json.decode(response.body);
         final responseModel = ResponseModel.fromJson(responseData);
 
-        if (responseModel.reqbody != null) {
-          String bodystart = "{";
-          String bodyend = "\n}";
-          for (RequestParameter parameter in responseModel.reqbody!) {
-            if (parameter.type == 'string') {
-              bodystart += '\n"${parameter.name}" : "string",';
-            } else if (parameter.type == 'boolean') {
-              bodystart += '\n"${parameter.name}" : true,';
-            } else {
-              bodystart += '\n"${parameter.name}" : 0,';
-            }
-          }
+        // if (responseModel.reqbody != null) {
+        //   String bodystart = "{";
+        //   String bodyend = "\n}";
+        //   for (RequestParameter parameter in responseModel.reqbody!) {
+        //     if (parameter.type == 'string') {
+        //       bodystart += '\n"${parameter.name}" : "string",';
+        //     } else if (parameter.type == 'boolean') {
+        //       bodystart += '\n"${parameter.name}" : true,';
+        //     } else {
+        //       bodystart += '\n"${parameter.name}" : 0,';
+        //     }
+        //   }
 
-          if (bodystart != '{') {
-            bodystart = bodystart.substring(0, bodystart.length - 1);
-          }
-          reqBody = bodystart + bodyend;
-        }
+        //   if (bodystart != '{') {
+        //     bodystart = bodystart.substring(0, bodystart.length - 1);
+        //   }
+        //   reqBody = bodystart + bodyend;
+        // }
+
         if (responseModel.responseschema != null) {
           String bodystart = "{";
           String bodyend = "\n}";
@@ -110,7 +111,7 @@ class EndpointWidgetState extends State<EndpointWidget> {
 
         Map<String, dynamic> map = HashMap<String, dynamic>();
         map.addAll({
-          "reqBody": reqBody,
+          "reqBody": responseModel.reqbody,
           "queryParam": queryparam,
           "endpointPath": endpoint.path,
           "httpMethod": endpoint.httpMethod,
@@ -357,7 +358,7 @@ class ModalWithStepperState extends State<ModalWithStepper> {
   Map<String, dynamic> finalmap = {};
   int currentPage = 0;
   TextEditingController testscriptNameController = TextEditingController();
-  
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(

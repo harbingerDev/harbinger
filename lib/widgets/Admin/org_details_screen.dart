@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:accordion/accordion.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:harbinger/assets/config.dart';
+import 'package:harbinger/widgets/Admin/user_register.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:harbinger/models/organisation.dart';
@@ -260,7 +261,7 @@ class _SuperAdminOrganisationDetailsState
                                         fontWeight: FontWeight.w500),
                                   ),
                                   IconButton(
-                                    icon:!_isDateChanged
+                                    icon: !_isDateChanged
                                         ? Icon(Icons.edit)
                                         : Icon(Icons.save),
                                     onPressed: !_isDateChanged
@@ -301,7 +302,12 @@ class _SuperAdminOrganisationDetailsState
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Icon(Icons.add),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _addUsers(2, widget.organisation.orgId);
+                                    },
+                                    child: Icon(Icons.add),
+                                  ),
                                 ],
                               ),
                               SizedBox(height: 10),
@@ -321,30 +327,74 @@ class _SuperAdminOrganisationDetailsState
                                 }).toList(),
                               ),
                               Accordion(
-                                contentBorderColor: Color(0xFFE8E8E8),
-                                headerBorderColor: Color(0xFFE8E8E8),
-                                rightIcon: const Icon(
-                                  Icons.keyboard_arrow_down,
-                                ),
-                                children: [
-                                  AccordionSection(
-                                    headerBackgroundColor: Color(0xFFE8E8E8),
-                                    header: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: const Text("Accept Requests"),
-                                    ),
-                                    isOpen: false,
-                                    content: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text("user1@gmail.com"),
-                                          Text("user2@gmail.com"),
-                                          Text("user3@gmail.com")
-                                        ]),
+                                  contentBorderColor: Color(0xFFE8E8E8),
+                                  headerBorderColor: Color(0xFFE8E8E8),
+                                  rightIcon: const Icon(
+                                    Icons.keyboard_arrow_down,
                                   ),
-                                ],
-                              )
+                                  children: [
+                                    AccordionSection(
+                                      headerBackgroundColor: Color(0xFFE8E8E8),
+                                      header: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: const Text("Accept Requests"),
+                                      ),
+                                      isOpen: false,
+                                      content: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user1@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user2@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user2@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                          ]),
+                                    )
+                                  ])
                             ],
                           ),
                         ),
@@ -374,7 +424,12 @@ class _SuperAdminOrganisationDetailsState
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Icon(Icons.add),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _addUsers(3, widget.organisation.orgId);
+                                    },
+                                    child: Icon(Icons.add),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 8.0),
@@ -394,6 +449,75 @@ class _SuperAdminOrganisationDetailsState
                                   );
                                 }).toList(),
                               ),
+                              Accordion(
+                                  contentBorderColor: Color(0xFFE8E8E8),
+                                  headerBorderColor: Color(0xFFE8E8E8),
+                                  rightIcon: const Icon(
+                                    Icons.keyboard_arrow_down,
+                                  ),
+                                  children: [
+                                    AccordionSection(
+                                      headerBackgroundColor: Color(0xFFE8E8E8),
+                                      header: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: const Text("Accept Requests"),
+                                      ),
+                                      isOpen: false,
+                                      content: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user1@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user2@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user2@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                          ]),
+                                    )
+                                  ])
                             ],
                           ),
                         ),
@@ -423,7 +547,12 @@ class _SuperAdminOrganisationDetailsState
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Icon(Icons.add),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _addUsers(4, widget.organisation.orgId);
+                                    },
+                                    child: Icon(Icons.add),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 8.0),
@@ -443,6 +572,75 @@ class _SuperAdminOrganisationDetailsState
                                   );
                                 }).toList(),
                               ),
+                              Accordion(
+                                  contentBorderColor: Color(0xFFE8E8E8),
+                                  headerBorderColor: Color(0xFFE8E8E8),
+                                  rightIcon: const Icon(
+                                    Icons.keyboard_arrow_down,
+                                  ),
+                                  children: [
+                                    AccordionSection(
+                                      headerBackgroundColor: Color(0xFFE8E8E8),
+                                      header: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: const Text("Accept Requests"),
+                                      ),
+                                      isOpen: false,
+                                      content: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user1@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user2@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("user2@gmail.com"),
+                                                InkWell(
+                                                    child: Text(
+                                                  "Accept",
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                              ],
+                                            ),
+                                          ]),
+                                    )
+                                  ])
                             ],
                           ),
                         ),
@@ -453,6 +651,66 @@ class _SuperAdminOrganisationDetailsState
               );
             }
           }),
+    );
+  }
+
+  void _addUsers(roleRefId, orgId) {
+    print("_addUsersorgid$orgId");
+    String user = "";
+    if (roleRefId == 2) {
+      user = "Organization Admin";
+    } else if (roleRefId == 3) {
+      user = "Project Admin";
+    } else if (roleRefId == 4) {
+      user = "Project Member";
+    }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Add $user',
+                style: TextStyle(fontSize: 20),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+          content: SizedBox(
+            width: 600,
+            height: 400,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Enter the registration details here: ',
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w200),
+                    ),
+                  ],
+                ),
+                new Divider(
+                  color: Color(0xffE95622),
+                ),
+                Expanded(
+                  child: UserRegistrationForm(
+                    orgId: orgId,
+                    roleRefId: roleRefId,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

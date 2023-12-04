@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:harbinger/assets/config.dart';
 import 'package:harbinger/main.dart';
 import 'package:harbinger/screens/home_screen.dart';
+import 'package:harbinger/screens/speech.dart';
 import 'package:harbinger/screens/test_lab_screen.dart';
 import 'package:harbinger/screens/test_plan_screen.dart';
 import 'package:harbinger/screens/test_reports_screen.dart';
@@ -152,7 +153,7 @@ class _NavigateToSpecificScreenInDashboardState
       } else if (selectedIndex == 3) {
         return TestReports();
       } else if (selectedIndex == 4) {
-        return TestLabScreen();
+        return VoiceToText();
       } else {
         // Handle other cases as needed
         return Container(); // Placeholder, replace with appropriate widget
