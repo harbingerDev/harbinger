@@ -71,6 +71,8 @@ class ApiTestingState extends State<ApiTesting> {
       keyofvalue = "str";
     else if (value == "boolean")
       keyofvalue = "true";
+    else if (value == "date-time")
+      keyofvalue = "2023-12-04T09:01:53.703Z";
     else {
       keyofvalue = value;
     }
@@ -872,38 +874,42 @@ class ApiTestingState extends State<ApiTesting> {
                                 234), // Color when checkbox is checked
                             checkColor: Colors.green, // Color of the checkmark
                           ),
+                          isDirectTestChecked
+                              ? ElevatedButton(
+                                  onPressed: () async {
+                                    Map<String, dynamic> convertedMap =
+                                        convertListToMap(reqbodyList);
+
+                                    String jsonString =
+                                        json.encode(convertedMap);
+
+                                    String responseBody =
+                                        await performApiRequest(
+                                      selectedHttpMethod,
+                                      baseurlController.text +
+                                          urlController.text,
+                                      jsonString,
+                                    );
+                                    setState(() {
+                                      responseBodyController.text =
+                                          responseBody;
+                                    });
+                                  },
+                                  child: Text("Test"))
+                              : ElevatedButton(
+                                  onPressed: () {
+                                    // if (widget.page != "next") {
+
+                                    // }
+                                    createMapAndAdd();
+
+                                    //  if(widget.page != "next")performApiRequest();
+                                  },
+                                  child: widget.page == "next"
+                                      ? Text("Next")
+                                      : Text("Generate")),
                         ],
                       ),
-                      isDirectTestChecked
-                          ? ElevatedButton(
-                              onPressed: () async {
-                                Map<String, dynamic> convertedMap =
-                                    convertListToMap(reqbodyList);
-
-                                String jsonString = json.encode(convertedMap);
-
-                                String responseBody = await performApiRequest(
-                                  selectedHttpMethod,
-                                  baseurlController.text + urlController.text,
-                                  jsonString,
-                                );
-                                setState(() {
-                                  responseBodyController.text = responseBody;
-                                });
-                              },
-                              child: Text("Test"))
-                          : ElevatedButton(
-                              onPressed: () {
-                                // if (widget.page != "next") {
-
-                                // }
-                                createMapAndAdd();
-
-                                //  if(widget.page != "next")performApiRequest();
-                              },
-                              child: widget.page == "next"
-                                  ? Text("Next")
-                                  : Text("Generate")),
                     ],
                   ),
                 ],
@@ -1014,7 +1020,7 @@ Future<String> performApiRequest(
   // Encode the query parameters into a query string
   String queryString = Uri(queryParameters: queryParams).query;
 
-  String serverUrl = "http://127.0.0.1:8001/makerequest/?$queryString";
+  String serverUrl = "http://127.0.0.1:8000/env/makerequest/?$queryString";
 
   // Make the API call with the query parameters in the URL
   final response = await http.post(

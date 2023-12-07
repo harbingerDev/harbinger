@@ -15,6 +15,7 @@ import '../assets/constants.dart';
 import '../helpers/helper_functions.dart';
 import '../widgets/TestPlan/show_code_updated.dart';
 import '../widgets/Admin/superadmin_adminstrate_screen.dart';
+
 class DashboardScreen extends ConsumerWidget {
   final selectedIndexProvider = StateProvider<int>((ref) => 0);
 
@@ -150,6 +151,8 @@ class _NavigateToSpecificScreenInDashboardState
         return TestPlanScreen();
       } else if (selectedIndex == 1 && screenIndicator == "Code") {
         return ShowCodeUpdated(filePath: widget.filePath);
+      } else if (selectedIndex == 2) {
+        return TestLabScreen();
       } else if (selectedIndex == 3) {
         return TestReports();
       } else if (selectedIndex == 4) {
@@ -193,6 +196,8 @@ class _NavigateToSpecificScreenInDashboardState
         return TestPlanScreen();
       } else if (selectedIndex == 1 && screenIndicator == "Code") {
         return ShowCodeUpdated(filePath: widget.filePath);
+      } else if (selectedIndex == 2) {
+        return TestLabScreen();
       } else if (selectedIndex == 3) {
         return TestReports();
       } else if (selectedIndex == 4) {
