@@ -31,7 +31,7 @@ async function createProjectOnDisk(req) {
     await new Promise((resolve, reject) => {
       // Initialize npm and install packages
       exec(
-        "npm init -y && npm i -D @playwright/test @reportportal/agent-js-playwright dotenv && npx playwright install && git init && git remote add origin git@github.com:codetesta2z/kilimanjaro.git",
+        "npm init -y && npm i -D @faker-js/faker @playwright/test @reportportal/agent-js-playwright dotenv && npx playwright install && git init && git remote add origin git@github.com:codetesta2z/kilimanjaro.git",
         (error, stdout) => {
           if (error) {
             console.error(`exec error: ${error}`);

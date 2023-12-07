@@ -274,7 +274,7 @@ function detectControllers(javaCode) {
 
 // Function to detect model classes
 function detectModels(javaCode) {
-  const regex = /@Entity|@Table/g;
+  const regex = /@Entity|@Table|@Data/g;
   const matches = javaCode.match(regex);
 
   return matches ? true : false;
@@ -368,9 +368,27 @@ function parseControllers(controllerCode){
   let globalPath=""
 
     // Use regex to extract the global path
-    const pathRegex = /@\s*RequestMapping\s*\(\s*"([^"]+)"\s*\)\s*public\s*class\s*(\w+)/;
-    const pathMatch = controllerCode.match(pathRegex);
-    globalPath = pathMatch ? pathMatch[1] : "";
+    const classRegex1 = /([\s\S]*?)\bpublic\s*class\s*(\w+)/;
+
+const classMatch1 = classRegex1.exec(controllerCode);
+if (classMatch1) {
+  const classCode = classMatch1[1]; // Code before the class declaration
+  const className = classMatch1[2]; // Class name
+
+  // Regex to extract @RequestMapping("/bot")
+  const pathRegex = /@RequestMapping\s*\(\s*"([^"]+)"\s*\)/;
+  const pathMatch = pathRegex.exec(classCode);
+
+  if (pathMatch) {
+    const pathValue = pathMatch[1]; // Extracted path value
+    globalPath=pathValue
+  }
+}
+
+    // //jk
+    // const pathRegex = /@\s*RequestMapping\s*\(\s*"([^"]+)"\s*\)\s*public\s*class\s*(\w+)/;
+    // const pathMatch = controllerCode.match(pathRegex);
+    // globalPath = pathMatch ? pathMatch[1] : "";
 
     // Use regex to remove all code above the class
     const classRegex = /(class.*?{[\s\S]*})/;
@@ -392,6 +410,41 @@ function parseControllers(controllerCode){
   )
 
   return paths;
+}
+
+function extractRequestParam(input) {
+  console.log("input", input);
+  
+  
+
+  const valueRegex = /value\s*=\s*["']([^"']+)["']/;
+const nameRegex = /@RequestParam.*\b(\w+)\b/g;
+const requiredRegex = /required\s*=\s*([^,]+)/;
+  const defaultValueRegex = /defaultValue\s*=\s*["']([^"']+)["']/;
+  const typeRegex = /\b(int|Integer|String)\b/;
+  
+  const nameMatch = nameRegex.exec(input);
+  const valueMatch = valueRegex.exec(input);
+  const requiredMatch = requiredRegex.exec(input);
+  const defaultValueMatch = defaultValueRegex.exec(input);
+  const typeMatch = typeRegex.exec(input);
+
+  const name = nameMatch ? nameMatch[1] :  valueMatch ? valueMatch[1] : null;
+
+  const required = requiredMatch ? requiredMatch[1].trim() === 'true' : true;
+  const defaultValue = defaultValueMatch ? defaultValueMatch[1] : undefined;
+  const type = typeMatch ? typeMatch[1] : null;
+
+  return {
+    name,
+    "in": "query",
+    required,
+    schema: {
+      type,
+      default: type === 'Integer' ? parseInt(defaultValue) : defaultValue ,
+      title: ""
+    }
+  };
 }
 
 function generateSchemaForMethod(apiCode,globalpath){
@@ -416,8 +469,8 @@ function generateSchemaForMethod(apiCode,globalpath){
     console.log("******api method printed check the method as its null->>>>>>",apiCode)
   }
 
- const pathregex1 = /Mapping\(value\s*=\s*["']([^"']+)["']\)/;
-  const pathregex2=/Mapping\(["']([^"']+)["']\)/;
+ const pathregex1 = /Mapping\(value\s*=\s*["']([^"']+)["']/;
+  const pathregex2=/Mapping\(["']([^"']+)["']/;
   const matchpathregex1 = apiCode.match(pathregex1);
   const matchpathregex2 = apiCode.match(pathregex2);
 
@@ -428,7 +481,24 @@ function generateSchemaForMethod(apiCode,globalpath){
     path= matchpathregex2[1];
   }
 
+//request parameters
+const functionParamsRegex = /(@RequestParam\([^)]*\)\s*(?:int|Integer|String|boolean)\s*\w+)/g;let reqparammatch;
+const parameters = [];
 
+while ((reqparammatch = functionParamsRegex.exec(apiCode)) !== null) {
+  const paramAnnotation = reqparammatch[1];
+  const extractedParam = extractRequestParam(paramAnnotation);
+
+  if (extractedParam) {
+    parameters.push(extractedParam);
+  }
+}
+console.log("parameters",parameters)
+
+
+
+
+//request body..
   const requestBodyRegex =/@RequestBody\s+(\w+(?:\s*<\s*\w+\s*>)?)\s+(\w+)/;
 
   // Search for @RequestBody annotation in the code
@@ -464,6 +534,9 @@ return { key:[api.path],
       tags: [api.requestBodyType.toLowerCase()],
       summary: api.summary || '',
       operationId: api.operationId || '',
+      ...(parameters && parameters.length > 0
+        ? { parameters: parameters }
+        : {}),
       ...(api.requestBodyType
         ? {
             requestBody: {

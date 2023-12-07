@@ -50,6 +50,11 @@ function getSchemas() {
                     placeholder: val.title,
                     required: required.includes(key),
                 };
+                
+                if(val.format){
+                    console.log("hi i am inside ",innerDict.type)
+                    innerDict.type=val.format
+                }
                 tupleList.push(innerDict);
             }
 
@@ -217,7 +222,8 @@ async function getApiInfo(apiInfo, method)  {
 
 
 function convertToPlaywright(tests) {
-    let script = `const { test, expect } = require('@playwright/test');\n\n`;
+    let script = `const { test, expect } = require('@playwright/test');\n import { faker } from '@faker-js/faker'; \n\n`;
+    
   
     script += `test('Combined Test', async ({ request }) => {\n`;
   
@@ -236,10 +242,12 @@ function convertToPlaywright(tests) {
 function generateTestSteps(testConfig) {
     const method = testConfig.method.toLowerCase();
     const url = testConfig.url;
-    const requestBody = testConfig.requestBody || {};
+    const requestBody =  JSON.parse(testConfig.requestBody) || [];
+    console.log("reqqq",requestBody)
     const headers = testConfig.headers || {};
     const statusCode = testConfig.expectedStatusCode;
-  
+    const outputObject = {};
+
     let testSteps = `  // ${method.toUpperCase()} ${url}\n`;
     testSteps += `  const response${getUniqueIdentifier()} = await request.${method}('${url}', {\n`;
     testSteps=testSteps.replace("'","`")
@@ -247,9 +255,43 @@ function generateTestSteps(testConfig) {
     if (testConfig.headers) {
       testSteps += `    headers: ${headers},\n`;
     }
-    if (Object.keys(requestBody).length > 0) {
-        const cleanedRequestBody = requestBody.replace(/\\n/g, '').replace(/\\"/g, '"');
-      testSteps += `    data: ${cleanedRequestBody},\n`;
+
+
+    requestBody.forEach(item => {
+        outputObject[item.paramkey] = item.paramvalue;
+
+
+        if(item.isFakerEnabled){
+            if(item.fakertype=="Name"){
+                outputObject[item.paramkey] =`\${faker.person.fullName()}`
+            }
+            else if(item.fakertype=="Address"){
+                outputObject[item.paramkey] =`\${faker.person.streetAddress()}`
+            }
+            else if(item.fakertype=="Email"){
+                outputObject[item.paramkey] =`\${faker.person.email()}`
+            }
+            else if(item.fakertype=="UserName"){
+                outputObject[item.paramkey] =`\${faker.person.userName()}`
+            }
+            else if(item.fakertype=="Password"){
+                outputObject[item.paramkey] =`\${faker.person.password()}`
+            }
+            else if(item.fakertype=="Number"){
+                outputObject[item.paramkey] =`\${faker.person.number()}`
+            }
+            else if(item.fakertype=="FutureDate"){
+                outputObject[item.paramkey] =`\${faker.person.future()}`
+            }
+            else if(item.fakertype=="CompanyName"){
+                outputObject[item.paramkey] =`\${faker.person.companyName()}`
+            }
+        }
+      });
+  
+
+    if (requestBody.length > 0) {
+      testSteps += `     data: ${ JSON.stringify(outputObject).replace(/"(\${[^}]+})"/g, (_, p1) => `\`${p1}\``)}`;
     }
   
     testSteps += `  });\n\n`;
