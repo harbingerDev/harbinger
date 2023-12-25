@@ -8,6 +8,7 @@ class ResponseModel {
   List<RequestParameter>? pathvariable;
   List<RequestParameter>? queryparam;
   Map<String, dynamic>? securityparameters;
+  List<RequestParameter>? extrasecurityparameters;
   List<RequestParameter>? responseschema;
 
   ResponseModel(
@@ -15,6 +16,7 @@ class ResponseModel {
       this.pathvariable,
       this.queryparam,
       this.securityparameters,
+      this.extrasecurityparameters,
       this.responseschema});
 
   factory ResponseModel.fromJson(Map<String, dynamic> json) =>

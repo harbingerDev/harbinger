@@ -39,7 +39,8 @@ class EndpointWidgetState extends State<EndpointWidget> {
     String? responseSchema;
     List<RequestParameter>? pathvariable;
     List<RequestParameter>? queryparam;
-    String? headers;
+    Map<String, dynamic>? headers;
+    List<RequestParameter>? extraheaders;
 
     Future<Map<String, dynamic>> makeApiCallAndNavigateToApiScreen(
         Endpoint endpoint) async {
@@ -105,14 +106,20 @@ class EndpointWidgetState extends State<EndpointWidget> {
         if (responseModel.queryparam != null) {
           queryparam = responseModel.queryparam;
         }
+        if (responseModel.extrasecurityparameters != null) {
+          extraheaders = responseModel.extrasecurityparameters;
+        }
         if (responseModel.securityparameters != null) {
-          headers = jsonEncode(responseModel.securityparameters);
+          print(
+              "responseModel.securityparameters${responseModel.securityparameters}");
+          headers = responseModel.securityparameters;
         }
 
         Map<String, dynamic> map = HashMap<String, dynamic>();
         map.addAll({
           "reqBody": responseModel.reqbody,
           "queryParam": queryparam,
+          "extraheaders": extraheaders,
           "endpointPath": endpoint.path,
           "httpMethod": endpoint.httpMethod,
           "headers": headers,
@@ -358,11 +365,33 @@ class ModalWithStepperState extends State<ModalWithStepper> {
   Map<String, dynamic> finalmap = {};
   int currentPage = 0;
   TextEditingController testscriptNameController = TextEditingController();
+  String clientId = '';
+  String clientSecret = '';
+  String tokenEndpoint = '';
+  bool isUsingOAuth = false;
+  String variable = '';
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Multiple Api Testing"),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text("Multiple Api Testing"),
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                isUsingOAuth = false;
+              });
+              _showOAuthDialog(context);
+            },
+            label: isUsingOAuth ? Text('UnAuthorize ') : Text('Authorize '),
+            icon: !isUsingOAuth
+                ? Icon(Icons.lock_open)
+                : Icon(Icons.location_searching_outlined),
+          ),
+        ],
+      ),
       content: SizedBox(
         width: MediaQuery.of(context).size.width * .8,
         height: MediaQuery.of(context).size.height * .8,
@@ -385,6 +414,7 @@ class ModalWithStepperState extends State<ModalWithStepper> {
                   reqBody: widget.dataMap[index]["reqBody"],
                   responseSchema: widget.dataMap[index]["responseSchema"],
                   headers: widget.dataMap[index]["headers"],
+                  extraheaders: widget.dataMap[index]["extraheaders"],
                   baseUrl: widget.url),
             );
           }),
@@ -393,6 +423,100 @@ class ModalWithStepperState extends State<ModalWithStepper> {
           },
         ),
       ),
+    );
+  }
+
+  void _showOAuthDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('OAuth Configuration'),
+          content: Container(
+            height: MediaQuery.of(context).size.height * .4,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 20,
+                ),
+                TextField(
+                  decoration: InputDecoration(labelText: 'OAuth Url'),
+                  onChanged: (value) {
+                    setState(() {
+                      tokenEndpoint = value;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                TextField(
+                  decoration: InputDecoration(labelText: 'Client ID'),
+                  onChanged: (value) {
+                    setState(() {
+                      clientId = value;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                TextField(
+                  decoration: InputDecoration(labelText: 'Client Secret'),
+                  onChanged: (value) {
+                    setState(() {
+                      clientSecret = value;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      labelText: 'Variable Name to store token'),
+                  onChanged: (value) {
+                    setState(() {
+                      variable = value;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "Close",
+                selectionColor: const Color.fromARGB(255, 204, 204, 204),
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            SizedBox(
+              width: 45,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isUsingOAuth = true;
+                });
+                // Perform actions with clientId and clientSecret
+                print('Client ID: $clientId');
+                print('Client Secret: $clientSecret');
+                print("oath url: $tokenEndpoint");
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Authorize'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -444,7 +568,14 @@ class ModalWithStepperState extends State<ModalWithStepper> {
                       final jsonBody = jsonEncode({
                         "finalmap": finalmap,
                         "filename": testscriptNameController.text,
-                        "filePath": widget.activeprojectpath
+                        "filePath": widget.activeprojectpath,
+                        "isUsingOAuth": isUsingOAuth,
+                        "oauthCredentials": jsonEncode({
+                          "clientId": clientId,
+                          "clientSecret": clientSecret,
+                          "tokenEndpoint": tokenEndpoint,
+                          "variable": variable
+                        })
                       });
                       print("jsonBody$jsonBody");
                       final response = await http.post(Uri.parse(url),

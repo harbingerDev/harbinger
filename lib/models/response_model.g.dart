@@ -18,6 +18,9 @@ ResponseModel _$ResponseModelFromJson(Map<String, dynamic> json) =>
           ?.map((e) => RequestParameter.fromJson(e as Map<String, dynamic>))
           .toList(),
       securityparameters: json['securityparameters'] as Map<String, dynamic>?,
+      extrasecurityparameters: (json['extrasecurityparameters'] as List<dynamic>?)
+          ?.map((e) => RequestParameter.fromJson(e as Map<String, dynamic>))
+          .toList(),
       responseschema: (json['responseschema'] as List<dynamic>?)
           ?.map((e) => RequestParameter.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -29,6 +32,7 @@ Map<String, dynamic> _$ResponseModelToJson(ResponseModel instance) =>
       'pathvariable': instance.pathvariable,
       'queryparam': instance.queryparam,
       'securityparameters': instance.securityparameters,
+      'extrasecurityparameters': instance.extrasecurityparameters,
       'responseschema': instance.responseschema,
     };
 

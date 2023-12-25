@@ -17,7 +17,8 @@ class ApiTesting extends StatefulWidget {
   final String? httpMethod;
   final String? responseSchema;
   final String? baseUrl;
-  final String? headers;
+  final Map<String, dynamic>? headers;
+  final List<RequestParameter>? extraheaders;
 
   const ApiTesting({
     required this.page,
@@ -29,6 +30,7 @@ class ApiTesting extends StatefulWidget {
     required this.responseSchema,
     required this.baseUrl,
     required this.headers,
+    required this.extraheaders,
     Key? key,
   }) : super(key: key);
 
@@ -47,7 +49,6 @@ class ApiTestingState extends State<ApiTesting> {
   TextEditingController requestBodyController = TextEditingController();
   TextEditingController responseBodyController = TextEditingController();
   TextEditingController requestparamController = TextEditingController();
-  TextEditingController headersController = TextEditingController();
   String selectedHttpMethod = 'get'; // Default HTTP method
   String selectedBaseUrl = 'https://example.com';
 
@@ -110,7 +111,6 @@ class ApiTestingState extends State<ApiTesting> {
     selectedHttpMethod = widget.httpMethod!;
     selectedBaseUrl = widget.baseUrl!;
     baseurlController.text = widget.baseUrl!;
-    headersController.text = widget.headers!;
     if (widget.queryParam!.length != 0) {
       urlController.text += "?";
       for (int i = 0; i < widget.queryParam!.length; i++) {
@@ -128,6 +128,12 @@ class ApiTestingState extends State<ApiTesting> {
 
     super.initState();
   }
+
+  Map<String, String> header = {};
+
+  String selectedAuthorizationType = 'JWT Bearer'; // Default value
+// List of authorization types for the dropdown
+  List<String> authorizationTypes = ['JWT Bearer', 'Basic Auth', 'OAuth'];
 
   @override
   Widget build(BuildContext context) {
@@ -384,28 +390,198 @@ class ApiTestingState extends State<ApiTesting> {
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      child: Container(
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: const Color.fromARGB(
-                                                255, 212, 211, 211),
-                                            width: 1.0,
+                                      child: Column(
+                                        children: [
+                                          ////////////////
+                                          Container(
+                                            height: 100,
+                                            child: Column(children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text("       Authorization"),
+                                                  // DropdownButton(
+                                                  //   value:
+                                                  //       selectedAuthorizationType,
+                                                  //   items: authorizationTypes
+                                                  //       .map((String type) {
+                                                  //     return DropdownMenuItem(
+                                                  //       value: type,
+                                                  //       child: Text(type),
+                                                  //     );
+                                                  //   }).toList(),
+                                                  //   onChanged:
+                                                  //       (String? newValue) {
+                                                  //     setState(() {
+                                                  //       selectedAuthorizationType =
+                                                  //           newValue!;
+                                                  //     });
+                                                  //   },
+                                                  // ),
+                                                  IconButton(
+                                                    icon: Icon(Icons.add),
+                                                    onPressed: () {
+                                                      if (widget.headers!
+                                                              .length ==
+                                                          0) {
+                                                        setState(() {
+                                                          widget.headers![
+                                                                  "Authorization"] =
+                                                              "`Bearer \${token}`";
+                                                        });
+                                                      }
+                                                    },
+                                                  )
+                                                ],
+                                              ),
+                                              Expanded(
+                                                child: ListView.builder(
+                                                  itemCount:
+                                                      widget.headers?.length ??
+                                                          0,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    final headerKey = widget
+                                                        .headers?.keys
+                                                        .elementAt(index);
+                                                    final headerValue = widget
+                                                        .headers?[headerKey];
+
+                                                    return Card(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child: TextField(
+                                                                readOnly: true,
+                                                                decoration:
+                                                                    InputDecoration(
+                                                                        labelText:
+                                                                            'Key'),
+                                                                controller:
+                                                                    TextEditingController(
+                                                                  text:
+                                                                      headerKey,
+                                                                ),
+                                                                onChanged:
+                                                                    (value) {
+                                                                  // Nothing changed, as the key is read-only
+                                                                },
+                                                              ),
+                                                            ),
+                                                            SizedBox(width: 10),
+                                                            Expanded(
+                                                              child: TextField(
+                                                                decoration:
+                                                                    InputDecoration(
+                                                                        labelText:
+                                                                            'Value'),
+                                                                controller:
+                                                                    TextEditingController(
+                                                                  text: headerValue
+                                                                      .toString(),
+                                                                ),
+                                                                onChanged:
+                                                                    (value) {
+                                                                  widget.headers?[
+                                                                          headerKey!] =
+                                                                      value;
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ]),
                                           ),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(10.0)),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: TextField(
-                                            controller: headersController,
-                                            maxLines: 4,
-                                            decoration: const InputDecoration(
-                                              labelText: 'Headers',
-                                              //labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                                            ),
+                                          /////////////////////////////////////
+                                          Container(
+                                            height: 100,
+                                            child: Column(children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Text("       Custom Headers"),
+                                                ],
+                                              ),
+                                              Expanded(
+                                                child: ListView.builder(
+                                                  itemCount: widget.extraheaders
+                                                          ?.length ??
+                                                      0,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    return Card(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child: TextField(
+                                                                readOnly: true,
+                                                                decoration:
+                                                                    InputDecoration(
+                                                                        labelText:
+                                                                            'Header Key'),
+                                                                controller:
+                                                                    TextEditingController(
+                                                                  text: widget
+                                                                      .extraheaders?[
+                                                                          index]
+                                                                      .name,
+                                                                ),
+                                                                onChanged:
+                                                                    (value) {
+                                                                  //nothing changed
+                                                                },
+                                                              ),
+                                                            ),
+                                                            SizedBox(width: 10),
+                                                            Expanded(
+                                                              child: TextField(
+                                                                decoration:
+                                                                    InputDecoration(
+                                                                        labelText:
+                                                                            'Header Value'),
+                                                                controller:
+                                                                    TextEditingController(
+                                                                  text: getValue(widget
+                                                                      .extraheaders?[
+                                                                          index]
+                                                                      .type),
+                                                                ),
+                                                                onChanged:
+                                                                    (value) {
+                                                                  //on value changed
+                                                                  widget
+                                                                      .extraheaders?[
+                                                                          index]
+                                                                      .placeholder = value;
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ]),
                                           ),
-                                        ),
+                                        ],
                                       ),
                                     ),
                                     const SizedBox(
@@ -414,7 +590,7 @@ class ApiTestingState extends State<ApiTesting> {
                                     widget.queryParam?.length == 0
                                         ? Expanded(
                                             child: Container(
-                                              height: 100,
+                                              height: 200,
                                               decoration: BoxDecoration(
                                                 border: Border.all(
                                                   color: const Color.fromARGB(
@@ -431,7 +607,7 @@ class ApiTestingState extends State<ApiTesting> {
                                                   child: TextField(
                                                     controller:
                                                         requestparamController,
-                                                    maxLines: 4,
+                                                    maxLines: 8,
                                                     decoration:
                                                         const InputDecoration(
                                                       labelText:
@@ -922,18 +1098,18 @@ class ApiTestingState extends State<ApiTesting> {
   }
 
   createMapAndAdd() {
+    print(widget.headers);
     String httpMethod = selectedHttpMethod;
     String url = baseurlController.text + urlController.text;
     String requestBody = requestBodyController.text;
     String path = urlController.text;
-    String headers = headersController.text;
+    Map<String, String> headers = {};
     String queryParams = requestparamController.text;
     String expectedStatusCode = statusController.text;
     String expectedkey = keyController.text;
     String expectedvalue = valueController.text;
     String expectedkeyOfVariable = keyOfVariableController.text;
     String expectedvariable = variableController.text;
-
     bool isStatusValidation = false;
     bool isKeyValueValidation = false;
     bool isExtractkeyValidation = false;
@@ -947,6 +1123,39 @@ class ApiTestingState extends State<ApiTesting> {
     if (expectedkeyOfVariable != "" || expectedkeyOfVariable.trim() != "") {
       isExtractkeyValidation = true;
     }
+
+// Map<String, String> headers = {};
+
+// Assuming widget.headers is Map<String, dynamic>?
+// and widget.extraheaders is List<RequestParameter>?
+
+    print("netx${widget.headers}");
+    print("netx1${widget.extraheaders}");
+
+    if (widget.headers != null && widget.extraheaders != null) {
+      print("netx2${widget.headers}");
+
+      // Add entries from widget.headers to headers
+      headers.addAll(
+        (widget.headers as Map<String, dynamic>)
+            .map((key, value) => MapEntry(key, value?.toString() ?? '')),
+      );
+      print("netx3${widget.headers}  nectcc3 ${widget.extraheaders}");
+
+      // Add entries from widget.extraheaders to headers
+      for (int index = 0; index < widget.extraheaders!.length; index++) {
+        final requestParameter = widget.extraheaders![index];
+        if (requestParameter.name != null) {
+          // Assuming requestParameter.placeholder is a non-null String
+          headers[requestParameter.name!] = requestParameter.placeholder!;
+        }
+      }
+      print("netx4${widget.headers}  nectcc4 ${widget.extraheaders}");
+    }
+    print("netx5${widget.headers}  nectcc5 ${widget.extraheaders}");
+
+// Print the resulting headers map
+    print('Headers: $headers');
 
     Map<String, dynamic> map = {
       "method": httpMethod,
