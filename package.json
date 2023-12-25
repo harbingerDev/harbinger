@@ -1,5 +1,5 @@
 {
-  "name": "harbinger_backend",
+  "name": "harbinger-backend-launcher",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -18,6 +18,7 @@
     "esprima": "^4.0.1",
     "express": "^4.18.2",
     "fs-extra": "^11.1.1",
+    "getmac": "^6.4.0",
     "glob": "^10.2.2",
     "js-tokens": "^8.0.1",
     "knex": "^2.4.1",
@@ -25,6 +26,26 @@
     "prettier": "^2.8.8",
     "require-from-string": "^2.0.2",
     "sqlite3": "^5.1.4",
-    "swagger-jsdoc": "^6.2.8"
+    "swagger-jsdoc": "^6.2.8",
+    "uuid": "^9.0.1"
+  },
+  "pkg": {
+    "assets": [
+      "./helper/**/*",
+      "./db/**/*",
+      "./godSchema.json",
+      "./harbinger.sqlite3",
+      "./playwrightActionLocators.json"
+    ],
+    "targets": [
+      "node14-win-x64",
+      "node14-linux-x64",
+      "node14-macos-x64"
+    ],
+    "outputPath": "dist",
+    "public": true,
+    "scripts": [
+      "server.js"
+    ]
   }
 }

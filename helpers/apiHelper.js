@@ -1,3 +1,4 @@
+const { Console } = require('console');
 const fs = require('fs');
 const path = require('path');
 
@@ -115,6 +116,7 @@ async function getApiInfo(apiInfo, method)  {
     const reqbody = [];
     const responseschema = [];
     let securityparameters = {};
+    let extrasecurityparameters = [];
     const jsonFilePath = "test.json";
     const data = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
 
@@ -187,6 +189,10 @@ async function getApiInfo(apiInfo, method)  {
             const onePathVariable = { name, required, type, placeholder };
             if (pathOrReq === "query") queryparam.push(onePathVariable);
             if (pathOrReq === "path") pathvariable.push(onePathVariable);
+            // if (pathOrReq === "header")securityparameters=onePathVariable
+            if (pathOrReq === "header")extrasecurityparameters.push(onePathVariable);
+            
+            console.log(securityparameters)
         }
 
         // Security Parameters
@@ -213,6 +219,7 @@ async function getApiInfo(apiInfo, method)  {
             queryparam,
             securityparameters,
             responseschema,
+            extrasecurityparameters
         };
     } catch (error) {
         return { error: "Invalid JSON format" };
@@ -220,13 +227,30 @@ async function getApiInfo(apiInfo, method)  {
 }
 
 
+function generateOAuthSteps(oauthCredentials) {
+    const { clientId, clientSecret, tokenEndpoint, variable } = JSON.parse(oauthCredentials);
+    // console.log(jsonInput["clientId"],"}]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]")
 
-function convertToPlaywright(tests) {
+    let oAuthSteps = `  // OAuth 2.0 Authorization\n`;
+    oAuthSteps += `  const tokenResponse = await request.post('${tokenEndpoint}', {\n`;
+    oAuthSteps += `    data: \`grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}\`,\n`;
+    oAuthSteps += `    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },\n`;
+    oAuthSteps += `  });\n\n`;
+  
+    oAuthSteps += `  const ${variable} = tokenResponse.json().access_token;\n\n`;
+  
+    return oAuthSteps;
+  }
+
+
+
+function convertToPlaywright(tests,isUsingOAuth,oauthCredentials) {
     let script = `const { test, expect } = require('@playwright/test');\n import { faker } from '@faker-js/faker'; \n\n`;
     
   
     script += `test('Combined Test', async ({ request }) => {\n`;
-  
+
+   if(isUsingOAuth) script += generateOAuthSteps(oauthCredentials);
     for (let key in tests) {
       const testConfig = tests[key];
       if (testConfig.method && testConfig.url) {
@@ -244,7 +268,13 @@ function generateTestSteps(testConfig) {
     const url = testConfig.url;
     const requestBody =  JSON.parse(testConfig.requestBody) || [];
     console.log("reqqq",requestBody)
-    const headers = testConfig.headers || {};
+    var headers = JSON.stringify( testConfig.headers )|| {};
+    console.log("___________________________",headers)
+    headers = headers.replace("\"`","`");
+    headers = headers.replace("`\"","`");
+
+    console.log("___________________________",headers)
+
     const statusCode = testConfig.expectedStatusCode;
     const outputObject = {};
 

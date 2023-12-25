@@ -115,8 +115,8 @@ async function getAllDataAndParse(req){
   const  parsedResult=await apiHelper.getAllDataAndParse(req);
   return parsedResult;
 }
-async function convertToPlaywright(req){
-  const  convertedscript=await apiHelper.convertToPlaywright(req);
+async function convertToPlaywright(req,isUsingOAuth,oauthCredentials){
+  const  convertedscript=await apiHelper.convertToPlaywright(req,isUsingOAuth,oauthCredentials);
   return convertedscript;
 }
 

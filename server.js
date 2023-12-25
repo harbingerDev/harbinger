@@ -622,8 +622,9 @@ app.post("/git/status", (req, res) => {
 
 // generate api script
 app.post("/api/generateScript", async (req, res) => {
-  const { finalmap, filename,filePath }  = req.body;
- const  playwrightScript =await  db.convertToPlaywright(finalmap);
+  const { finalmap, filename,filePath,isUsingOAuth,oauthCredentials }  = req.body;
+  console.log(oauthCredentials,"}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}")
+ const  playwrightScript =await  db.convertToPlaywright(finalmap,isUsingOAuth,oauthCredentials);
  const finalfilepath = path.join(filePath, filename);
  
  try {
