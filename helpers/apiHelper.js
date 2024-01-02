@@ -1,6 +1,8 @@
 const { Console } = require('console');
 const fs = require('fs');
 const path = require('path');
+const js = require('json-schema-generator');
+const { JsonSchema } = require('jsonschema');
 
 function extractPaths(data) {
     const paths = [];
@@ -236,16 +238,13 @@ function generateOAuthSteps(oauthCredentials) {
     oAuthSteps += `    data: \`grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}\`,\n`;
     oAuthSteps += `    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },\n`;
     oAuthSteps += `  });\n\n`;
-  
-    oAuthSteps += `  const ${variable} = tokenResponse.json().access_token;\n\n`;
-  
+    oAuthSteps+=  `   const tokenjsonResponse = await tokenResponse.json();  `
+    oAuthSteps += `  const ${variable} = tokenjsonResponse.access_token;\n\n`;
     return oAuthSteps;
   }
 
-
-
 function convertToPlaywright(tests,isUsingOAuth,oauthCredentials) {
-    let script = `const { test, expect } = require('@playwright/test');\n import { faker } from '@faker-js/faker'; \n\n`;
+    let script = `const { test, expect } = require('@playwright/test');\n import { faker } from '@faker-js/faker';\n const Ajv = require('ajv');\n const ajv = new Ajv(); \n\n`;
     
   
     script += `test('Combined Test', async ({ request }) => {\n`;
@@ -279,6 +278,12 @@ function generateTestSteps(testConfig) {
     const outputObject = {};
 
     let testSteps = `  // ${method.toUpperCase()} ${url}\n`;
+    testSteps+=`  await test.step('Make request for API:${getcurrentIdentifier()+1} `
+    if(testConfig.isStatusValidation && statusCode) testSteps+=`and check status code `
+    if(testConfig.isKeyValueValidation && testConfig.expectedKeyValue) testSteps+=`and validate key,value `
+    if(testConfig.isExtractkeyValidation && testConfig.expectedkeyAndVariableName) testSteps+=`and extract value `
+
+    testSteps+=`', async () => {\n        `
     testSteps += `  const response${getUniqueIdentifier()} = await request.${method}('${url}', {\n`;
     testSteps=testSteps.replace("'","`")
     testSteps=testSteps.replace("'","`")
@@ -286,10 +291,8 @@ function generateTestSteps(testConfig) {
       testSteps += `    headers: ${headers},\n`;
     }
 
-
     requestBody.forEach(item => {
         outputObject[item.paramkey] = item.paramvalue;
-
 
         if(item.isFakerEnabled){
             if(item.fakertype=="Name"){
@@ -325,14 +328,24 @@ function generateTestSteps(testConfig) {
     }
   
     testSteps += `  });\n\n`;
+
   console.log(statusCode,"<-code:trueorfalse->",testConfig.isStatusValidation)
+
     if (testConfig.isStatusValidation && statusCode) {
-      testSteps += `  expect(response${getcurrentIdentifier()}.status()).toBe(${statusCode});\n`;
+    //   testSteps += `  expect(response${getcurrentIdentifier()}.status()).toBe(${statusCode});\n`;
+    testSteps += `const temp = response${getcurrentIdentifier()}.status(); \n
+    await test.step(\`Expected Status Code: ${statusCode}  Received Status Code: \${temp}\`, async () => {\n
+      expect(response${getcurrentIdentifier()}.status()).toBe(${statusCode});\n
+      console.log('Status code of response${getcurrentIdentifier()} is:', response${getcurrentIdentifier()}.status());\n
+    }); \n`;
     }
   
     if (testConfig.isKeyValueValidation && testConfig.expectedKeyValue) {
       for (let [key, value] of Object.entries(testConfig.expectedKeyValue)) {
-        testSteps += `  expect(await response${getcurrentIdentifier()}.json()).toHaveProperty('${key}', '${value}');\n`;
+        // testSteps += `  expect(await response${getcurrentIdentifier()}.json()).toHaveProperty('${key}', '${value}');\n`;
+        testSteps+=`
+        await test.step('response${getcurrentIdentifier()} has property "${key}" with value "${value}"', async () => {\n 
+              expect(await response${getcurrentIdentifier()}.json()).toHaveProperty('${key}', '${value}');\n        });\n`;
       }
     }
     if (testConfig.isExtractkeyValidation && testConfig.expectedkeyAndVariableName) {
@@ -343,6 +356,103 @@ function generateTestSteps(testConfig) {
 
         }
       }
+
+      if (testConfig.validateSchema && testConfig.responseSchema) {
+        testSteps += `  const responseBodyJson = await response${getcurrentIdentifier()}.json();\n`;
+        testSteps += `  await test.step('Validate Response Schema', async () => {\n`;
+        testSteps += `    const ajv = new Ajv();\n`;
+        // testSteps += `  let obj =  ${testConfig.responseSchema}  \n
+        // let convertedSchemaObject = {};\n
+        //  for (const key in obj) {\n
+        //        convertedSchemaObject[key] = { type: typeof obj[key] };\n
+        //        }\n
+        //  const modifiedSchemaObject = { \n
+        //         type: 'object',\n
+        //         properties: convertedSchemaObject,\n
+        //         required: Object.keys(convertedSchemaObject),\n
+        //       };\n
+        // `;
+
+        // const generateSchema = (data) => {
+        //     let convertedSchemaObject = {};
+          
+        //     if (Array.isArray(data)) {
+        //       // If it's an array, create a schema for array items
+        //       convertedSchemaObject = {
+        //         type: 'array',
+        //         items: generateSchema(data[0]), // Assuming all array items have the same structure
+        //       };
+        //     } else if (typeof data === 'object') {
+        //       // If it's an object, create a schema for object properties
+        //       for (const key in data) {
+        //         convertedSchemaObject[key] = { type: typeof data[key] };
+        //       }
+        //     } else {
+        //       // Handle other data types as needed
+        //     }
+          
+        //     const modifiedSchemaObject = {
+        //       type: Array.isArray(data) ? 'array' : 'object',
+        //       properties: convertedSchemaObject,
+        //       required: Object.keys(convertedSchemaObject),
+        //     };
+          
+        //     return modifiedSchemaObject;
+        //   };
+
+        function convertJsonToSchema(jsonData, title = 'Generated schema for Root') {
+jsonData = JSON.parse(jsonData)            
+            if (!Array.isArray(jsonData) && typeof jsonData !== 'object') {
+                throw new Error('Invalid JSON data. Must be an object or an array.');
+            }
+          
+            const schema = {
+              $schema: 'http://json-schema.org/draft-07/schema#',
+              title: title,
+              type: Array.isArray(jsonData) ? 'array' : 'object',
+            };
+          
+            if (Array.isArray(jsonData)) {
+              if (jsonData.length > 0) {
+                const sampleObject = jsonData[0];
+                schema.items = {
+                  type: 'object',
+                  properties: {},
+                  required: Object.keys(sampleObject),
+                };
+          
+                for (const key in sampleObject) {
+                  schema.items.properties[key] = { type: typeof sampleObject[key] };
+                }
+              }
+            } else {
+              schema.properties = {};
+          
+              for (const key in jsonData) {
+                schema.properties[key] = { type: typeof jsonData[key] };
+              }
+          
+              schema.required = Object.keys(jsonData);
+            }
+          
+            return schema;
+          }
+
+
+          const schemaForObject =  convertJsonToSchema(testConfig.responseSchema);
+        //    validator.make(testConfig.responseSchema);
+
+       console.log(testConfig.responseSchema,"+++++++++++++++++++++++++++++++++++++++++++",schemaForObject)
+       testSteps += `    const schemaexp = ${JSON.stringify(schemaForObject)};\n`;
+        testSteps += `    const validate = ajv.compile(schemaexp);\n`;
+        testSteps += `    const isValid = validate(responseBodyJson);\n`;
+        testSteps += `    expect(isValid).toBeTruthy();\n`;        
+        testSteps += `  });\n`;
+      }
+      
+
+      
+      testSteps+=`\n  });`
   
     return testSteps;
 }

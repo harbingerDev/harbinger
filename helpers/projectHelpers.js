@@ -17,6 +17,7 @@ async function createProjectOnDisk(req) {
   try {
     // Setup paths and filenames
     const separator = path.sep; // Use Node.js's path module to get the OS-specific separator
+    console.log(req.project_name)
     const updatedProjectName = req.project_name.replaceAll(" ", "_");
     const projectDir = path.join(req.project_path, updatedProjectName);
     const configuratorFileName = path.join(projectDir, "playwright.config.js");
@@ -83,11 +84,11 @@ async function createScript(req) {
   const temp = "tempScript.spec.js";
   return new Promise((resolve, reject) => {
     exec(
-      `npx playwright codegen -o "${req.project_path}${separator}${req.project_name}${separator}tests${separator}${temp}" ${req.url}`,
+      `npx playwright codegen  -o "${req.project_path}${separator}${req.project_name}${separator}tests${separator}${temp}" ${req.url}`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
-          reject(error);
+          // reject(error);
         } 
         console.log(`stdout: ${stdout}`);
         resolve(true);
@@ -108,19 +109,21 @@ async function createScript(req) {
           "import { test, expect } from '@playwright/test';"
         );
       } else {
+        console.log("i am going to replaceAndRename ")
         await replaceAndRename(
           `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${temp}`,
           `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`,
           "'test', async",
           `'${req.test_name} ${req.tags}', async`
         );
+        console.log("i am after replaceAndRename ")
 
         await promiseHandler
           .replacePatternInFile(
             `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`
           )
           .then(async () => {
-            console.log("File modified and saved successfully!");
+            console.log("File modified and saved successfully!    ->   replaceAsyncPage method");
             await promiseHandler.replaceAsyncPage(
               `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`
             );
@@ -131,9 +134,11 @@ async function createScript(req) {
       }
     })
     .then(async () => {
+      console.log("getting godjson internal")
       const godJSON = await getGodJSONInternal(
         `${req.project_path}${separator}${req.project_name}${separator}tests${separator}${req.script_name}`
       );
+      console.log("getting getControlsFromGodJSON ")
       await objectRepo.getControlsFromGodJSON(
         godJSON,
         `${req.project_path}${separator}${req.project_name}${separator}objectRepository.js`,
@@ -201,11 +206,24 @@ async function getScripts(req) {
 async function executeScript(req) {
   const separator = os.platform() === "win32" ? "\\" : "/";
   return new Promise((resolve, reject) => {
+    // exec(
+    //   `cd ${req.project_path}${separator}${req.project_name} && npx playwright test tests/${req.script_name} --headed`,
+    //   (error, stdout, stderr) => {
+    //     console.log(`stdout: ${stdout}`);
+    //     resolve(true);
+    //   }
+    // );
     exec(
       `cd ${req.project_path}${separator}${req.project_name} && npx playwright test tests/${req.script_name} --headed`,
       (error, stdout, stderr) => {
         console.log(`stdout: ${stdout}`);
-        resolve(true);
+        console.error(`stderr: ${stderr}`);
+        if (error) {
+          console.error(`Error: ${error.message}`);
+        } else {
+          // Wait until the process is completed before resolving
+          resolve(true);
+        }
       }
     );
   });
@@ -213,13 +231,26 @@ async function executeScript(req) {
 async function executeScripts(req) {
   const separator = os.platform() === "win32" ? "\\" : "/";
   return new Promise((resolve, reject) => {
+    // exec(
+    //   `cd ${req.project_path}${separator}${req.project_name} && npx playwright test --headed`,
+    //   (error, stdout, stderr) => {
+    //     console.log(`stdout: ${stdout}`);
+    //     resolve(true);
+    //   }
+    // );
     exec(
       `cd ${req.project_path}${separator}${req.project_name} && npx playwright test --headed`,
       (error, stdout, stderr) => {
         console.log(`stdout: ${stdout}`);
-        resolve(true);
+        console.error(`stderr: ${stderr}`);
+        if (error) {
+          console.error(`Error: ${error.message}`);
+        } else {
+          resolve(true);
+        }
       }
     );
+    
   });
 }
 

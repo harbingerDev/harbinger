@@ -22,6 +22,7 @@ function replacePatternInFile(filePath) {
     // read the file
     fs.readFile(filePath, "utf8", function (err, data) {
       if (err) {
+        console.log("error in replacePatternInFile in promise helper line 25 while reading file")
         reject(err);
         return;
       }

@@ -21,6 +21,8 @@
     "getmac": "^6.4.0",
     "glob": "^10.2.2",
     "js-tokens": "^8.0.1",
+    "json-schema-generator": "^2.0.6",
+    "jsonschema": "^1.4.1",
     "knex": "^2.4.1",
     "multer": "^1.4.5-lts.1",
     "prettier": "^2.8.8",
@@ -38,9 +40,7 @@
       "./playwrightActionLocators.json"
     ],
     "targets": [
-      "node14-win-x64",
-      "node14-linux-x64",
-      "node14-macos-x64"
+      "node18-win-x64"
     ],
     "outputPath": "dist",
     "public": true,

@@ -283,8 +283,16 @@ function getLocatorName(input) {
   if (!match) {
     return "unknown_locator_name";
   }
+  // TODO:
+  // const specialTestRegex = /div:nth-child\([^)]*\)/g;
+  // const specialTestRegexmatches = input.match(specialTestRegex);
+  //  if(specialTestRegexmatches) return "unknown_locator_name";
+  // TODO:
+
 
   let label = match[2] || match[1];
+  console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^",type,label)
+
 
   // Format the extracted string
   switch (type) {
@@ -310,7 +318,9 @@ function getLocatorName(input) {
       break;
     default:
       // For locators, just return the label directly
-      return label;
+      return label
+      .trim().replace(" ","").replace("-","");
+      //#roshan changed here.
   }
 
   return `${type}_${label}`;
@@ -370,13 +380,14 @@ async function getControlsFromGodJSON(
             locatorNameMap[locatorName] = locatorNameMap[locatorName] + 1;
           }
         }
-        console.log("*******", testStep["tokens"]);
+        // console.log("*******", testStep["tokens"]);
         const controlToBeReplaced =
           `${operator}.${joinWithAlternatingParentheses(
             testStep["tokens"],
             locatorObjectFirst.index,
             locatorObjectLast.index + 1
           )}`.replace(/\\(?=")/g, "");
+          //we will replace - and space for locator here !!!
         const controlToBeReplacedWith =
           `objectRepository.default.${locatorName}(${operator})`.replace(
             /\\(?=")/g,
