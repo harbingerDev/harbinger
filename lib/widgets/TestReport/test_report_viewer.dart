@@ -14,7 +14,6 @@ final navigatorKey = GlobalKey<NavigatorState>();
 class TestReportViewer extends StatefulWidget {
   final String type;
   const TestReportViewer({super.key, required this.type});
-
   @override
   State<TestReportViewer> createState() => _TestReportViewerState();
 }
@@ -58,19 +57,21 @@ class _TestReportViewerState extends State<TestReportViewer> {
       htmlFileContent = fileContent.body;
     });
     if (widget.type != "local") {
+      print("in if");
+
       _iframeElement = html.IFrameElement()
         ..width = '100%'
         ..height = '100%'
         ..src = "http://10.10.90.150:8080/ui/#superadmin_personal/launches/all"
         ..style.border = 'none';
     } else {
+      print("in else${htmlFileContent.characters.length}");
       _iframeElement = html.IFrameElement()
         ..width = '100%'
         ..height = '100%'
         ..srcdoc = htmlFileContent
         ..style.border = 'none';
     }
-
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory(
       _key.toString(),
@@ -106,7 +107,11 @@ class _TestReportViewerState extends State<TestReportViewer> {
                 icon: Icon(Icons.refresh),
                 splashRadius: 20,
                 onPressed: () {
-                  _iframeElement.src = _iframeElement.src!;
+                  setState(() {
+                    // _iframeElement.srcdoc = _iframeElement.srcdoc!;
+                    _iframeElement.src = _iframeElement.src!;
+
+                  });
                 },
               ),
             ]),

@@ -6,14 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class EditableDataRepoScreen extends StatefulWidget {
-  const EditableDataRepoScreen({Key? key}) : super(key: key);
+class EditableDataRepoOldScreen extends StatefulWidget {
+  const EditableDataRepoOldScreen({Key? key}) : super(key: key);
 
   @override
-  _EditableDataRepoScreenState createState() => _EditableDataRepoScreenState();
+  _EditableDataRepoOldScreenState createState() => _EditableDataRepoOldScreenState();
 }
 
-class _EditableDataRepoScreenState extends State<EditableDataRepoScreen> {
+class _EditableDataRepoOldScreenState extends State<EditableDataRepoOldScreen> {
   Map<String, List<TextEditingController>> _dataParameterNameControllers = {};
   final _formKey = GlobalKey<FormState>();
   late Map<String, dynamic> dataRepo = {};

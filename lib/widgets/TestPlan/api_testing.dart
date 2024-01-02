@@ -39,6 +39,7 @@ class ApiTesting extends StatefulWidget {
 }
 
 class ApiTestingState extends State<ApiTesting> {
+  bool validateSchema = false;
   List<RequestBodyParameter> reqbodyList = [];
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -78,7 +79,7 @@ class ApiTestingState extends State<ApiTesting> {
       keyofvalue = value;
     }
 
-    return keyofvalue;
+    return keyofvalue + "";
   }
 
   initialiseReqBodyList() {
@@ -117,10 +118,17 @@ class ApiTestingState extends State<ApiTesting> {
         if (i > 0) urlController.text += "&";
         urlController.text += widget.queryParam![i].name!;
         urlController.text += "=";
-        urlController.text += getValue(widget.queryParam![i].type!);
+        print("111111111111111111111111111111111111111111");
 
+        if (widget.queryParam![i].type == null) {
+          widget.queryParam![i].type = "undefined";
+        }
+        urlController.text += getValue(widget.queryParam![i].type!);
+        print("222222222222222222222222222222222222222222222222");
         widget.queryParam![i].placeholder =
             getValue(widget.queryParam![i].type!);
+        print("333333333333333333333333333333333333333");
+
         print("checkinggggg${getValue(widget.queryParam![i].type!)}");
       }
     }
@@ -266,8 +274,36 @@ class ApiTestingState extends State<ApiTesting> {
                                                       color: Colors.black26),
                                                 ),
                                               ]),
-                                        )
+                                        ),
                                       ]),
+                                  Row(
+                                    children: [
+                                      Checkbox(
+                                        fillColor: MaterialStateProperty.all(
+                                          const Color.fromARGB(
+                                              255, 235, 234, 234),
+                                        ),
+                                        value: validateSchema,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            validateSchema = value!;
+                                          });
+                                        },
+                                        activeColor: const Color.fromARGB(
+                                            255,
+                                            236,
+                                            234,
+                                            234), // Color when checkbox is checked
+                                        checkColor: Colors
+                                            .green, // Color of the checkmark
+                                      ),
+                                      !validateSchema
+                                          ? Text(
+                                              "Wanna Validate the schemas enable the checkbox")
+                                          : Text(
+                                              "Dont Want to Validate the schemas disable the checkbox"),
+                                    ],
+                                  ),
                                 ]),
                           )
                         ]),
@@ -990,7 +1026,6 @@ class ApiTestingState extends State<ApiTesting> {
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: TextField(
-                                            readOnly: true,
                                             controller: responseBodyController,
                                             maxLines:
                                                 10, // Make it multiline (expanded)
@@ -999,6 +1034,12 @@ class ApiTestingState extends State<ApiTesting> {
                                                   'Expected Response Schema',
                                               //labelStyle: TextStyle(fontWeight: FontWeight.bold),
                                             ),
+                                            onChanged: ((value) => {
+                                                  setState(() {
+                                                    responseBodyController
+                                                        .text = value!;
+                                                  })
+                                                }),
                                           ),
                                         ),
                                       ),
@@ -1098,6 +1139,7 @@ class ApiTestingState extends State<ApiTesting> {
   }
 
   createMapAndAdd() {
+    print(validateSchema);
     print(widget.headers);
     String httpMethod = selectedHttpMethod;
     String url = baseurlController.text + urlController.text;
@@ -1162,11 +1204,13 @@ class ApiTestingState extends State<ApiTesting> {
       "url": url,
       "path": path,
       "requestBody": RequestBodyParameter.listToJson(reqbodyList),
+      "responseSchema": responseBodyController.text,
       "headers": headers,
       "queryParams": queryParams,
       "isStatusValidation": isStatusValidation,
       "isKeyValueValidation": isKeyValueValidation,
       "isExtractkeyValidation": isExtractkeyValidation,
+      "validateSchema": validateSchema,
       "expectedStatusCode": expectedStatusCode,
       "expectedKeyValue": {expectedkey: expectedvalue},
       "expectedkeyAndVariableName": {expectedkeyOfVariable: expectedvariable},

@@ -62,7 +62,7 @@ dependencies:
   editable: ^2.0.0
   syncfusion_flutter_datagrid: ^20.4.44
   toggle_switch: ^2.1.0
-  webview_flutter: ^4.0.7
+  webview_flutter: ^4.4.2
   flutter_riverpod: ^2.3.5
   flutter_sound: ^9.2.13
   speech_to_text: ^6.4.1
@@ -78,6 +78,7 @@ dependencies:
   flutter_dropzone: ^3.0.6
   syncfusion_flutter_charts: ^20.4.54
   flutter_tts: ^3.8.5
+  fluttertoast: ^8.2.4
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,8 @@
 class AppConfig {
   // Define your constants as static final fields.
   static const String BASE_URL1 = "http://localhost:1337";
-  // static const String BASE_URL2 = "http://10.10.90.71:2468";
-  static const String BASE_URL2 = "http://localhost:8000";
+  static const String BASE_URL2 = "http://10.10.90.71:2468";
+  // static const String BASE_URL2 = "http://localhost:8000";
 
   static const String SUPERADMIN = "superadmin";
   static const String ORGADMIN = "org_admin";
