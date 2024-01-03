@@ -283,10 +283,16 @@ function getLocatorName(input) {
   if (!match) {
     return "unknown_locator_name";
   }
+  console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",input);
   // TODO:
-  // const specialTestRegex = /div:nth-child\([^)]*\)/g;
-  // const specialTestRegexmatches = input.match(specialTestRegex);
-  //  if(specialTestRegexmatches) return "unknown_locator_name";
+  const specialTestRegex = /div:nth-child\((\d+)\)/g;
+  const specialTestRegexmatches = input.toString().match(specialTestRegex);
+  
+  if (specialTestRegexmatches) {
+      console.log("hii")
+    const numericPart = specialTestRegexmatches[1];
+    return "unknown_locator_name";
+  }
   // TODO:
 
 
