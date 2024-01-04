@@ -95,7 +95,7 @@ async function getASTFromFile(req) {
   return ast;
 }
 async function getSpecificJSON(req) {
-  const ast = await promjectHelper.getSpecificAstJSON(req);
+  const ast = await projectHelper.getSpecificAstJSON(req);
   return ast;
 }
 
