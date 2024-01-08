@@ -325,7 +325,7 @@ function getLocatorName(input) {
     default:
       // For locators, just return the label directly
       return label
-      .trim().replace(" ","").replace("-","").replace("<","").replace(">","");
+      .trim().replaceAll(" ","").replaceAll("-","").replaceAll("<","").replaceAll(">","");
       //#roshan changed here.
   }
 

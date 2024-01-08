@@ -32,7 +32,7 @@ const config = {
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ["junit", { outputFile: "test-results/results.xml" }],
-    ["html"],
+    ["html", { open: 'always' }],
 
     ["@reportportal/agent-js-playwright", RPconfig],
   ],

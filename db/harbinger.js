@@ -6,8 +6,12 @@ const openApiJsonHelper = require("../helpers/openApiJsonHelper");
 
 // everything related to projects
 async function createProject(project) {
-  await projectHelper.createProjectOnDisk(project);
-  return knex("projects").insert(project);
+ const projectResult= await projectHelper.createProjectOnDisk(project);
+  // if(projectResult){
+    console.log(project)
+    return knex("projects").insert(project);
+  // }
+  // return false
 }
 
 function getAllProjects() {

@@ -43,6 +43,7 @@ app.get("/projects/getActiveProject", async (req, res) => {
 
 app.post("/projects/createProject", async (req, res) => {
   const results = await db.createProject(req.body);
+  if(results==false)res.status(500).json({ result:"false" });
   res.status(201).json({ id: results[0] });
 });
 
@@ -571,6 +572,15 @@ const executeGitCommand = (cmd, path, callback) => {
 
 app.post("/git/add", (req, res) => {
   const { folderPath } = req.body;
+  // const cmd2 = "git checkout -b main";
+
+  // executeGitCommand(cmd2, folderPath, (error, result) => {
+  //   if (error) {
+  //     console.log("error in checkout");
+  //   } else {
+  //     console.log(" in checkout ");
+  //   }
+  // });
   const cmd = "git add .";
   executeGitCommand(cmd, folderPath, (error, result) => {
     if (error) {
@@ -599,9 +609,14 @@ app.post("/git/commit", (req, res) => {
 
 app.post("/git/push", (req, res) => {
   const { folderPath } = req.body;
-  const cmd = "git push -u origin master";
+ 
+  const cmd = "git push origin main";
   executeGitCommand(cmd, folderPath, (error, result) => {
     if (error) {
+
+
+
+      
       res.status(500).send({ error: "Failed to push files" });
     } else {
       res.send({ message: "Files pushed successfully", result });

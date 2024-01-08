@@ -230,9 +230,9 @@ async function getApiInfo(apiInfo, method)  {
 
 
 function generateOAuthSteps(oauthCredentials) {
-    const { clientId, clientSecret, tokenEndpoint, variable } = JSON.parse(oauthCredentials);
+    let { clientId, clientSecret, tokenEndpoint, variable } = JSON.parse(oauthCredentials);
     // console.log(jsonInput["clientId"],"}]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]")
-
+    tokenEndpoint=tokenEndpoint.trim()
     let oAuthSteps = `  // OAuth 2.0 Authorization\n`;
     oAuthSteps += `  const tokenResponse = await request.post('${tokenEndpoint}', {\n`;
     oAuthSteps += `    data: \`grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}\`,\n`;
@@ -324,7 +324,7 @@ function generateTestSteps(testConfig) {
   
 
     if (requestBody.length > 0) {
-      testSteps += `     data: ${ JSON.stringify(outputObject).replace(/"(\${[^}]+})"/g, (_, p1) => `\`${p1}\``)}`;
+      testSteps += `     data: ${JSON.stringify(outputObject).replace(/"(\${[^}]+})"/g, (_, p1) => `\`${p1}\``)}`;
     }
   
     testSteps += `  });\n\n`;

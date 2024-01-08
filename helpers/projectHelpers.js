@@ -15,6 +15,10 @@ const { Console } = require("console");
 //project functions
 async function createProjectOnDisk(req) {
   try {
+    console.log("++++++++++++++",typeof(req.default_timeout))
+    // if(typeof(req.default_timeout)=="string"){
+    //   return false
+    // }
     // Setup paths and filenames
     const separator = path.sep; // Use Node.js's path module to get the OS-specific separator
     console.log(req.project_name)
@@ -28,16 +32,16 @@ async function createProjectOnDisk(req) {
     // Create directory and setup project
     await fs.ensureDir(path.join(projectDir, "tests")); // This also creates the parent directories if they don't exist
     process.chdir(projectDir); // Change to project directory
-
+console.log("hii i m here")
     await new Promise((resolve, reject) => {
       // Initialize npm and install packages
       exec(
-        "npm init -y && npm i -D ajv @faker-js/faker  @playwright/test @reportportal/agent-js-playwright dotenv && npx playwright install && git init && git remote add origin git@github.com:codetesta2z/kilimanjaro.git",
+        `npm init -y && npm i -D ajv @faker-js/faker  @playwright/test @reportportal/agent-js-playwright dotenv && npx playwright install && git init && git remote add origin ${req.github_url}`,
         (error, stdout) => {
           if (error) {
             console.error(`exec error: ${error}`);
-            return reject(error);
-          }
+            return false;
+           }
           console.log(`stdout: ${stdout}`);
           resolve();
         }
@@ -56,7 +60,7 @@ async function createProjectOnDisk(req) {
     return true;
   } catch (error) {
     console.error(`Error in createProjectOnDisk: ${error}`);
-    throw error;
+    return false;
   }
 }
 function createGitignore(folderName) {
