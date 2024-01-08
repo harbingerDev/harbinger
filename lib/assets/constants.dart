@@ -7,7 +7,7 @@ List<Map<String, dynamic>> projectAdminNavigationRailItems = [
     "icon": Icons.home,
     "selectedIcon": Icons.home_filled,
     "selectedIconColor": themeColor,
-    "text": "PA"
+    "text": ""
   },
   {
     "icon": Icons.account_tree_outlined,

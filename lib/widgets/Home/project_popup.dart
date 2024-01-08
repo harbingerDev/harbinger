@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProjectPopup extends StatefulWidget {
   final Function(Map<String, dynamic> projectObject) onClickedDone;
@@ -27,6 +28,12 @@ class _ProjectPopupState extends State<ProjectPopup> {
   final environmentNameController = TextEditingController();
   final environmentValueController = TextEditingController();
   final workerNumberController = TextEditingController();
+  final gitUrlController = TextEditingController();
+  final apitokenUrlController = TextEditingController();
+  final jenkinsUrlController = TextEditingController();
+  final jenkinsUsernameController = TextEditingController();
+
+  
   Map<String, dynamic> projectObject = {};
 
   List<String> tags = [];
@@ -88,7 +95,7 @@ class _ProjectPopupState extends State<ProjectPopup> {
                     style: GoogleFonts.roboto(
                         color: Colors.black87, fontSize: 14)),
                 Text('${widget.projectPath}/harbingerProjects',
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.roboto(  
                         color: Colors.black87,
                         fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
@@ -97,6 +104,37 @@ class _ProjectPopupState extends State<ProjectPopup> {
             ),
             SizedBox(height: 8),
             buildField(projectNameController, "Enter project name"),
+            SizedBox(height: 8),
+            buildField(
+              gitUrlController,
+                 "Enter git url (https://github.com/username/repo.git)",
+                    ),
+                    SizedBox(height: 8),
+            Row(
+              children: [
+                 Expanded(
+                   child: buildEnvironmentField(
+                     jenkinsUrlController,
+                     "Enter jenkins url (http://localhost:8080)",
+                   ),
+                 ),
+                  SizedBox(width: 10),
+                    Expanded(
+                      child: buildEnvironmentField(
+                       jenkinsUsernameController,
+                        "Enter jenkins username"
+                      ),
+                    ),
+                     SizedBox(width: 10),
+                    Expanded(
+                      child: buildEnvironmentField(
+                        apitokenUrlController,
+                        "Enter jenkins api token"
+                      ),
+                    ),
+ 
+              ],
+            ),
             SizedBox(height: 8),
             buildField(
                 defaultTimeOutController, "Enter default timeout (in ms)"),
@@ -268,7 +306,6 @@ class _ProjectPopupState extends State<ProjectPopup> {
       child: Text('Chose a file'));
   Widget buildAddButton(BuildContext context) {
     final text = widget.isAdd ? 'Add project' : 'Import';
-
     return TextButton(
       child: Text(text,
           style: GoogleFonts.roboto(
@@ -280,15 +317,19 @@ class _ProjectPopupState extends State<ProjectPopup> {
 
         if (isValid) {
           projectObject["project_name"] = projectNameController.text;
-          projectObject["project_path"] =
-              '${widget.projectPath}/harbingerProjects';
+          projectObject["github_url"]=gitUrlController.text ;
+          projectObject["project_path"] ='${widget.projectPath}/harbingerProjects';
           projectObject["default_timeout"] = defaultTimeOutController.text;
           projectObject["environments"] = environments;
           projectObject["parallel_execution"] = parallel.toString();
           projectObject["browsers"] = tags;
-
           widget.onClickedDone(projectObject);
-
+          // jenkinsUrlController.text
+          // apitokenUrlController.text
+          final sharedPreferences = await SharedPreferences.getInstance();
+          await sharedPreferences.setString('jenkins_url', jenkinsUrlController.text);
+          await sharedPreferences.setString('jenkins_api_token', apitokenUrlController.text);
+          await sharedPreferences.setString('jenkins_username', jenkinsUsernameController.text);
           Navigator.of(context).pop();
         }
       },

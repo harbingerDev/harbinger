@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           //   );
                           // }
                           /////******************************with fastapi*********************************************
-
+                          ///////////////////////////
                           final Map<String, dynamic>? loginResult =
                               await AuthService(AppConfig.BASE_URL2).login(
                             email_id: _emailController.text,

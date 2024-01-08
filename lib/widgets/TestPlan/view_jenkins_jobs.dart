@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class JenkinsJobsScreen extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class JenkinsJobsScreen extends StatefulWidget {
 
 class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
   List<dynamic> jobs = [];
+  
 
   @override
   void initState() {
@@ -19,13 +21,23 @@ class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
   }
 
   _fetchJobs() async {
-    String username = 'admin';
-    String apiToken = '11d8fe2988c83f162f11d5586aa3337526';
+
+
+     final sharedPreferences = await SharedPreferences.getInstance();
+    final jenkins_url = sharedPreferences.getString("jenkins_url");
+    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
+    final jenkins_username = sharedPreferences.getString("jenkins_username");
+
+
+
+    String username = jenkins_username!;
+    String apiToken =jenkins_api_token!;
+    
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/json'),
+      Uri.parse('$jenkins_url/api/json'),
       headers: <String, String>{'authorization': basicAuth},
     );
 
@@ -39,8 +51,14 @@ class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
   }
 
   _createJob(String jobName) async {
-    String username = 'admin';
-    String apiToken = '11d8fe2988c83f162f11d5586aa3337526';
+      final sharedPreferences = await SharedPreferences.getInstance();
+    final jenkins_url = sharedPreferences.getString("jenkins_url");
+    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
+    final jenkins_username = sharedPreferences.getString("jenkins_username");
+
+    print("creating job$jobName");
+    String username = jenkins_username!;
+    String apiToken = jenkins_api_token!;
 
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
@@ -59,7 +77,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'gitCredentials', url: 'git@github.com:codetesta2z/kilimanjaro.git']])
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'gitCredentials', url: 'git@github.com:roshan59777/harbinger.git']])
             }
         }
         
@@ -93,15 +111,17 @@ pipeline {
   <disabled>false</disabled>
 </flow-definition>
 """;
-
+print("making the post request");
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/createItem?name=$jobName'),
+      Uri.parse('$jenkins_url/createItem?name=$jobName'),
       headers: <String, String>{
         'authorization': basicAuth,
         'Content-Type': 'application/xml',
       },
       body: configXml,
     );
+
+print("made  the post request$response");
 
     if (response.statusCode == 200) {
       Fluttertoast.showToast(msg: 'Pipeline job created successfully');
@@ -142,13 +162,19 @@ pipeline {
   }
 
   Future<void> _triggerBuild(String jobName) async {
-    String username = 'admin';
-    String apiToken = '119dd70df35908d1eb482509c47c52023e';
+      final sharedPreferences = await SharedPreferences.getInstance();
+    final jenkins_url = sharedPreferences.getString("jenkins_url");
+    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
+    final jenkins_username = sharedPreferences.getString("jenkins_username");
+
+   String username =jenkins_username!;
+    String apiToken =jenkins_api_token!;
+
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/job/$jobName/build'),
+      Uri.parse('$jenkins_url/job/$jobName/build'),
       headers: <String, String>{
         'authorization': basicAuth,
       },
@@ -162,16 +188,21 @@ pipeline {
   }
 
   Future<List<String>> _fetchJobDetails(String jobName) async {
-    String username = 'admin';
-    String apiToken = '119dd70df35908d1eb482509c47c52023e';
+       final sharedPreferences = await SharedPreferences.getInstance();
+    final jenkins_url = sharedPreferences.getString("jenkins_url");
+    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
+    final jenkins_username = sharedPreferences.getString("jenkins_username");
+
+    String username =jenkins_username!;
+    String apiToken =jenkins_api_token!;
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
 
     final response = await http.get(
       Uri.parse(
-          'http://127.0.0.1:8000/job/$jobName/api/json?tree=builds[result]{0,5}'),
+          '$jenkins_url/job/$jobName/api/json?tree=builds[result]{0,5}'),
       headers: <String, String>{
-        'authorization': basicAuth,
+        'Authorization': basicAuth,
       },
     );
 

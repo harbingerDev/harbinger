@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\flutter\src"
-export "FLUTTER_APPLICATION_PATH=C:\Users\roshan.kumar\OneDrive - Feuji Software Solutions Pvt Ltd\Desktop\harbinger\harbinger"
+export "FLUTTER_ROOT=/Users/anjanikumarv/development/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/anjanikumarv/Downloads/harbinger_frontend"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

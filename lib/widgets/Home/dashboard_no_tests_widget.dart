@@ -107,6 +107,17 @@ class _NoTestsWidgetState extends State<NoTestsWidget> {
         headers: headers,
       )
     ]);
+    if(json.decode(creationResponse[0].body)['result']=="false"){
+    setState(() {
+      loaded = true;
+    });
+  const snackBar = SnackBar(
+  content: Text('Failed to create project!'),
+);
+
+ScaffoldMessenger.of(context).showSnackBar(snackBar);
+return;
+}
     var activateProjectUrl = Uri.parse(
         "http://127.0.0.1:1337/projects/activate/${json.decode(creationResponse[0].body)['id']}");
     await http.put(activateProjectUrl);
