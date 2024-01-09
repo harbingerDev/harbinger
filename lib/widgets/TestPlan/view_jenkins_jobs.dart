@@ -12,32 +12,66 @@ class JenkinsJobsScreen extends StatefulWidget {
 
 class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
   List<dynamic> jobs = [];
-  
+
+  late String jenkinsUrl;
+  late String jenkinsApiToken;
+  late String jenkinsUsername;
+
 
   @override
   void initState() {
     super.initState();
+    fetchJenkinsInfo();
     _fetchJobs();
   }
+
+
+    Future<void> fetchJenkinsInfo() async {
+    try {
+      final info = await getJenkinsInfo();
+      setState(() {
+       jenkinsUrl = info['jenkins_url'];
+        jenkinsApiToken = info['jenkins_api_token'];
+        jenkinsUsername = info['jenkins_username'];
+      });
+    } catch (e) {
+      // Handle error
+      print('Error fetching Jenkins info: $e');
+    }
+  }
+
+
+  Future<Map<String, dynamic>> getJenkinsInfo() async {
+
+     final sharedPreferences = await SharedPreferences.getInstance();
+     final projectId = sharedPreferences.getString("activeProject");
+     final response = await http.get(Uri.parse("http://127.0.0.1:1337/getJenkinsInfo?id=$projectId"));
+
+  if (response.statusCode == 200) {
+    // Parse the JSON response
+    final Map<String, dynamic> data = json.decode(response.body);
+    return data;
+  } else {
+    // Handle error
+    throw Exception('Failed to load Jenkins information');
+  }
+}
 
   _fetchJobs() async {
 
 
-     final sharedPreferences = await SharedPreferences.getInstance();
-    final jenkins_url = sharedPreferences.getString("jenkins_url");
-    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
-    final jenkins_username = sharedPreferences.getString("jenkins_username");
+     
 
 
 
-    String username = jenkins_username!;
-    String apiToken =jenkins_api_token!;
+    String username = jenkinsUsername!;
+    String apiToken =jenkinsApiToken!;
     
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
 
     final response = await http.get(
-      Uri.parse('$jenkins_url/api/json'),
+      Uri.parse('$jenkinsUrl/api/json'),
       headers: <String, String>{'authorization': basicAuth},
     );
 
@@ -51,14 +85,11 @@ class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
   }
 
   _createJob(String jobName) async {
-      final sharedPreferences = await SharedPreferences.getInstance();
-    final jenkins_url = sharedPreferences.getString("jenkins_url");
-    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
-    final jenkins_username = sharedPreferences.getString("jenkins_username");
+      
 
     print("creating job$jobName");
-    String username = jenkins_username!;
-    String apiToken = jenkins_api_token!;
+    String username = jenkinsUsername!;
+    String apiToken = jenkinsApiToken!;
 
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
@@ -113,7 +144,7 @@ pipeline {
 """;
 print("making the post request");
     final response = await http.post(
-      Uri.parse('$jenkins_url/createItem?name=$jobName'),
+      Uri.parse('$jenkinsUrl/createItem?name=$jobName'),
       headers: <String, String>{
         'authorization': basicAuth,
         'Content-Type': 'application/xml',
@@ -121,7 +152,7 @@ print("making the post request");
       body: configXml,
     );
 
-print("made  the post request$response");
+    print("made  the post request$response");
 
     if (response.statusCode == 200) {
       Fluttertoast.showToast(msg: 'Pipeline job created successfully');
@@ -162,19 +193,16 @@ print("made  the post request$response");
   }
 
   Future<void> _triggerBuild(String jobName) async {
-      final sharedPreferences = await SharedPreferences.getInstance();
-    final jenkins_url = sharedPreferences.getString("jenkins_url");
-    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
-    final jenkins_username = sharedPreferences.getString("jenkins_username");
+      
 
-   String username =jenkins_username!;
-    String apiToken =jenkins_api_token!;
+   String username =jenkinsUsername!;
+    String apiToken =jenkinsApiToken!;
 
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
 
     final response = await http.post(
-      Uri.parse('$jenkins_url/job/$jobName/build'),
+      Uri.parse('$jenkinsUrl/job/$jobName/build'),
       headers: <String, String>{
         'authorization': basicAuth,
       },
@@ -188,19 +216,16 @@ print("made  the post request$response");
   }
 
   Future<List<String>> _fetchJobDetails(String jobName) async {
-       final sharedPreferences = await SharedPreferences.getInstance();
-    final jenkins_url = sharedPreferences.getString("jenkins_url");
-    final jenkins_api_token = sharedPreferences.getString("jenkins_api_token");
-    final jenkins_username = sharedPreferences.getString("jenkins_username");
+       
 
-    String username =jenkins_username!;
-    String apiToken =jenkins_api_token!;
+    String username =jenkinsUsername!;
+    String apiToken =jenkinsApiToken!;
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
 
     final response = await http.get(
       Uri.parse(
-          '$jenkins_url/job/$jobName/api/json?tree=builds[result]{0,5}'),
+          '$jenkinsUrl/job/$jobName/api/json?tree=builds[result]{0,5}'),
       headers: <String, String>{
         'Authorization': basicAuth,
       },
@@ -266,7 +291,6 @@ print("made  the post request$response");
                     ),
                   );
                 }
-
                 return Container(
                   decoration: BoxDecoration(
                     border: Border(
