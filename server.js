@@ -613,10 +613,6 @@ app.post("/git/push", (req, res) => {
   const cmd = "git push origin main";
   executeGitCommand(cmd, folderPath, (error, result) => {
     if (error) {
-
-
-
-      
       res.status(500).send({ error: "Failed to push files" });
     } else {
       res.send({ message: "Files pushed successfully", result });
@@ -730,6 +726,10 @@ app.post("/uploadFileWithPath/", async (req, res) => {
     res.status(500).json({ error: "Failed to upload file with path." });
   }
 
+});
+app.get("/getJenkinsInfo", async (req, res) => {
+  const project = await db.getProjectById(req.id)
+  res.status(200).json({"jenkins_url":project.jenkins_url,"jenkins_api_token":project.jenkins_api_token,"jenkins_username":project.jenkins_username});
 });
 
 

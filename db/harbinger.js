@@ -13,6 +13,10 @@ async function createProject(project) {
   // }
   // return false
 }
+function getProjectById(){
+  return knex("projects").where("id", id).first();
+
+}
 
 function getAllProjects() {
   return knex("projects").select("*");
