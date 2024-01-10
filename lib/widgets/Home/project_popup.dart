@@ -323,8 +323,8 @@ class _ProjectPopupState extends State<ProjectPopup> {
           projectObject["environments"] = environments;
           projectObject["parallel_execution"] = parallel.toString();
           projectObject["browsers"] = tags;
-          projectObject["jenkins_api_token"] = jenkinsUrlController.text;
-          projectObject["jenkins_url"] = apitokenUrlController.text;
+          projectObject["jenkins_api_token"] = apitokenUrlController.text;
+          projectObject["jenkins_url"] = jenkinsUrlController.text;
           projectObject["jenkins_username"] = jenkinsUsernameController.text;
           widget.onClickedDone(projectObject);
           Navigator.of(context).pop();

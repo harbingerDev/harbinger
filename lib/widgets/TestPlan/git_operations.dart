@@ -108,15 +108,54 @@ class _GitOperationsScreenState extends State<GitOperationsScreen> {
     );
   }
 
-  Future<void> _gitPush() async {
-    final response = await http.post(
+  // Future<void> _gitPushBranch(String branchName) async {
+    
+  // }
+
+    Future<void> _gitPush() async {
+    final TextEditingController branchcontroller = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Branch Name'),
+          content: TextField(
+            controller: branchcontroller,
+            decoration: InputDecoration(hintText: 'Enter your branch name'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final branchName = branchcontroller.text;
+                print(branchName);
+                if (branchName.isNotEmpty) {
+                final response = await http.post(
       Uri.parse('http://127.0.0.1:1337/git/push'),
-      body: jsonEncode({"folderPath": folderPath}),
+      body: jsonEncode({"folderPath": folderPath,"branch": branchName}),
       headers: {"Content-Type": "application/json"},
     );
     if (response.statusCode == 200) {
+          Navigator.of(context).pop(true);
       _gitStatus();
     }
+    else{
+        Navigator.of(context).pop(true);
+    }
+
+                }
+              },
+              child: Text('Push'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -163,7 +202,9 @@ class _GitOperationsScreenState extends State<GitOperationsScreen> {
                   child: Text('Commit'),
                 ),
                 ElevatedButton(
-                  onPressed: _gitPush,
+                  onPressed: () async {
+                   _gitPush();
+                  },
                   child: Text('Push'),
                 ),
               ],

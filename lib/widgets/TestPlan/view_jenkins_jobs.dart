@@ -13,27 +13,34 @@ class JenkinsJobsScreen extends StatefulWidget {
 class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
   List<dynamic> jobs = [];
 
-  late String jenkinsUrl;
-  late String jenkinsApiToken;
-  late String jenkinsUsername;
+  late String jenkinsUrl="";
+  late String jenkinsApiToken="";
+  late String jenkinsUsername="";
+  late String giturl="";
+
 
 
   @override
   void initState() {
     super.initState();
-    fetchJenkinsInfo();
-    _fetchJobs();
+    _fetchJenkinsInfo();
+            
+
   }
 
 
-    Future<void> fetchJenkinsInfo() async {
+    _fetchJenkinsInfo() async {
     try {
+      print("hii");
       final info = await getJenkinsInfo();
       setState(() {
        jenkinsUrl = info['jenkins_url'];
         jenkinsApiToken = info['jenkins_api_token'];
         jenkinsUsername = info['jenkins_username'];
+        giturl=info['git_url'];
       });
+      print(jenkinsUrl);
+      _fetchJobs();
     } catch (e) {
       // Handle error
       print('Error fetching Jenkins info: $e');
@@ -42,12 +49,13 @@ class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
 
 
   Future<Map<String, dynamic>> getJenkinsInfo() async {
-
+print("hello");
      final sharedPreferences = await SharedPreferences.getInstance();
-     final projectId = sharedPreferences.getString("activeProject");
+     final projectId = sharedPreferences.getInt("activeProject");
      final response = await http.get(Uri.parse("http://127.0.0.1:1337/getJenkinsInfo?id=$projectId"));
 
   if (response.statusCode == 200) {
+    print("hii hello");
     // Parse the JSON response
     final Map<String, dynamic> data = json.decode(response.body);
     return data;
@@ -58,15 +66,10 @@ class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
 }
 
   _fetchJobs() async {
+    String username = jenkinsUsername;
+    String apiToken =jenkinsApiToken;
+    print("++++++++++$username and $apiToken");
 
-
-     
-
-
-
-    String username = jenkinsUsername!;
-    String apiToken =jenkinsApiToken!;
-    
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$apiToken'));
 
@@ -78,6 +81,7 @@ class _JenkinsJobsScreenState extends State<JenkinsJobsScreen> {
     if (response.statusCode == 200) {
       setState(() {
         jobs = jsonDecode(response.body)['jobs'];
+        print(jobs);
       });
     } else {
       Fluttertoast.showToast(msg: 'Failed to load Jenkins jobs.');
@@ -108,7 +112,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'gitCredentials', url: 'git@github.com:roshan59777/harbinger.git']])
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'gitCredentials', url: '$giturl']])
             }
         }
         
