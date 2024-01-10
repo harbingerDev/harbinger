@@ -607,10 +607,11 @@ app.post("/git/commit", (req, res) => {
   });
 });
 
+
 app.post("/git/push", (req, res) => {
-  const { folderPath } = req.body;
+  const { folderPath,branch } = req.body;
  
-  const cmd = "git push origin main";
+  const cmd = `git push origin ${branch}`;
   executeGitCommand(cmd, folderPath, (error, result) => {
     if (error) {
       res.status(500).send({ error: "Failed to push files" });
@@ -728,9 +729,12 @@ app.post("/uploadFileWithPath/", async (req, res) => {
 
 });
 app.get("/getJenkinsInfo", async (req, res) => {
-  const project = await db.getProjectById(req.id)
-  res.status(200).json({"jenkins_url":project.jenkins_url,"jenkins_api_token":project.jenkins_api_token,"jenkins_username":project.jenkins_username});
+  console.log(req.query.id)
+  const project = await db.getProjectById(req.query.id)
+  res.status(200).json({"jenkins_url":project.jenkins_url,"jenkins_api_token":project.jenkins_api_token,"jenkins_username":project.jenkins_username,"git_url":project.github_url});
 });
+
+
 
 
 app.listen(1337, () => console.log("server running on port 1337"));
